@@ -36,7 +36,7 @@ namespace Bilibili.Api
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
 
-            using (HttpResponseMessage response = await user.Client.SendAsync(HttpMethod.Get, CAPTCHA_URL))
+            using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Get, CAPTCHA_URL))
                 return await response.Content.ReadAsByteArrayAsync();
         }
 
@@ -50,7 +50,7 @@ namespace Bilibili.Api
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
 
-            using (HttpResponseMessage response = await user.Client.SendAsync(HttpMethod.Get, LOGIN_EXIT_URL, null, user.PCHeaders))
+            using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Get, LOGIN_EXIT_URL, null, user.PCHeaders))
                 return true;
         }
 
@@ -70,7 +70,7 @@ namespace Bilibili.Api
                 { "appkey", General["appkey"] }
             };
             queries.SortAndSign();
-            using (HttpResponseMessage response = await user.Client.SendAsync(HttpMethod.Post, OAUTH2_GETKEY_URL, queries, null))
+            using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Post, OAUTH2_GETKEY_URL, queries, null))
                 return await response.Content.ReadAsStringAsync();
         }
 
@@ -99,7 +99,7 @@ namespace Bilibili.Api
             }));
             queries.AddRange(General);
             queries.SortAndSign();
-            using (HttpResponseMessage response = await user.Client.SendAsync(HttpMethod.Get, OAUTH2_INFO_URL, queries, user.AppHeaders))
+            using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Get, OAUTH2_INFO_URL, queries, user.AppHeaders))
                 return await response.Content.ReadAsStringAsync();
         }
 
@@ -132,7 +132,7 @@ namespace Bilibili.Api
             };
             queries.AddRange(General);
             queries.SortAndSign();
-            using (HttpResponseMessage response = await user.Client.SendAsync(HttpMethod.Post, OAUTH2_LOGIN_URL, queries, null))
+            using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Post, OAUTH2_LOGIN_URL, queries, null))
             {
                 return await response.Content.ReadAsStringAsync();
             }
@@ -164,7 +164,7 @@ namespace Bilibili.Api
             }));
             queries.AddRange(General);
             queries.SortAndSign();
-            using (HttpResponseMessage response = await user.Client.SendAsync(HttpMethod.Post, OAUTH2_REFRESH_TOKEN_URL, queries, user.AppHeaders))
+            using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Post, OAUTH2_REFRESH_TOKEN_URL, queries, user.AppHeaders))
                 return await response.Content.ReadAsStringAsync();
         }
 

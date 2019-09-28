@@ -20,7 +20,7 @@ namespace Bilibili
         [JsonProperty("Password")]
         private readonly string _password;
 
-        private readonly HttpClient _client;
+        private readonly HttpClient _handler;
 
         private readonly Dictionary<string, string> _pcHeaders;
 
@@ -45,7 +45,7 @@ namespace Bilibili
         public string Password => _password;
 
         /// <summary />
-        public HttpClient Client => _client;
+        public HttpClient Handler => _handler;
 
         /// <summary />
         public Dictionary<string, string> PCHeaders => _pcHeaders;
@@ -67,7 +67,7 @@ namespace Bilibili
         [EditorBrowsable(EditorBrowsableState.Never)]
         public User()
         {
-            _client = new HttpClient(new HttpClientHandler { UseCookies = false })
+            _handler = new HttpClient(new HttpClientHandler { UseCookies = false })
             {
                 Timeout = TimeSpan.FromMilliseconds(3000)
             };
@@ -135,7 +135,7 @@ namespace Bilibili
         {
             if (_isDisposed)
                 return;
-            _client.Dispose();
+            _handler.Dispose();
             _isDisposed = true;
         }
 

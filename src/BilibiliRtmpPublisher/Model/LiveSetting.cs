@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BilibiliLiveTools.Model
+namespace BilibiliRtmpPublisher.Model
 {
     class LiveSetting
     {

@@ -13,7 +13,7 @@ namespace Bilibili.System.Extensions
 {
     static class HttpResponseMessageExtensions
     {
-        public static async Task<ResultModel<T>> ConvertResultModel<T>(this HttpResponseMessage httpResponse) where T: IResultData
+        public static async Task<ResultModel<T>> ConvertResultModel<T>(this HttpResponseMessage httpResponse) where T : IResultData
         {
             try
             {
@@ -24,13 +24,13 @@ namespace Bilibili.System.Extensions
                 }
                 JObject jObject = JObject.Parse(result);
                 //如果data结点是空的话，返回的是一个空数组
-                if(jObject["data"].Type == JTokenType.Array)
+                if (jObject["data"].Type == JTokenType.Array)
                 {
-                    result =  result.Replace("\"data\":[]", "\"data\":null");
+                    result = result.Replace("\"data\":[]", "\"data\":null");
                 }
                 return JsonHelper.DeserializeJsonToObject<ResultModel<T>>(result);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Convert result model failed. {ex.Message}");
             }

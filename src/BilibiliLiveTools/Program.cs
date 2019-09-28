@@ -7,6 +7,7 @@ using BilibiliLiveTools.Model;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BilibiliLiveTools
@@ -47,27 +48,60 @@ namespace BilibiliLiveTools
                 Console.ReadKey(true);
                 return;
             }
+            if (!await StartLive(user))
+            {
+                return;
+            }
 
+            if (Console.IsInputRedirected || Console.IsOutputRedirected)
+            {
+                while (true)
+                {
+                    Thread.Sleep(300);
+                }
+            }
+            else
+            {
+                Console.ReadKey(true);
+            }
+        }
+
+        /// <summary>
+        /// 开启
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private static async Task<bool> StartLive(User user)
+        {
             try
             {
+                //加载配置文件
                 LiveSetting liveSetting = LoadLiveSettingConfig();
 
-                //获取直播房间号
-                LiveApi liveApi = new LiveApi();
-                StartLiveDataInfo liveInfo = await liveApi.StartLive(user, liveSetting.LiveCategory);
+                //先停止历史直播
+                if (await LiveApi.StopLive(user))
+                {
+                    GlobalSettings.Logger.LogInfo("尝试关闭历史直播...成功！");
+                }
+                //修改直播间名称
+                if (await LiveApi.UpdateLiveRoomName(user, liveSetting.LiveRoomName))
+                {
+                    GlobalSettings.Logger.LogInfo($"成功修改直播间名称。直播间名称：{liveSetting.LiveRoomName}");
+                }
+                StartLiveDataInfo liveInfo = await LiveApi.StartLive(user, liveSetting.LiveCategory);
                 if (liveInfo != null)
                 {
                     GlobalSettings.Logger.LogInfo("开启直播成功！");
                     GlobalSettings.Logger.LogInfo($"我的直播间地址：http://live.bilibili.com/{liveInfo.RoomId}");
                     GlobalSettings.Logger.LogInfo($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 }
+                return true;
             }
             catch (Exception ex)
             {
                 GlobalSettings.Logger.LogError($"开启直播失败！错误：{ex.Message}");
+                return false;
             }
-
-            Console.ReadKey(true);
         }
 
         private static string GetTitle()
