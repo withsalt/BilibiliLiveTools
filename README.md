@@ -6,7 +6,7 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 Bilibili登录API以及部分工具类从项目[BilibiliAfk](https://github.com/wwh1004/BilibiliAfk "BilibiliAfk") Fork而来。本项目也是在项目[BilibiliAfk](https://github.com/wwh1004/BilibiliAfk "BilibiliAfk")基础上开发。
 
 #### 前提条件
-在Bilibili通过了实名认证并拥有直播间。开启直播间方式很简单，实名认证完了打开就行。
+在Bilibili通过了实名认证并拥有直播间。开启直播间方式很简单，实名认证完了启用直播间就行。
 
 #### 项目说明
 （1）Bilibili  
