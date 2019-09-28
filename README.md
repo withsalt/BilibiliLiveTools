@@ -11,10 +11,10 @@ Bilibili登录API以及部分工具类从项目[BilibiliAfk](https://github.com/
 #### 项目说明
 （1）Bilibili  
 Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，直接调用即可。  
-（2）BilibiliLiveCategoryList
-直播分区获取获取工具，可以通过此工具获取直播分区。
-（3）BilibiliLiveTools
-一键开启直播工具。
+（2）BilibiliLiveCategoryList  
+直播分区获取获取工具，可以通过此工具获取直播分区。  
+（3）BilibiliLiveTools  
+一键开启直播工具。  
 [![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")
 
 #### 如何使用
