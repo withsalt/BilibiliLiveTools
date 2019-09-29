@@ -45,7 +45,6 @@ namespace BilibiliLiveTools
             User user = users[0];
             if (!await user.Login())
             {
-                string cookie = user.Data.Cookie;
                 GlobalSettings.Logger.LogError($"账号{user.Account}登录失败！");
                 Console.ReadKey(true);
                 return;
@@ -98,7 +97,7 @@ namespace BilibiliLiveTools
                     GlobalSettings.Logger.LogInfo($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 }
                 //开始使用ffmpeg推流直播
-                StartPublish(liveSetting, $"{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
+                //StartPublish(liveSetting, $"{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 return true;
             }
             catch (Exception ex)

@@ -73,7 +73,7 @@ namespace Bilibili
             };
             _pcHeaders = new Dictionary<string, string>();
             _appHeaders = new Dictionary<string, string>();
-            _loginData = new LoginData();
+            _loginData = null;
             Initialize();
         }
 
@@ -121,6 +121,7 @@ namespace Bilibili
         public void Clear()
         {
             Initialize();
+            IsLogin = false;
             _loginData = null;
         }
 
@@ -167,6 +168,5 @@ namespace Bilibili
                 target["uid"] = source.Uid;
             }
         }
-
     }
 }

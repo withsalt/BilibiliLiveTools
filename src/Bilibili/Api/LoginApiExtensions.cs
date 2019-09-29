@@ -8,12 +8,10 @@ namespace Bilibili.Api
     /// <summary />
     public class LoginDataUpdatedEventArgs : EventArgs
     {
-        private readonly User _user;
-
         /// <summary>
         /// 登录数据出现更新的用户
         /// </summary>
-        public User User => _user;
+        public User User { get; }
 
         /// <summary>
         /// 构造器
@@ -21,10 +19,7 @@ namespace Bilibili.Api
         /// <param name="user"></param>
         public LoginDataUpdatedEventArgs(User user)
         {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
-
-            _user = user;
+            User = user ?? throw new ArgumentNullException(nameof(user));
         }
     }
 
@@ -66,14 +61,21 @@ namespace Bilibili.Api
                     {
                         // Token有效，但是有效时间太短，小于半个小时
                         user.LogWarning("Token有效时间不足");
-                        return await user.RefreshToken();
+                        if (await user.RefreshToken())
+                        {
+                            return user.IsLogin = true;
+                        }
+                        else
+                        {
+                            return user.IsLogin = false;
+                        }
                     }
                     else
                     {
                         // Token有效时间足够
                         user.LogInfo("使用缓存Token登录成功");
                         user.LogInfo($"Token有效时间还剩：{Math.Round(expiresIn / 3600d, 1)} 小时");
-                        return true;
+                        return user.IsLogin = true;
                     }
                 }
             }
@@ -95,8 +97,7 @@ namespace Bilibili.Api
                 user.LogInfo("登录成功");
                 UpdateLoginData(user, result);
                 OnLoginDataUpdated(new LoginDataUpdatedEventArgs(user));
-                user.IsLogin = true;
-                return true;
+                return user.IsLogin = true;
             }
             else if ((int)result["code"] == -105)
                 // 需要验证码
@@ -132,9 +133,13 @@ namespace Bilibili.Api
                 throw new ApiException(ex);
             }
             if ((int)result["code"] == 0 && result["data"]["mid"] != null)
+            {
                 return (true, (int)result["data"]["expires_in"]);
+            }
             else
+            {
                 return (false, 0);
+            }
         }
 
         /// <summary>
