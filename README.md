@@ -6,7 +6,9 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 Bilibili登录API以及部分工具类从项目[BilibiliAfk](https://github.com/wwh1004/BilibiliAfk "BilibiliAfk") Fork而来。本项目也是在项目[BilibiliAfk](https://github.com/wwh1004/BilibiliAfk "BilibiliAfk")基础上开发。
 
 #### 前提条件
-在Bilibili通过了实名认证并拥有直播间。开启直播间方式很简单，实名认证完了启用直播间就行。
+a.首先要有一个树莓派，并连接了摄像头。并能够访问网络。  
+b.在Bilibili中通过实名认证，并开通了直播间。点击连接开通直播间（很简单的，实名认证通过后直接就可以开通了）  
+c.FFmpeg。推流默认使用FFmpeg，树莓派官方系统默认安装了的，我就不再赘述，其它系统请自行安装。  
 
 #### 项目说明
 （1）Bilibili  
