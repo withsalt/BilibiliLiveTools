@@ -97,7 +97,7 @@ namespace BilibiliLiveTools
                     GlobalSettings.Logger.LogInfo($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 }
                 //开始使用ffmpeg推流直播
-                //StartPublish(liveSetting, $"{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
+                StartPublish(liveSetting, $"{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 return true;
             }
             catch (Exception ex)
