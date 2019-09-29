@@ -2,6 +2,7 @@
 using Bilibili.Model.Live.LiveCategoryInfo;
 using Bilibili.Settings;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace BilibiliLiveCategoryList
@@ -26,7 +27,7 @@ namespace BilibiliLiveCategoryList
                     foreach (var bigCate in info.Data)
                     {
                         Console.WriteLine("-------------------------");
-                        Console.WriteLine($"分区：{bigCate.Name}");
+                        Console.WriteLine(bigCate.Name);
                         Console.WriteLine("-------------------------");
                         foreach (var item in bigCate.List)
                         {
@@ -42,9 +43,16 @@ namespace BilibiliLiveCategoryList
                     //        Console.WriteLine($" | {item.id} | {item.name} | {item.parent_name} | ");
                     //    }
                     //}
-                }
 
-                Console.ReadKey(false);
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        Console.ReadKey(false);
+                    }
+                }
             }
             catch (Exception ex)
             {
