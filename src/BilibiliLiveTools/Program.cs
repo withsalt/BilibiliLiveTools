@@ -5,8 +5,10 @@ using Bilibili.Model.Live.StartLiveInfo;
 using Bilibili.Settings;
 using BilibiliLiveTools.Model;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -95,11 +97,71 @@ namespace BilibiliLiveTools
                     GlobalSettings.Logger.LogInfo($"我的直播间地址：http://live.bilibili.com/{liveInfo.RoomId}");
                     GlobalSettings.Logger.LogInfo($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 }
+                //开始使用ffmpeg推流直播
+                StartPublish(liveSetting, $"{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 return true;
             }
             catch (Exception ex)
             {
                 GlobalSettings.Logger.LogError($"开启直播失败！错误：{ex.Message}");
+                return false;
+            }
+        }
+
+        private static bool StartPublish(LiveSetting setting, string url)
+        {
+            try
+            {
+                string ffmpegArgs;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    ffmpegArgs = $"-i \"{setting.VideoSource}\" -s {setting.Resolution} -r 30 -input_format mjpeg -c:v h264_omx -vcodec h264 -an -f flv \"{url}\"";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    ffmpegArgs = $"-f dshow -i video=\"{setting.VideoSource}\" -s {setting.Resolution} -r 30 -vcodec libx264 -acodec copy -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
+                }
+                else
+                {
+                    throw new Exception("UnSupport system.");
+                }
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "ffmpeg",
+                    Arguments = ffmpegArgs,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
+                };
+                //启动
+                var proc = Process.Start(psi);
+                if (proc == null)
+                {
+                    throw new Exception("Can not exec ffmpeg cmd.");
+                }
+                else
+                {
+                    //开始读取
+                    using (var sr = proc.StandardOutput)
+                    {
+                        while (!sr.EndOfStream)
+                        {
+                            Console.WriteLine(sr.ReadLine());
+                        }
+
+                        if (!proc.HasExited)
+                        {
+                            proc.Kill();
+                        }
+                    }
+                    Console.WriteLine($"FFmpeg exited.");
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }

@@ -1,7 +1,7 @@
 {
   "LiveCategory": "28",
   "LiveRoomName": "小金鱼啦~",
-  "VideoSource": "Logitech HD Webcam C270",
+  "VideoSource": "/dev/video0",
   "AudioSource": "",
-  "Resolution": "640*480"
+  "Resolution": "1280*720"
 }

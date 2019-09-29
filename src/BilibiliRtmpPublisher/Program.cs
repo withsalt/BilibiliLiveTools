@@ -11,49 +11,61 @@ namespace BilibiliRtmpPublisher
     {
         static void Main(string[] args)
         {
-            string serverAddress = "rtmp://10.10.10.150/living/video";
+            string serverAddress = "rtmp://live.geeiot.net/living/video";
             LiveSetting liveSetting = LoadLiveSettingConfig();
 
-            string cmd;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            try
             {
-                cmd = $" -i \"{liveSetting.VideoSource}\" -s {liveSetting.Resolution} -r 30 -input_format mjpeg -c:v h264_omx -vcodec h264 -an -f flv \"{serverAddress}\"";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                cmd = $"-f dshow -i video=\"{liveSetting.VideoSource}\" -s {liveSetting.Resolution} -r 30 -vcodec libx264 -acodec copy -preset:v ultrafast -tune:v zerolatency -f flv \"{serverAddress}\"";
-            }
-            else
-            {
-                throw new Exception("UnSupport system.");
-            }
-
-            //创建一个ProcessStartInfo对象 使用系统shell 指定命令和参数 设置标准输出
-            var psi = new ProcessStartInfo("ffmpeg", cmd) { RedirectStandardOutput = true };
-            //启动
-            var proc = Process.Start(psi);
-            if (proc == null)
-            {
-                Console.WriteLine("Can not exec.");
-            }
-            else
-            {
-                //开始读取
-                using (var sr = proc.StandardOutput)
+                string ffmpegArgs;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    while (!sr.EndOfStream)
-                    {
-                        Console.WriteLine(sr.ReadLine());
-                    }
-
-                    if (!proc.HasExited)
-                    {
-                        proc.Kill();
-                    }
+                    ffmpegArgs = $"-i \"{liveSetting.VideoSource}\" -s {liveSetting.Resolution} -r 30 -input_format mjpeg -c:v h264_omx -vcodec h264 -an -f flv \"{serverAddress}\"";
                 }
-                Console.WriteLine($"FFmpeg exited.");
-            }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    ffmpegArgs = $"-f dshow -i video=\"{liveSetting.VideoSource}\" -s {liveSetting.Resolution} -r 30 -vcodec libx264 -acodec copy -preset:v ultrafast -tune:v zerolatency -f flv \"{serverAddress}\"";
+                }
+                else
+                {
+                    throw new Exception("UnSupport system.");
+                }
 
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "ffmpeg",
+                    Arguments = ffmpegArgs,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
+                };
+                //启动
+                var proc = Process.Start(psi);
+                if (proc == null)
+                {
+                    throw new Exception("Can not exec ffmpeg cmd.");
+                }
+                else
+                {
+                    //开始读取
+                    using (var sr = proc.StandardOutput)
+                    {
+                        while (!sr.EndOfStream)
+                        {
+                            Console.WriteLine(sr.ReadLine());
+                        }
+
+                        if (!proc.HasExited)
+                        {
+                            proc.Kill();
+                        }
+                    }
+                    Console.WriteLine($"FFmpeg exited.");
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             Console.ReadKey(false);
         }
 
