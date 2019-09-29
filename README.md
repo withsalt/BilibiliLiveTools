@@ -31,12 +31,14 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
 配置LiveSetting.json中的LiveCategory（直播分类）、LiveRoomName（直播间名称）。如下所示：
 ```json
 {
-  "LiveCategory": "28",
-  "LiveRoomName": "直播间名称"
+  "LiveCategory": "28",          //分类ID，查询分类ID：https://github.com/withsalt/BilibiliLiveTools/blob/master/README.md
+  "LiveRoomName": "小金鱼啦~",  //直播间名称
+  "VideoSource": "/dev/video0", //视频源，即为摄像头名称
+  "AudioSource": "",            //声音源，暂不支持声音
+  "Resolution": "1280*720"      //推流分辨率，如果视频源为摄像头的话，要保证此分辨率受支持。
 }
-
 ```
-然后运行程序即可。
+然后运行程序即可。详情可以查看：https://www.quarkbook.com/?p=733
 
 #### 直播分区
 开播时需要将ID填写到LiveSetting.json中的LiveCategory中。
@@ -170,4 +172,3 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
  
  ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/withsalt/BilibiliLiveTools.svg)](https://starchart.cc/withsalt/BilibiliLiveTools)
-
