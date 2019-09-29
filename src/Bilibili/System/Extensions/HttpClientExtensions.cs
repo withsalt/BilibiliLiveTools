@@ -76,7 +76,7 @@ namespace System.Extensions
             }
             if (!string.IsNullOrEmpty(cookie))
             {
-                request.Headers.Add("Cookie", cookie.Replace("&", ";"));
+                request.Headers.Add("Cookie", cookie);
             }
             return client.SendAsync(request);
         }

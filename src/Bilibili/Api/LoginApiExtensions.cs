@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Bilibili.Helper;
+using Bilibili.Model.User;
+using Bilibili.Model.User.LoginResult;
 using Newtonsoft.Json.Linq;
 
 namespace Bilibili.Api
@@ -47,7 +50,7 @@ namespace Bilibili.Api
             int expiresIn;
             string key;
             string json;
-            JObject result;
+            ResultInfo result;
 
             if (user.HasData)
             {
@@ -61,14 +64,7 @@ namespace Bilibili.Api
                     {
                         // Token有效，但是有效时间太短，小于半个小时
                         user.LogWarning("Token有效时间不足");
-                        if (await user.RefreshToken())
-                        {
-                            return user.IsLogin = true;
-                        }
-                        else
-                        {
-                            return user.IsLogin = false;
-                        }
+                        return user.IsLogin = await user.RefreshToken();
                     }
                     else
                     {
@@ -84,14 +80,18 @@ namespace Bilibili.Api
             {
                 key = await LoginApi.GetKeyAsync(user);
                 json = await LoginApi.LoginAsync(user, key, null);
-                result = JObject.Parse(json);
+                if (string.IsNullOrEmpty(json))
+                {
+                    throw new ApiException(new Exception("登录失败，没有返回的数据。"));
+                }
+                result = JsonHelper.DeserializeJsonToObject<ResultInfo>(json);
             }
             catch (Exception ex)
             {
                 user.LogError("登录失败");
                 throw new ApiException(ex);
             }
-            if ((int)result["code"] == 0 && (int)result["data"]["status"] == 0)
+            if (result.Code == 0 && result.Data.Status == 0)
             {
                 // 登录成功，保存数据直接返回
                 user.LogInfo("登录成功");
@@ -99,7 +99,7 @@ namespace Bilibili.Api
                 OnLoginDataUpdated(new LoginDataUpdatedEventArgs(user));
                 return user.IsLogin = true;
             }
-            else if ((int)result["code"] == -105)
+            else if (result.Code == -105)
                 // 需要验证码
                 return await LoginWithCaptcha(user, key);
             else
@@ -121,20 +121,24 @@ namespace Bilibili.Api
             if (user == null)
                 throw new ArgumentNullException(nameof(user));
 
-            JObject result;
+            ResultInfo result;
 
             try
             {
                 string json = await LoginApi.GetInfoAsync(user);
-                result = JObject.Parse(json);
+                if (string.IsNullOrEmpty(json))
+                {
+                    throw new ApiException(new Exception("获取Token过期时间失败，没有返回的数据。"));
+                }
+                result = JsonHelper.DeserializeJsonToObject<ResultInfo>(json);
             }
             catch (Exception ex)
             {
                 throw new ApiException(ex);
             }
-            if ((int)result["code"] == 0 && result["data"]["mid"] != null)
+            if (result.Code == 0 && !string.IsNullOrEmpty(result.Data.Mid))
             {
-                return (true, (int)result["data"]["expires_in"]);
+                return (true, result.Data.ExpiresIn);
             }
             else
             {
@@ -153,18 +157,22 @@ namespace Bilibili.Api
                 throw new ArgumentNullException(nameof(user));
 
             string json;
-            JObject result;
+            ResultInfo result;
 
             try
             {
                 json = await LoginApi.RefreshTokenAsync(user);
-                result = JObject.Parse(json);
+                if (string.IsNullOrEmpty(json))
+                {
+                    throw new ApiException(new Exception("登录失败，没有返回的数据。"));
+                }
+                result = JsonHelper.DeserializeJsonToObject<ResultInfo>(json);
             }
             catch (Exception ex)
             {
                 throw new ApiException(ex);
             }
-            if ((int)result["code"] == 0 && result["data"]["token_info"]["mid"] != null)
+            if (result.Code == 0 && !string.IsNullOrEmpty(result.Data.TokenInfo.Mid))
             {
                 user.LogInfo("Token刷新成功");
                 UpdateLoginData(user, result);
@@ -182,7 +190,7 @@ namespace Bilibili.Api
         private static async Task<bool> LoginWithCaptcha(User user, string key)
         {
             string json;
-            JObject result;
+            ResultInfo result;
 
             try
             {
@@ -190,14 +198,18 @@ namespace Bilibili.Api
 
                 captcha = await LoginApi.SolveCaptchaAsync(await LoginApi.GetCaptchaAsync(user));
                 json = await LoginApi.LoginAsync(user, key, captcha);
-                result = JObject.Parse(json);
+                if (string.IsNullOrEmpty(json))
+                {
+                    throw new ApiException(new Exception("登录失败，没有返回的数据。"));
+                }
+                result = JsonHelper.DeserializeJsonToObject<ResultInfo>(json);
             }
             catch (Exception ex)
             {
                 user.LogError("登录失败");
                 throw new ApiException(ex);
             }
-            if ((int)result["code"] == 0 && (int)result["data"]["status"] == 0)
+            if (result.Code == 0 && result.Data.Status == 0)
             {
                 // 登录成功，保存数据直接返回
                 user.LogInfo("登录成功");
@@ -214,20 +226,37 @@ namespace Bilibili.Api
             }
         }
 
-        private static void UpdateLoginData(User user, JToken data)
+        private static void UpdateLoginData(User user, ResultInfo result)
         {
-            JToken tokenInfo;
-            JToken cookies;
+            try
+            {
+                if (user.Data == null)
+                {
+                    user.Data = new LoginData();
+                }
 
-            data = data["data"];
-            tokenInfo = data["token_info"];
-            cookies = data["cookie_info"]["cookies"];
+                LoginResultData data = result.Data;
 
-            user.Data.AccessKey = (string)tokenInfo["access_token"];
-            user.Data.Cookie = string.Join("&", cookies.Select(t => (string)t["name"] + "=" + (string)t["value"]));
-            user.Data.Csrf = (string)cookies[0]["value"];
-            user.Data.RefreshToken = (string)tokenInfo["refresh_token"];
-            user.Data.Uid = (string)cookies[1]["value"];
+                user.Data.AccessKey = data.TokenInfo.AccessToken;
+                user.Data.Cookie = string.Join(";", data.CookieInfo.Cookies.Select(t => t.Name + "=" + t.Value));
+                CookiesItem cookie = data.CookieInfo.Cookies.SingleOrDefault(t => t.Name == "bili_jct");
+                if (cookie == null)
+                {
+                    throw new Exception("Can not get csrf by cookie.");
+                }
+                user.Data.Csrf = cookie.Value;
+                user.Data.RefreshToken = data.TokenInfo.RefreshToken;
+                cookie = data.CookieInfo.Cookies.SingleOrDefault(t => t.Name == "DedeUserID");
+                if (cookie == null)
+                {
+                    throw new Exception("Can not get uid by cookie.");
+                }
+                user.Data.Uid = data.CookieInfo.Cookies.SingleOrDefault(t => t.Name == "DedeUserID").Value;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Update user login data failed. {ex.Message}");
+            }
         }
 
         private static void OnLoginDataUpdated(LoginDataUpdatedEventArgs e)

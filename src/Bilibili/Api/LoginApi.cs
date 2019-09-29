@@ -99,8 +99,8 @@ namespace Bilibili.Api
             }));
             queries.AddRange(General);
             queries.SortAndSign();
-            using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Get, OAUTH2_INFO_URL, queries, user.AppHeaders))
-                return await response.Content.ReadAsStringAsync();
+            using HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Get, OAUTH2_INFO_URL, queries, user.AppHeaders);
+            return await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>

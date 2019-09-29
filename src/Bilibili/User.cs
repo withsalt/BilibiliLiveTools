@@ -26,9 +26,8 @@ namespace Bilibili
 
         private readonly Dictionary<string, string> _appHeaders;
 
-        [JsonProperty("LoginData", NullValueHandling = NullValueHandling.Ignore)]
 
-        private LoginData _loginData;
+        //private LoginData _loginData;
 
         private bool _isDisposed;
 
@@ -53,13 +52,14 @@ namespace Bilibili
         /// <summary />
         public Dictionary<string, string> AppHeaders => _appHeaders;
 
-        /// <summary />
-        public LoginData Data => _loginData;
+
+        [JsonProperty("Data", NullValueHandling = NullValueHandling.Ignore)]
+        public LoginData Data { get; set; }
 
         /// <summary>
         /// 是否存在登录数据（不保证数据有效，只判断是否存在数据）
         /// </summary>
-        public bool HasData => (_loginData != null && !string.IsNullOrEmpty(_loginData.Uid));
+        public bool HasData => (Data != null && !string.IsNullOrEmpty(Data.Uid));
 
         /// <summary>
         /// 构造器（用于反序列化，虽然Json.NET可以使用有参构造器，但是如果程序被混淆，反序列化将失败）
@@ -73,7 +73,7 @@ namespace Bilibili
             };
             _pcHeaders = new Dictionary<string, string>();
             _appHeaders = new Dictionary<string, string>();
-            _loginData = null;
+            Data = null;
             Initialize();
         }
 
@@ -111,8 +111,8 @@ namespace Bilibili
         {
             if (!HasData)
                 return;
-            UpdateDictionary(_pcHeaders, _loginData);
-            UpdateDictionary(_appHeaders, _loginData);
+            UpdateDictionary(_pcHeaders, Data);
+            UpdateDictionary(_appHeaders, Data);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Bilibili
         {
             Initialize();
             IsLogin = false;
-            _loginData = null;
+            Data = null;
         }
 
         /// <summary />

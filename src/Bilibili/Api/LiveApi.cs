@@ -320,7 +320,7 @@ namespace Bilibili.Api
                     }
                     else
                     {
-                        throw new Exception($"Start live failed. error code is {resultModel.Code}({resultModel.Msg}).");
+                        throw new Exception($"Update live room name failed. error code is {resultModel.Code}({resultModel.Msg}).");
                     }
                 }
             }
