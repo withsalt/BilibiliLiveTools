@@ -167,3 +167,7 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
  | 51 | 原创绘画 | 绘画 |
  | 95 | 临摹绘画 | 绘画 |
  | 96 | 其他绘画 | 绘画 |
+ 
+ ## Stargazers over time
+[![Stargazers over time](https://starchart.cc/withsalt/BilibiliLiveTools.svg)](https://starchart.cc/withsalt/BilibiliLiveTools)
+
