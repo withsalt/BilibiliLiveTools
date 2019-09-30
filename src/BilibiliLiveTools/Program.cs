@@ -113,16 +113,23 @@ namespace BilibiliLiveTools
                 {
                     if (!string.IsNullOrEmpty(setting.AudioSource))
                     {
-                        ffmpegArgs = $"-f video4linux2 -thread_queue_size 10240 -threads auto -i \"{setting.VideoSource}\" -i \"{setting.AudioSource}\" -input_format mjpeg -vcodec h264_omx -pix_fmt yuv420p -vb 9000k -bufsize 10000k -s {setting.Resolution} -r 30 -f flv -g 50 -acodec aac -ac 2 -ar 44100 -b:a 192k \"{url}\"";
+                        ffmpegArgs = $"-thread_queue_size 64 -f video4linux2 -input_format mjpeg -s {setting.Resolution} -i \"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10000k -acodec aac -ac 2 -ar 44100 -ab 128k -f flv \"{url}\"";
                     }
                     else
                     {
-                        ffmpegArgs = $"-f video4linux2 -thread_queue_size 10240 -threads auto -i \"{setting.VideoSource}\" -input_format mjpeg -vcodec h264_omx -pix_fmt yuv420p -vb 9000k -bufsize 10000k -s {setting.Resolution} -r 30 -f flv -g 50 -an \"{url}\"";
+                        ffmpegArgs = $"-thread_queue_size 64 -f video4linux2 -input_format mjpeg -s {setting.Resolution} -i \"{setting.VideoSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10000k -an -f flv \"{url}\"";
                     }
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    ffmpegArgs = $"-f dshow -i video=\"{setting.VideoSource}\" -s {setting.Resolution} -r 30 -vcodec libx264 -acodec copy -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
+                    if (!string.IsNullOrEmpty(setting.AudioSource))
+                    {
+                       ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 30 -i video=\"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -acodec aac -ac 2 -ar 44100 -ab 128k -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
+                    }
+                    else
+                    {
+                        ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 30 -i video=\"{setting.VideoSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
+                    }
                 }
                 else
                 {
