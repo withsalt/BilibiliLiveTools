@@ -21,7 +21,6 @@ namespace BilibiliLiveTools
             string usersFilePath;
             Users users;
 
-            Console.Title = GetTitle();
             GlobalSettings.Logger = Logger.Instance;
             if (!BitConverter.IsLittleEndian)
             {
@@ -38,7 +37,6 @@ namespace BilibiliLiveTools
             {
                 GlobalSettings.Logger.LogException(ex);
                 GlobalSettings.Logger.LogError($"缺失或无效配置文件，请检查是否添加\"{usersFilePath}\"");
-                Console.ReadKey(true);
                 return;
             }
             LoginApiExtensions.LoginDataUpdated += (sender, e) => File.WriteAllText(usersFilePath, users.ToJson());
@@ -46,7 +44,6 @@ namespace BilibiliLiveTools
             if (!await user.Login())
             {
                 GlobalSettings.Logger.LogError($"账号{user.Account}登录失败！");
-                Console.ReadKey(true);
                 return;
             }
             if (!await StartLive(user))
@@ -146,7 +143,7 @@ namespace BilibiliLiveTools
                     {
                         while (!sr.EndOfStream)
                         {
-                            Console.WriteLine(sr.ReadLine());
+                            GlobalSettings.Logger.LogInfo(sr.ReadLine());
                         }
 
                         if (!proc.HasExited)
@@ -154,13 +151,13 @@ namespace BilibiliLiveTools
                             proc.Kill();
                         }
                     }
-                    Console.WriteLine($"FFmpeg exited.");
+                    GlobalSettings.Logger.LogInfo($"FFmpeg exited.");
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                GlobalSettings.Logger.LogError(ex.Message);
                 return false;
             }
         }
