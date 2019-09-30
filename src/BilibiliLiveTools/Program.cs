@@ -113,22 +113,22 @@ namespace BilibiliLiveTools
                 {
                     if (!string.IsNullOrEmpty(setting.AudioSource))
                     {
-                        ffmpegArgs = $"-thread_queue_size 64 -f video4linux2 -input_format mjpeg -s {setting.Resolution} -i \"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10000k -acodec aac -ac 2 -ar 44100 -ab 128k -f flv \"{url}\"";
+                        ffmpegArgs = $"-thread_queue_size 1024 -f video4linux2 -s {setting.Resolution} -i \"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10000k -acodec aac -ac 2 -ar 44100 -ab 128k -f flv \"{url}\"";
                     }
                     else
                     {
-                        ffmpegArgs = $"-thread_queue_size 64 -f video4linux2 -input_format mjpeg -s {setting.Resolution} -i \"{setting.VideoSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10000k -an -f flv \"{url}\"";
+                        ffmpegArgs = $"-thread_queue_size 1024 -f video4linux2 -s {setting.Resolution} -i \"{setting.VideoSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10000k -an -f flv \"{url}\"";
                     }
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     if (!string.IsNullOrEmpty(setting.AudioSource))
                     {
-                       ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 30 -i video=\"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -acodec aac -ac 2 -ar 44100 -ab 128k -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
+                       ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 1024 -i video=\"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -acodec aac -ac 2 -ar 44100 -ab 128k -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
                     }
                     else
                     {
-                        ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 30 -i video=\"{setting.VideoSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
+                        ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 1024 -i video=\"{setting.VideoSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
                     }
                 }
                 else
