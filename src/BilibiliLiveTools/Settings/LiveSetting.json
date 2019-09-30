@@ -2,6 +2,6 @@
   "LiveCategory": "28",
   "LiveRoomName": "小金鱼啦~",
   "VideoSource": "/dev/video0",
-  "AudioSource": "",
-  "Resolution": "1280*720"
+  "AudioSource": "http://media.xxoojoke.com/tingyu/therain.m4a",
+  "Resolution": "hd720"
 }

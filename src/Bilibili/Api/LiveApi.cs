@@ -116,7 +116,7 @@ namespace Bilibili.Api
         }
 
         /// <summary>
-        /// 获取房间信息
+        /// 获取房间信息（用户登录后）
         /// </summary>
         /// <returns></returns>
         public static async Task<LiveRoomStreamDataInfo> GetRoomInfo(User user)
@@ -137,7 +137,7 @@ namespace Bilibili.Api
         }
 
         /// <summary>
-        /// 获取房间信息（用户登录后）
+        /// 更具直播间ID获取房间信息（用户登录后），获取到的为直播间推流信息
         /// </summary>
         /// <returns></returns>
         public static async Task<LiveRoomStreamDataInfo> GetRoomInfo(User user, string roomId)
@@ -175,7 +175,7 @@ namespace Bilibili.Api
         }
 
         /// <summary>
-        /// 获取房间信息（不需要登录）
+        /// 更具直播间ID获取房间信息（不需要登录），获取到的为直播间详细信息
         /// </summary>
         /// <param name="roomId"></param>
         /// <returns></returns>

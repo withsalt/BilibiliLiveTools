@@ -111,7 +111,14 @@ namespace BilibiliLiveTools
                 string ffmpegArgs;
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    ffmpegArgs = $"-i \"{setting.VideoSource}\" -s {setting.Resolution} -r 30 -input_format mjpeg -c:v h264_omx -vcodec h264 -an -f flv \"{url}\"";
+                    if (!string.IsNullOrEmpty(setting.AudioSource))
+                    {
+                        ffmpegArgs = $"-f video4linux2 -thread_queue_size 10240 -threads auto -i \"{setting.VideoSource}\" -i \"{setting.AudioSource}\" -input_format mjpeg -vcodec h264_omx -pix_fmt yuv420p -vb 9000k -bufsize 10000k -s {setting.Resolution} -r 30 -f flv -g 50 -acodec aac -ac 2 -ar 44100 -b:a 192k \"{url}\"";
+                    }
+                    else
+                    {
+                        ffmpegArgs = $"-f video4linux2 -thread_queue_size 10240 -threads auto -i \"{setting.VideoSource}\" -input_format mjpeg -vcodec h264_omx -pix_fmt yuv420p -vb 9000k -bufsize 10000k -s {setting.Resolution} -r 30 -f flv -g 50 -an \"{url}\"";
+                    }
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
