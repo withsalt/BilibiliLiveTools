@@ -1,5 +1,6 @@
 ﻿using Bilibili.Api;
 using Bilibili.Model.Live.LiveCategoryInfo;
+using Bilibili.Model.Live.LiveRoomInfo;
 using Bilibili.Settings;
 using System;
 using System.Threading.Tasks;

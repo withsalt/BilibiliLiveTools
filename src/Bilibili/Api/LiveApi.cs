@@ -6,6 +6,7 @@ using Bilibili.Helper;
 using Bilibili.Model;
 using Bilibili.Model.Live;
 using Bilibili.Model.Live.LiveCategoryInfo;
+using Bilibili.Model.Live.LiveRealAddressInfo;
 using Bilibili.Model.Live.LiveRoomInfo;
 using Bilibili.Model.Live.LiveRoomStreamInfo;
 using Bilibili.Model.Live.StartLiveInfo;
@@ -54,6 +55,16 @@ namespace Bilibili.Api
         /// 获取直播种类
         /// </summary>
         private const string _getLiveCategoryApi = "https://api.live.bilibili.com/room/v1/Area/getList";
+
+        /// <summary>
+        /// 获取直播间信息
+        /// </summary>
+        private const string _getUserRoomInfoApi = "https://api.live.bilibili.com/room/v1/Room/get_info";
+
+        /// <summary>
+        /// 获取直播间真实流地址
+        /// </summary>
+        private const string _getRealRoomAddressApi = "https://api.live.bilibili.com/room/v1/Room/playUrl";
 
         #endregion
 
@@ -126,7 +137,7 @@ namespace Bilibili.Api
         }
 
         /// <summary>
-        /// 获取房间信息
+        /// 获取房间信息（用户登录后）
         /// </summary>
         /// <returns></returns>
         public static async Task<LiveRoomStreamDataInfo> GetRoomInfo(User user, string roomId)
@@ -164,6 +175,42 @@ namespace Bilibili.Api
         }
 
         /// <summary>
+        /// 获取房间信息（不需要登录）
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        public static async Task<UserLiveRoomDataInfo> GetRoomInfo(string roomId)
+        {
+            if (string.IsNullOrEmpty(roomId))
+            {
+                throw new Exception("Room id cannot null.");
+            }
+            try
+            {
+                var queries = new QueryCollection {
+                    { "id", roomId }
+                };
+                using HttpClient client = new HttpClient();
+                using (HttpResponseMessage response = await client.SendAsync(HttpMethod.Get, _getUserRoomInfoApi, queries, GlobalSettings.Bilibili.PCHeaders))
+                {
+                    ResultModel<UserLiveRoomDataInfo> resultModel = await response.ConvertResultModel<UserLiveRoomDataInfo>();
+                    if (resultModel.Code == 0)
+                    {
+                        return resultModel.Data;
+                    }
+                    else
+                    {
+                        throw new Exception($"Get live room info failed. error code is {resultModel.Code}({resultModel.Msg}).");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
         /// 获取直播分类列表
         /// </summary>
         /// <returns></returns>
@@ -187,6 +234,44 @@ namespace Bilibili.Api
                     else
                     {
                         throw new Exception($"Get live category failed. error code is {resultModel.Code}({resultModel.Msg}).");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 获取直播间真实流地址
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        public static async Task<RealAddressDataInfo> GetLiveRealAddress(string roomId)
+        {
+            if (string.IsNullOrEmpty(roomId))
+            {
+                throw new Exception("Room id cannot null.");
+            }
+            try
+            {
+                var queries = new QueryCollection {
+                    { "cid", roomId },
+                    { "qn", "10000" },
+                    { "platform", "web" }
+                };
+                using HttpClient client = new HttpClient();
+                using (HttpResponseMessage response = await client.SendAsync(HttpMethod.Get, _getRealRoomAddressApi, queries, GlobalSettings.Bilibili.PCHeaders))
+                {
+                    ResultModel<RealAddressDataInfo> resultModel = await response.ConvertResultModel<RealAddressDataInfo>();
+                    if (resultModel.Code == 0)
+                    {
+                        return resultModel.Data;
+                    }
+                    else
+                    {
+                        throw new Exception($"Get live room address failed. error code is {resultModel.Code}({resultModel.Msg}).");
                     }
                 }
             }
