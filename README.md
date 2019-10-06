@@ -20,26 +20,42 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
 [![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")
 
 #### 如何使用
-首先在Users.json配置Account（登录名称）、Password（密码）。如下所示：
-```json
-[
-  {
-    "Account": "xxxxxxx",
-    "Password": "xxxxxxxxxxx"
-  }
-]
+1.获取程序  
+```shell
+wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.2.0/BilibiliLiveTools_ARM32.zip
 ```
 
-配置LiveSetting.json中的LiveCategory（直播分类）、LiveRoomName（直播间名称）。如下所示：
+2.解压并授权
+```shell
+unzip BilibiliLiveTools_ARM32.zip && chmod -R 775  BilibiliLiveTools_ARM32 && chmod +x BilibiliLiveTools_ARM32/BilibiliLiveTools
+```
+
+3.编辑配置文件  
+编辑用户配置文件User.json  
+```shell
+cd BilibiliLiveTools_ARM32
+nano Settings/Users.json  #输入用户名和密码
+```
+编辑直播配置文件  
+
+```shell
+nano Settings/LiveSetting.json
+```
+
+
 ```json
 {
-  "LiveCategory": "28",          //分类ID，查询分类ID：https://github.com/withsalt/BilibiliLiveTools/blob/master/README.md
-  "LiveRoomName": "小金鱼啦~",  //直播间名称
-  "VideoSource": "/dev/video0", //视频源，即为摄像头名称
-  "AudioSource": "",            //声音源，暂不支持声音
-  "Resolution": "1280*720"      //推流分辨率，如果视频源为摄像头的话，要保证此分辨率受支持。
+  "LiveCategory": "28",                     //直播间分类
+  "LiveRoomName": "【24H】小金鱼啦~",        //直播间名称
+  "CmdString": "ffmpeg -thread_queue_size 1024 -f video4linux2 -s 1280*720 -i \"/dev/video0\" -stream_loop -1 -i \"therain.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv [[URL]]",    //推流命令
+  "AutoRestart": true                       //推流命令异常结束后是否自动重新开始
 }
 ```
+
+由于推流方式不同以及FFmpeg配置的多边性，这里采用直接填写推流命令的方式。建议填写之前先测试推流命令能否正确执行。
+
+推流命令（CmdString）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。
+
 然后运行程序即可。详情可以查看：https://www.quarkbook.com/?p=733
 
 #### 直播分区
