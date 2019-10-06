@@ -17,18 +17,13 @@ namespace BilibiliLiveTools.Model
         public string LiveRoomName { get; set; }
 
         /// <summary>
-        /// 视频来源
+        /// 推流命令
         /// </summary>
-        public string VideoSource { get; set; }
+        public string CmdString { get; set; }
 
         /// <summary>
-        /// 音频来源
+        /// 是否自动重启命令
         /// </summary>
-        public string AudioSource { get; set; }
-
-        /// <summary>
-        /// 分辨率
-        /// </summary>
-        public string Resolution { get; set; }
+        public bool AutoRestart { get; set; }
     }
 }

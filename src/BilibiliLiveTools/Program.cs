@@ -75,7 +75,6 @@ namespace BilibiliLiveTools
             {
                 //加载配置文件
                 LiveSetting liveSetting = LoadLiveSettingConfig();
-
                 //先停止历史直播
                 if (await LiveApi.StopLive(user))
                 {
@@ -108,64 +107,77 @@ namespace BilibiliLiveTools
         {
             try
             {
-                string ffmpegArgs;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (string.IsNullOrEmpty(setting.CmdString))
                 {
-                    if (!string.IsNullOrEmpty(setting.AudioSource))
-                    {
-                        ffmpegArgs = $"-thread_queue_size 1024 -f video4linux2 -s {setting.Resolution} -i \"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv \"{url}\"";
-                    }
-                    else
-                    {
-                        ffmpegArgs = $"-thread_queue_size 1024 -f video4linux2 -s {setting.Resolution} -i \"{setting.VideoSource}\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 10M -bufsize 10M -an -f flv \"{url}\"";
-                    }
+                    throw new Exception("CMD string can not null.");
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (setting.CmdString.IndexOf("[[URL]]") < 0)
                 {
-                    if (!string.IsNullOrEmpty(setting.AudioSource))
-                    {
-                       ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 1024 -i video=\"{setting.VideoSource}\" -stream_loop -1 -i \"{setting.AudioSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -acodec aac -ac 2 -ar 44100 -ab 128k -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
-                    }
-                    else
-                    {
-                        ffmpegArgs = $"-f dshow -s {setting.Resolution} -r 1024 -i video=\"{setting.VideoSource}\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s {setting.Resolution} -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv \"{url}\"";
-                    }
+                    throw new Exception("Cmd args cannot find '[[URL]]' mark.");
                 }
-                else
-                {
-                    throw new Exception("UnSupport system.");
-                }
+                setting.CmdString = setting.CmdString.Replace("[[URL]]", $"\"{url}\"");
+                GlobalSettings.Logger.LogInfo($"执行命令：{setting.CmdString}");
 
+                int firstNullChar = setting.CmdString.IndexOf((char)32);
+                if (firstNullChar < 0)
+                {
+                    throw new Exception("Cannot find cmd process name(look like 'ping 127.0.0.1','ping' is process name).");
+                }
+                string cmdName = setting.CmdString.Substring(0, firstNullChar);
+                string cmdArgs = setting.CmdString.Substring(firstNullChar);
+                if (string.IsNullOrEmpty(cmdArgs))
+                {
+                    throw new Exception("Cmd args cannot null.");
+                }
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "ffmpeg",
-                    Arguments = ffmpegArgs,
+                    FileName = cmdName,
+                    Arguments = cmdArgs,
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
                 };
-                //启动
-                var proc = Process.Start(psi);
-                if (proc == null)
+                bool isAutoRestart = true;
+                while (isAutoRestart)
                 {
-                    throw new Exception("Can not exec ffmpeg cmd.");
-                }
-                else
-                {
-                    //开始读取
-                    using (var sr = proc.StandardOutput)
+                    isAutoRestart = setting.AutoRestart;
+                    //启动
+                    var proc = Process.Start(psi);
+                    if (proc == null)
                     {
-                        while (!sr.EndOfStream)
+                        throw new Exception("Can not exec set cmd.");
+                    }
+                    else
+                    {
+                        //开始读取命令输出
+                        using (var sr = proc.StandardOutput)
                         {
-                            GlobalSettings.Logger.LogInfo(sr.ReadLine());
+                            while (!sr.EndOfStream)
+                            {
+                                GlobalSettings.Logger.LogInfo(sr.ReadLine());
+                            }
+                            if (!proc.HasExited)
+                            {
+                                proc.Kill();
+                            }
                         }
-
-                        if (!proc.HasExited)
+                        //退出检测
+                        if (!Console.IsInputRedirected)
                         {
-                            proc.Kill();
+                            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
+                            {
+                                isAutoRestart = false;
+                            };
+                        }
+                        if (isAutoRestart)
+                        {
+                            GlobalSettings.Logger.LogInfo($"Cmd exited. Auto restart.");
+                        }
+                        else
+                        {
+                            GlobalSettings.Logger.LogInfo($"Cmd exited.");
                         }
                     }
-                    GlobalSettings.Logger.LogInfo($"FFmpeg exited.");
                 }
                 return true;
             }
