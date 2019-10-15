@@ -19,7 +19,7 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
 一键开启直播工具。  
 [![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")
 
-#### 如何使用
+#### 如何使用（树莓派）
 1.获取程序  
 ```shell
 wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.2.0/BilibiliLiveTools_ARM32.zip
