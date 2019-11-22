@@ -1,8 +1,10 @@
 using Bilibili;
 using Bilibili.Api;
 using Bilibili.Helper;
+using Bilibili.Model.Live.LiveRoomStreamInfo;
 using Bilibili.Model.Live.StartLiveInfo;
 using Bilibili.Settings;
+using BilibiliLiveTools.Common;
 using BilibiliLiveTools.Model;
 using System;
 using System.Diagnostics;
@@ -16,11 +18,11 @@ namespace BilibiliLiveTools
 {
     class Program
     {
+        private static Users _users;
+
         static async Task Main(string[] args)
         {
             string usersFilePath;
-            Users users;
-
             GlobalSettings.Logger = Logger.Instance;
             if (!BitConverter.IsLittleEndian)
             {
@@ -31,7 +33,11 @@ namespace BilibiliLiveTools
             try
             {
                 GlobalSettings.LoadAll();
-                users = Users.FromJson(File.ReadAllText(usersFilePath));
+                _users = Users.FromJson(File.ReadAllText(usersFilePath));
+                if (_users == null || _users.Count == 0)
+                {
+                    throw new Exception("Load user info failed.");
+                }
             }
             catch (Exception ex)
             {
@@ -39,17 +45,29 @@ namespace BilibiliLiveTools
                 GlobalSettings.Logger.LogError($"缺失或无效配置文件，请检查是否添加\"{usersFilePath}\"");
                 return;
             }
-            LoginApiExtensions.LoginDataUpdated += (sender, e) => File.WriteAllText(usersFilePath, users.ToJson());
-            User user = users[0];
+            LoginApiExtensions.LoginDataUpdated += (sender, e) => File.WriteAllText(usersFilePath, _users.ToJson());
+            User user = _users[0];
             if (!await user.Login())
             {
                 GlobalSettings.Logger.LogError($"账号{user.Account}登录失败！");
                 return;
             }
-            if (!await StartLive(user))
+            //加载配置文件
+            LiveSetting liveSetting = LoadLiveSettingConfig();
+            if (liveSetting == null)
             {
+                GlobalSettings.Logger.LogError($"加载直播设置配置文件失败！");
                 return;
             }
+            //获取直播间信息
+            LiveRoomStreamDataInfo roomInfo = await LiveApi.GetRoomInfo(user);
+            if (roomInfo == null)
+            {
+                GlobalSettings.Logger.LogError($"开启直播失败！");
+                return;
+            }
+            //开始使用ffmpeg推流直播
+            await StartPublish(user, liveSetting, $"{roomInfo.Rtmp}{roomInfo.StreamLine}");
 
             if (Console.IsInputRedirected || Console.IsOutputRedirected)
             {
@@ -69,12 +87,10 @@ namespace BilibiliLiveTools
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        private static async Task<bool> StartLive(User user)
+        private static async Task<StartLiveDataInfo> StartLive(User user, LiveSetting liveSetting)
         {
             try
             {
-                //加载配置文件
-                LiveSetting liveSetting = LoadLiveSettingConfig();
                 //先停止历史直播
                 if (await LiveApi.StopLive(user))
                 {
@@ -92,18 +108,22 @@ namespace BilibiliLiveTools
                     GlobalSettings.Logger.LogInfo($"我的直播间地址：http://live.bilibili.com/{liveInfo.RoomId}");
                     GlobalSettings.Logger.LogInfo($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
                 }
-                //开始使用ffmpeg推流直播
-                StartPublish(liveSetting, $"{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
-                return true;
+                return liveInfo;
             }
             catch (Exception ex)
             {
                 GlobalSettings.Logger.LogError($"开启直播失败！错误：{ex.Message}");
-                return false;
+                return null;
             }
         }
 
-        private static bool StartPublish(LiveSetting setting, string url)
+        /// <summary>
+        /// 开始推流
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private static async Task<bool> StartPublish(User user, LiveSetting setting, string url)
         {
             try
             {
@@ -141,6 +161,22 @@ namespace BilibiliLiveTools
                 while (isAutoRestart)
                 {
                     isAutoRestart = setting.AutoRestart;
+                    while (!await NetworkTools.NetworkCheck())
+                    {
+                        GlobalSettings.Logger.LogInfo($"Wait for network...");
+                        await Task.Delay(3000);
+                    }
+                    if (!await LiveRoomStateCheck(user))
+                    {
+                        GlobalSettings.Logger.LogInfo($"Start live failed...");
+                        return false;
+                    }
+                    StartLiveDataInfo liveInfo = await StartLive(user, setting);
+                    if (liveInfo == null)
+                    {
+                        GlobalSettings.Logger.LogInfo($"Start live failed...");
+                        return false;
+                    }
                     //启动
                     var proc = Process.Start(psi);
                     if (proc == null)
@@ -178,6 +214,11 @@ namespace BilibiliLiveTools
                             GlobalSettings.Logger.LogInfo($"Cmd exited.");
                         }
                     }
+                    if (isAutoRestart)
+                    {
+                        //如果开启了自动重试，那么等待60s后再次尝试
+                        await Task.Delay(60000);
+                    }
                 }
                 return true;
             }
@@ -188,16 +229,33 @@ namespace BilibiliLiveTools
             }
         }
 
-        private static string GetTitle()
+        /// <summary>
+        /// 直播间状态检查
+        /// </summary>
+        /// <returns></returns>
+        private static async Task<bool> LiveRoomStateCheck(User user)
         {
-            string productName = GetAssemblyAttribute<AssemblyProductAttribute>().Product;
-            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            return $"{productName} v{version}";
-        }
-
-        private static T GetAssemblyAttribute<T>()
-        {
-            return (T)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false)[0];
+            try
+            {
+                string info = await LoginApi.GetInfoAsync(user);
+                if (string.IsNullOrEmpty(info))
+                {
+                    if (!await user.Login())
+                    {
+                        throw new Exception("User login failed. exit.");
+                    }
+                }
+                LiveRoomStreamDataInfo roomInfo = await LiveApi.GetRoomInfo(user);
+                if (roomInfo == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>

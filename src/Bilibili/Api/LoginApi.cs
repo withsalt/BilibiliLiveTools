@@ -81,26 +81,33 @@ namespace Bilibili.Api
         /// <returns></returns>
         public static async Task<string> GetInfoAsync(User user)
         {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
+            try
+            {
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user));
 
-            QueryCollection queries;
+                QueryCollection queries;
 
-            queries = new QueryCollection {
+                queries = new QueryCollection {
                 { "access_key", user.Data.AccessKey },
                 { "ts", ApiUtils.GetTimeStamp().ToString() }
             };
-            queries.AddRange(user.Data.Cookie.Split(';').Select(item =>
-            {
-                string[] pair;
+                queries.AddRange(user.Data.Cookie.Split(';').Select(item =>
+                {
+                    string[] pair;
 
-                pair = item.Split('=');
-                return new KeyValuePair<string, string>(pair[0], pair[1]);
-            }));
-            queries.AddRange(General);
-            queries.SortAndSign();
-            using HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Get, OAUTH2_INFO_URL, queries, user.AppHeaders);
-            return await response.Content.ReadAsStringAsync();
+                    pair = item.Split('=');
+                    return new KeyValuePair<string, string>(pair[0], pair[1]);
+                }));
+                queries.AddRange(General);
+                queries.SortAndSign();
+                using HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Get, OAUTH2_INFO_URL, queries, user.AppHeaders);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>
