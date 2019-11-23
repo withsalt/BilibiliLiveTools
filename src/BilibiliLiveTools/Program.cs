@@ -67,7 +67,7 @@ namespace BilibiliLiveTools
                 return;
             }
             //开始使用ffmpeg推流直播
-            await StartPublish(user, liveSetting, $"{roomInfo.Rtmp}{roomInfo.StreamLine}");
+            await StartPublish(user, liveSetting, $"{roomInfo.Rtmp.Addr}{roomInfo.Rtmp.Code}");
 
             if (Console.IsInputRedirected || Console.IsOutputRedirected)
             {
@@ -136,8 +136,6 @@ namespace BilibiliLiveTools
                     throw new Exception("Cmd args cannot find '[[URL]]' mark.");
                 }
                 setting.CmdString = setting.CmdString.Replace("[[URL]]", $"\"{url}\"");
-                GlobalSettings.Logger.LogInfo($"执行命令：{setting.CmdString}");
-
                 int firstNullChar = setting.CmdString.IndexOf((char)32);
                 if (firstNullChar < 0)
                 {
@@ -216,6 +214,7 @@ namespace BilibiliLiveTools
                     }
                     if (isAutoRestart)
                     {
+                        GlobalSettings.Logger.LogInfo($"Wait for restart...");
                         //如果开启了自动重试，那么等待60s后再次尝试
                         await Task.Delay(60000);
                     }

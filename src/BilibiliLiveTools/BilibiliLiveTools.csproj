@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Source\demo_music.m4a" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Source\demo_music.m4a">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bilibili\Bilibili.csproj" />
   </ItemGroup>
 
