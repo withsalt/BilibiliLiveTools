@@ -22,7 +22,7 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
 #### 如何使用（树莓派）
 1.获取程序  
 ```shell
-wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.2.0/BilibiliLiveTools_ARM32.zip
+wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.3.0/BilibiliLiveTools_ARM32.zip
 ```
 
 2.解压并授权
