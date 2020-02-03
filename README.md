@@ -22,7 +22,7 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
 #### 如何使用（树莓派）
 1.获取程序  
 ```shell
-wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.3.0/BilibiliLiveTools_ARM32.zip
+wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.4.0/BilibiliLiveTools_ARM32.zip
 ```
 
 2.解压并授权
@@ -52,7 +52,7 @@ nano Settings/LiveSetting.json
 }
 ```
 
-由于推流方式不同以及FFmpeg配置的多边性，这里采用直接填写推流命令的方式。建议填写之前先测试推流命令能否正确执行。
+由于推流方式不同以及FFmpeg配置的问题，这里采用直接填写推流命令的方式。建议填写之前先测试推流命令能否正确执行。
 
 推流命令（CmdString）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。
 
