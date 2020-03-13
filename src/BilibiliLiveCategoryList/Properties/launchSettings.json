@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BilibiliLiveCategoryList": {
+      "commandName": "Project",
+      "commandLineArgs": "-md 1.txt"
+    }
+  }
+}
