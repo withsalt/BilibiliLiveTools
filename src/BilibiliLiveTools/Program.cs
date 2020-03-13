@@ -66,6 +66,7 @@ namespace BilibiliLiveTools
                 GlobalSettings.Logger.LogError($"开启直播失败！");
                 return;
             }
+
             //开始使用ffmpeg推流直播
             await StartPublish(user, liveSetting, $"{roomInfo.Rtmp.Addr}{roomInfo.Rtmp.Code}");
 

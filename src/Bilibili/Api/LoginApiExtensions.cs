@@ -52,7 +52,8 @@ namespace Bilibili.Api
             string json;
             ResultInfo result;
 
-            if (user.HasData)
+            if(false)   //目前token刷新存在问题，强制登录
+            //if (user.HasData)
             {
                 // 如果以前登录过，判断一下需不需要重新登录
                 // 这个API每次登录有效时间是720小时（expires_in=2592000）
@@ -166,6 +167,11 @@ namespace Bilibili.Api
                 {
                     throw new ApiException(new Exception("登录失败，没有返回的数据。"));
                 }
+                if(json.ToLower().Contains("doctype html"))
+                {
+                    throw new ApiException(new Exception("登录失败，刷新Token失败。"));
+                }
+
                 result = JsonHelper.DeserializeJsonToObject<ResultInfo>(json);
             }
             catch (Exception ex)

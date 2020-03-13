@@ -19,8 +19,8 @@ namespace Bilibili.Api
         private const string CAPTCHA_URL = "https://passport.bilibili.com/captcha";
         private const string LOGIN_EXIT_URL = "https://passport.bilibili.com/login?act=exit";
         private const string OAUTH2_GETKEY_URL = "https://passport.bilibili.com/api/oauth2/getKey";
-        private const string OAUTH2_INFO_URL = "https://passport.bilibili.com/api/v2/oauth2/info";
-        private const string OAUTH2_LOGIN_URL = "https://passport.bilibili.com/api/v2/oauth2/login";
+        private const string OAUTH2_INFO_URL = "https://passport.bilibili.com/api/v3/oauth2/info";
+        private const string OAUTH2_LOGIN_URL = "https://passport.bilibili.com/api/v3/oauth2/login";
         private const string OAUTH2_REFRESH_TOKEN_URL = "https://passport.bilibili.com/api/v2/oauth2/refresh_token";
         private const string SOLVE_CAPTCHA_URL = "http://115.159.205.242:19951/captcha/v1";
 
