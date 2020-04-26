@@ -8,15 +8,6 @@ namespace Bilibili.Settings
     /// </summary>
     public static class GlobalSettings
     {
-        private static string BILIBILISETTINGS_PATH
-        {
-            get
-            {
-                return Path.Combine("Settings", "Bilibili.json");
-            }
-        }
-
-
         private static BilibiliSettings _bilibili;
         private static ILogger _logger = DummyLogger.Instance;
         private static readonly object _syncRoot = new object();
@@ -44,7 +35,7 @@ namespace Bilibili.Settings
         {
             lock (_syncRoot)
             {
-                _bilibili = BilibiliSettings.FromJson(File.ReadAllText(BILIBILISETTINGS_PATH));
+                _bilibili = BilibiliSettings.FromJson(Setting.Bilibili);
             }
         }
 

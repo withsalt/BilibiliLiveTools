@@ -22,18 +22,17 @@ namespace BilibiliLiveTools
 
         static async Task Main(string[] args)
         {
-            string usersFilePath;
             GlobalSettings.Logger = Logger.Instance;
             if (!BitConverter.IsLittleEndian)
             {
                 GlobalSettings.Logger.LogWarning("在BigEndian模式的CPU下工作可能导致程序出错");
                 GlobalSettings.Logger.LogWarning("如果出现错误，请创建issue");
             }
-            usersFilePath = Path.Combine(Environment.CurrentDirectory, "Settings", "Users.json");
+            string usersConfigPath = Path.Combine(Environment.CurrentDirectory, "Settings", "Users.json");
             try
             {
                 GlobalSettings.LoadAll();
-                _users = Users.FromJson(File.ReadAllText(usersFilePath));
+                _users = Users.FromJson(File.ReadAllText(usersConfigPath));
                 if (_users == null || _users.Count == 0)
                 {
                     throw new Exception("Load user info failed.");
@@ -42,10 +41,10 @@ namespace BilibiliLiveTools
             catch (Exception ex)
             {
                 GlobalSettings.Logger.LogException(ex);
-                GlobalSettings.Logger.LogError($"缺失或无效配置文件，请检查是否添加\"{usersFilePath}\"");
+                GlobalSettings.Logger.LogError($"缺失或无效配置文件，请检查是否添加\"{usersConfigPath}\"");
                 return;
             }
-            LoginApiExtensions.LoginDataUpdated += (sender, e) => File.WriteAllText(usersFilePath, _users.ToJson());
+            LoginApiExtensions.LoginDataUpdated += (sender, e) => File.WriteAllText(usersConfigPath, _users.ToJson());
             User user = _users[0];
             if (!await user.Login())
             {
@@ -80,41 +79,6 @@ namespace BilibiliLiveTools
             else
             {
                 Console.ReadKey(true);
-            }
-        }
-
-        /// <summary>
-        /// 开启
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        private static async Task<StartLiveDataInfo> StartLive(User user, LiveSetting liveSetting)
-        {
-            try
-            {
-                //先停止历史直播
-                if (await LiveApi.StopLive(user))
-                {
-                    GlobalSettings.Logger.LogInfo("尝试关闭历史直播...成功！");
-                }
-                //修改直播间名称
-                if (await LiveApi.UpdateLiveRoomName(user, liveSetting.LiveRoomName))
-                {
-                    GlobalSettings.Logger.LogInfo($"成功修改直播间名称。直播间名称：{liveSetting.LiveRoomName}");
-                }
-                StartLiveDataInfo liveInfo = await LiveApi.StartLive(user, liveSetting.LiveCategory);
-                if (liveInfo != null)
-                {
-                    GlobalSettings.Logger.LogInfo("开启直播成功！");
-                    GlobalSettings.Logger.LogInfo($"我的直播间地址：http://live.bilibili.com/{liveInfo.RoomId}");
-                    GlobalSettings.Logger.LogInfo($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
-                }
-                return liveInfo;
-            }
-            catch (Exception ex)
-            {
-                GlobalSettings.Logger.LogError($"开启直播失败！错误：{ex.Message}");
-                return null;
             }
         }
 
@@ -230,6 +194,41 @@ namespace BilibiliLiveTools
         }
 
         /// <summary>
+        /// 开启
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private static async Task<StartLiveDataInfo> StartLive(User user, LiveSetting liveSetting)
+        {
+            try
+            {
+                //先停止历史直播
+                if (await LiveApi.StopLive(user))
+                {
+                    GlobalSettings.Logger.LogInfo("尝试关闭历史直播...成功！");
+                }
+                //修改直播间名称
+                if (await LiveApi.UpdateLiveRoomName(user, liveSetting.LiveRoomName))
+                {
+                    GlobalSettings.Logger.LogInfo($"成功修改直播间名称。直播间名称：{liveSetting.LiveRoomName}");
+                }
+                StartLiveDataInfo liveInfo = await LiveApi.StartLive(user, liveSetting.LiveCategory);
+                if (liveInfo != null)
+                {
+                    GlobalSettings.Logger.LogInfo("开启直播成功！");
+                    GlobalSettings.Logger.LogInfo($"我的直播间地址：http://live.bilibili.com/{liveInfo.RoomId}");
+                    GlobalSettings.Logger.LogInfo($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
+                }
+                return liveInfo;
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.Logger.LogError($"开启直播失败！错误：{ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 直播间状态检查
         /// </summary>
         /// <returns></returns>
@@ -253,6 +252,35 @@ namespace BilibiliLiveTools
                 return true;
             }
             catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 测试FFmpeg
+        /// </summary>
+        /// <returns></returns>
+        private static bool FFmpegTest()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = @"ffmpeg",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
+                };
+                using var proc = Process.Start(psi);
+                if (proc != null && proc.Id > 0)
+                {
+                    proc.Kill();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
             {
                 return false;
             }

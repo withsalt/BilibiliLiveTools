@@ -52,8 +52,7 @@ namespace Bilibili.Api
             string json;
             ResultInfo result;
 
-            if(false)   //目前token刷新存在问题，强制登录
-            //if (user.HasData)
+            if (user.HasData)
             {
                 // 如果以前登录过，判断一下需不需要重新登录
                 // 这个API每次登录有效时间是720小时（expires_in=2592000）
@@ -64,14 +63,14 @@ namespace Bilibili.Api
                     if (expiresIn < 1800)
                     {
                         // Token有效，但是有效时间太短，小于半个小时
-                        user.LogWarning("Token有效时间不足");
+                        user.LogWarning("Token有效时间不足，将刷新Token。");
                         return user.IsLogin = await user.RefreshToken();
                     }
                     else
                     {
                         // Token有效时间足够
-                        user.LogInfo("使用缓存Token登录成功");
-                        user.LogInfo($"Token有效时间还剩：{Math.Round(expiresIn / 3600d, 1)} 小时");
+                        user.LogInfo("使用缓存Token登录成功。");
+                        user.LogInfo($"Token有效时间还剩：{Math.Round(expiresIn / 3600d, 1)} 小时。");
                         return user.IsLogin = true;
                     }
                 }
@@ -158,7 +157,7 @@ namespace Bilibili.Api
                 throw new ArgumentNullException(nameof(user));
 
             string json;
-            ResultInfo result;
+            RefreshTokenResult result;
 
             try
             {
@@ -167,21 +166,21 @@ namespace Bilibili.Api
                 {
                     throw new ApiException(new Exception("登录失败，没有返回的数据。"));
                 }
-                if(json.ToLower().Contains("doctype html"))
+                if (json.ToLower().Contains("doctype html"))
                 {
                     throw new ApiException(new Exception("登录失败，刷新Token失败。"));
                 }
 
-                result = JsonHelper.DeserializeJsonToObject<ResultInfo>(json);
+                result = JsonHelper.DeserializeJsonToObject<RefreshTokenResult>(json);
             }
             catch (Exception ex)
             {
                 throw new ApiException(ex);
             }
-            if (result.Code == 0 && !string.IsNullOrEmpty(result.Data.TokenInfo.Mid))
+            if (result.Code == 0 && result.Data != null && !string.IsNullOrEmpty(result.Data.Mid))
             {
                 user.LogInfo("Token刷新成功");
-                UpdateLoginData(user, result);
+                UpdateLoginData(user, result.Data);
                 OnLoginDataUpdated(new LoginDataUpdatedEventArgs(user));
                 return true;
             }
@@ -229,6 +228,24 @@ namespace Bilibili.Api
                 user.LogError("登录失败");
                 user.LogError($"错误信息：{Utils.FormatJson(json)}");
                 return false;
+            }
+        }
+
+        private static void UpdateLoginData(User user, RefreshTokenResultData data)
+        {
+            try
+            {
+                if (user.Data == null)
+                {
+                    user.Data = new LoginData();
+                }
+
+                user.Data.AccessKey = data.AccessToken;
+                user.Data.RefreshToken = data.RefreshToken;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Update user login data failed. {ex.Message}");
             }
         }
 
