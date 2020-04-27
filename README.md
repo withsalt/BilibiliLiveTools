@@ -23,17 +23,17 @@ Bilibili Api，包括登陆、开启直播之类的操作都封装在里面，�
 [![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")
 
 #### 如何使用（树莓派）
-1.获取程序  
+1. 获取程序  
 ```shell
 wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.4.1/BilibiliLiveTools_Linux_ARM32.zip
 ```
 
-2.解压并授权
+2. 解压并授权
 ```shell
 unzip BilibiliLiveTools_Linux_ARM32.zip && chmod -R 775  BilibiliLiveTools_Linux_ARM32 && chmod +x BilibiliLiveTools_Linux_ARM32/BilibiliLiveTools
 ```
 
-3.编辑配置文件  
+3. 编辑配置文件  
 编辑用户配置文件User.json  
 ```shell
 cd BilibiliLiveTools_Linux_ARM32
@@ -59,7 +59,12 @@ nano Settings/LiveSetting.json
 
 推流命令（CmdString）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。
 
-然后运行程序即可。详情可以查看：https://www.quarkbook.com/?p=733
+4. 跑起来
+```shell
+sudo ./BilibiliLiveTools
+```
+
+详情可以查看：https://www.quarkbook.com/?p=733
 
 #### 直播分区
 开播时需要将ID填写到LiveSetting.json中的LiveCategory中。
