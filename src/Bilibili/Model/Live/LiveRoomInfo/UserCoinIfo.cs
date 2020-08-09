@@ -109,11 +109,11 @@ namespace Bilibili.Model.Live.LiveRoomInfo
         /// <summary>
         /// 
         /// </summary>
-        public float bili_coins { get; set; }
+        //public float bili_coins { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public float coins { get; set; }
+        //public float coins { get; set; }
     }
 }
