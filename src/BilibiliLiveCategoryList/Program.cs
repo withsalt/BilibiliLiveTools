@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BilibiliLiveCategoryList
+namespace BilibiliLiveCategoryTools
 {
     class Program
     {

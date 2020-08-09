@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveTools", "Bilibi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bilibili", "Bilibili\Bilibili.csproj", "{D29704DF-0AE8-493F-8403-C333BC985CEC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveCategoryList", "BilibiliLiveCategoryList\BilibiliLiveCategoryList.csproj", "{7914CA51-925E-44BF-A3D3-0F690B2DBEDA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveCategoryTools", "BilibiliLiveCategoryList\BilibiliLiveCategoryTools.csproj", "{7914CA51-925E-44BF-A3D3-0F690B2DBEDA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
