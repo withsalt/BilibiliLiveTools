@@ -62,7 +62,7 @@ namespace BilibiliLiveTools
             LiveRoomStreamDataInfo roomInfo = await LiveApi.GetRoomInfo(user);
             if (roomInfo == null)
             {
-                GlobalSettings.Logger.LogError($"开启直播失败！");
+                GlobalSettings.Logger.LogError($"开启直播失败，无法获取直播间信息！");
                 return;
             }
 
@@ -203,14 +203,19 @@ namespace BilibiliLiveTools
             try
             {
                 //先停止历史直播
-                if (await LiveApi.StopLive(user))
-                {
-                    GlobalSettings.Logger.LogInfo("尝试关闭历史直播...成功！");
-                }
+                //if (await LiveApi.StopLive(user))
+                //{
+                //    GlobalSettings.Logger.LogInfo("尝试关闭历史直播...成功！");
+                //}
                 //修改直播间名称
                 if (await LiveApi.UpdateLiveRoomName(user, liveSetting.LiveRoomName))
                 {
-                    GlobalSettings.Logger.LogInfo($"成功修改直播间名称。直播间名称：{liveSetting.LiveRoomName}");
+                    GlobalSettings.Logger.LogInfo($"成功修改直播间名称，直播间名称：{liveSetting.LiveRoomName}");
+                }
+                //更新分类
+                if (await LiveApi.UpdateLiveCategory(user, liveSetting.LiveCategory))
+                {
+                    GlobalSettings.Logger.LogInfo($"成功修改直播间分类，直播间分类ID：{liveSetting.LiveCategory}");
                 }
                 StartLiveDataInfo liveInfo = await LiveApi.StartLive(user, liveSetting.LiveCategory);
                 if (liveInfo != null)

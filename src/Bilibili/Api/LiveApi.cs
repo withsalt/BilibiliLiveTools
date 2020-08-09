@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Bilibili.Helper;
 using Bilibili.Model;
+using Bilibili.Model.Interface;
 using Bilibili.Model.Live;
 using Bilibili.Model.Live.LiveCategoryInfo;
 using Bilibili.Model.Live.LiveRealAddressInfo;
@@ -65,6 +67,11 @@ namespace Bilibili.Api
         /// 获取直播间真实流地址
         /// </summary>
         private const string _getRealRoomAddressApi = "https://api.live.bilibili.com/room/v1/Room/playUrl";
+
+        /// <summary>
+        /// 更新直播间直播地址
+        /// </summary>
+        private const string _updateLiveRoomCategory = "https://api.live.bilibili.com/room/v1/Room/update";
 
         #endregion
 
@@ -272,6 +279,63 @@ namespace Bilibili.Api
                     else
                     {
                         throw new Exception($"Get live room address failed. error code is {resultModel.Code}({resultModel.Msg}).");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 更新直播间分类
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static async Task<bool> UpdateLiveCategory(User user, string id)
+        {
+            try
+            {
+                LiveCategoryDataInfo liveCategoryData = await GetLiveCategoryInfo();
+                if (liveCategoryData == null || liveCategoryData.Code != 0 || liveCategoryData.Data == null)
+                {
+                    return false;
+                }
+                bool isOk = false;
+                foreach (var item in liveCategoryData.Data)
+                {
+                    foreach (var cate in item.List)
+                    {
+                        if (cate.id.Equals(id, StringComparison.OrdinalIgnoreCase))
+                        {
+                            isOk = true;
+                        }
+                    }
+                }
+                if (!isOk)
+                {
+                    return false;
+                }
+
+                string roomId = await GetRoomId(user);
+                var queries = new QueryCollection {
+                    { "room_id", roomId },
+                    { "area_id",id },
+                    { "csrf_token",user.Data.Csrf },
+                    { "csrf",user.Data.Csrf }
+                };
+                using (HttpResponseMessage response = await user.Handler.SendAsync(HttpMethod.Post, _updateLiveRoomCategory, queries, user.AppHeaders, user.Data.Cookie))
+                {
+                    ResultModel<IResultData> resultModel = await response.ConvertResultModel<IResultData>();
+                    if (resultModel.Code == 0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        throw new Exception($"Update live category failed. error code is {resultModel.Code}({resultModel.Msg}).");
                     }
                 }
             }
