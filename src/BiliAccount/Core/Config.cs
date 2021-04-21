@@ -15,7 +15,7 @@ namespace BiliAccount.Core
         /// <summary>
         /// 后端配置文件地址（如非必要请勿修改）
         /// </summary>
-        private const string init_url = "http://ctrl.zhangbudademao.com/118/Init.json";
+        private const string init_url = "https://www.quarkbook.com/public/bilibililiver/config.json";
 
         #endregion Private Fields
 

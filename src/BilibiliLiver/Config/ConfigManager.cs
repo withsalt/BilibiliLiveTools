@@ -68,6 +68,14 @@ namespace BilibiliLiver.Config
             return section.Get<T>();
         }
 
+        public AppSettingNode AppSetting
+        {
+            get
+            {
+                return GetSection<AppSettingNode>();
+            }
+        }
+
         public LiveSettingNode LiveSetting
         {
             get
