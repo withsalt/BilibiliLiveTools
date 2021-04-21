@@ -25,19 +25,19 @@ Bilibili账号操作Api。
 #### 如何使用（树莓派）
 1. 获取程序  
 ```shell
-wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.5.0/BilibiliLiveTools_Linux_ARM32.zip
+wget https://github.com/withsalt/BilibiliLiveTools/releases/download/2.0.1/BilibiliLiver_Linux_ARM.zip
 ```
 
 2. 解压并授权
 ```shell
-unzip BilibiliLiveTools_Linux_ARM32.zip && chmod -R 775  BilibiliLiveTools_Linux_ARM32 && chmod +x BilibiliLiveTools_Linux_ARM32/BilibiliLiveTools
+unzip BilibiliLiver_Linux_ARM.zip && chmod -R 775  BilibiliLiver_Linux_ARM && chmod +x BilibiliLiver_Linux_ARM/BilibiliLiver
 ```
 
 3. 编辑配置文件  
 编辑用户配置文件appsettings.json  
 ```shell
-cd BilibiliLiveTools_Linux_ARM32
-nano appsettings.json  #输入用户名和密码
+cd BilibiliLiver_Linux_ARM/
+nano appsettings.json
 ```
 
 编辑直播配置文件  
@@ -73,7 +73,7 @@ nano appsettings.json  #输入用户名和密码
 
 4. 跑起来
 ```shell
-sudo ./BilibiliLiveTools
+sudo ./BilibiliLiver
 ```
 
 详情可以查看：https://www.quarkbook.com/?p=733
