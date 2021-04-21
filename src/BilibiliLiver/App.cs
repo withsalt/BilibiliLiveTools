@@ -1,5 +1,6 @@
 ﻿using BiliAccount;
 using BiliAccount.Linq;
+using BilibiliLiver.Api;
 using BilibiliLiver.Config;
 using BilibiliLiver.Utils;
 using Microsoft.Extensions.Logging;
@@ -16,28 +17,26 @@ namespace BilibiliLiver
     {
         private readonly ILogger<App> _logger;
         private readonly ConfigManager _config;
+        private readonly LiveApi _liveApi;
         private readonly string _dataFilePath = Path.Combine(AppContext.BaseDirectory, "bilibili.dat");
         private Account _account = null;
 
         public App(ILogger<App> logger
-            , ConfigManager config)
+            , ConfigManager config
+            , LiveApi liveApi)
         {
             _logger = logger;
             _config = config;
+            _liveApi = liveApi ?? throw new ArgumentNullException(nameof(LiveApi));
         }
 
         public async Task Run(params string[] args)
         {
-            //while (true)
-            //{
-            //    await Task.Delay(1500);
-
-            //    _logger.LogInformation($"Account: {_config.UserSetting.Account}");
-            //}
+            //登录
             await LoginToBilibili();
-
-
-            _logger.LogInformation($"Account: {_account.AccessToken}");
+            _logger.LogInformation($"登录成功，登录账号为：{_config.UserSetting.Account}");
+            //
+            await _liveApi.GetRoomId(this._account);
         }
 
 

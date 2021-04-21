@@ -1,4 +1,5 @@
-﻿using BilibiliLiver.Config;
+﻿using BilibiliLiver.Api;
+using BilibiliLiver.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -57,6 +58,12 @@ namespace BilibiliLiver
             services.AddConfig();
             // 添加 app
             services.AddTransient<App>();
+
+            #region 注册API
+
+            services.AddTransient<LiveApi>();
+
+            #endregion
         }
     }
 }
