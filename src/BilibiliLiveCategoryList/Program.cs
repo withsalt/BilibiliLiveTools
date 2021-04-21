@@ -1,7 +1,5 @@
-﻿using Bilibili.Api;
-using Bilibili.Model.Live.LiveCategoryInfo;
-using Bilibili.Model.Live.LiveRoomInfo;
-using Bilibili.Settings;
+﻿using BilibiliLiver.Api;
+using BilibiliLiver.Model.Live;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,8 +20,7 @@ namespace BilibiliLiveCategoryTools
         {
             try
             {
-                GlobalSettings.LoadAll();
-                LiveCategoryDataInfo info = await LiveApi.GetLiveCategoryInfo();
+                LiveCategoryDataInfo info = await new LiveApi().GetLiveCategoryInfo();
                 if (info != null && info.Code == 0)
                 {
                     Console.WriteLine("-------------------------");

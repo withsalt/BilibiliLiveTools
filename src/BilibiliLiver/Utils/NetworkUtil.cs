@@ -1,13 +1,12 @@
-﻿using Bilibili.Settings;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BilibiliLiveTools.Common
+namespace BilibiliLiver.Utils
 {
-    public class NetworkTools
+    public class NetworkUtil
     {
         private static readonly List<string> _hosts = new List<string>()
         {
@@ -39,7 +38,7 @@ namespace BilibiliLiveTools.Common
                 }
                 return false;
             }
-            catch(Exception ex)
+            catch
             {
                 return false;
             }
