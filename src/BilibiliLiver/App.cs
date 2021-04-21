@@ -111,24 +111,30 @@ namespace BilibiliLiver
             {
                 if (string.IsNullOrEmpty(_config.LiveSetting.FFmpegCmd))
                 {
-                    throw new Exception("CMD string can not null.");
+                    throw new Exception("推流命令不能为空。");
                 }
-                if (_config.LiveSetting.FFmpegCmd.IndexOf("[[URL]]") < 0)
+                int markIndex = _config.LiveSetting.FFmpegCmd.IndexOf("[[URL]]");
+                if (markIndex < 5)
                 {
-                    throw new Exception("Cmd args cannot find '[[URL]]' mark.");
+                    throw new Exception("在填写的命令中未找到 '[[URL]]'标记。");
+                }
+                if (_config.LiveSetting.FFmpegCmd[markIndex - 1] == '\"')
+                {
+                    throw new Exception(" '[[URL]]'标记前后无需“\"”。");
                 }
                 string newCmd = _config.LiveSetting.FFmpegCmd.Replace("[[URL]]", $"\"{url}\"");
                 int firstNullChar = newCmd.IndexOf((char)32);
                 if (firstNullChar < 0)
                 {
-                    throw new Exception("Cannot find cmd process name(look like 'ping 127.0.0.1','ping' is process name).");
+                    throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
                 }
                 string cmdName = newCmd.Substring(0, firstNullChar);
                 string cmdArgs = newCmd.Substring(firstNullChar);
                 if (string.IsNullOrEmpty(cmdArgs))
                 {
-                    throw new Exception("Cmd args cannot null.");
+                    throw new Exception("命令参数不能为空！");
                 }
+                
                 var psi = new ProcessStartInfo
                 {
                     FileName = cmdName,
@@ -145,7 +151,7 @@ namespace BilibiliLiver
                     //check network
                     while (!await NetworkUtil.NetworkCheck())
                     {
-                        _logger.LogWarning($"Network disconnect, wait for network...");
+                        _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
                         await Task.Delay(10000);
                     }
                     //check token is available
@@ -157,15 +163,16 @@ namespace BilibiliLiver
                     StartLiveDataInfo liveInfo = await StartLive();
                     if (liveInfo == null)
                     {
-                        _logger.LogError($"Start live failed, can not get live stream url.");
+                        _logger.LogError($"开启B站直播间失败，无法获取推流地址。");
                         return false;
                     }
+                    _logger.LogInformation("正在初始化推流指令...");
                     //启动
                     using (var proc = Process.Start(psi))
                     {
                         if (proc == null || proc.Id <= 0)
                         {
-                            throw new Exception("Can not exec set cmd.");
+                            throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
                         }
                         //退出检测
                         if (!Console.IsInputRedirected)
@@ -178,16 +185,16 @@ namespace BilibiliLiver
                         await proc.WaitForExitAsync();
                         if (isAutoRestart)
                         {
-                            _logger.LogWarning($"FFmpeg cmd exited. Auto restart.");
+                            _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
                         }
                         else
                         {
-                            _logger.LogWarning($"FFmpeg cmd  exited.");
+                            _logger.LogWarning($"FFmpeg异常退出。");
                         }
                     }
                     if (isAutoRestart)
                     {
-                        _logger.LogWarning($"Wait for restart...");
+                        _logger.LogWarning($"等待重新推流...");
                         //如果开启了自动重试，那么等待60s后再次尝试
                         await Task.Delay(60000);
                     }

@@ -16,10 +16,9 @@ namespace BilibiliLiver
         {
             //编码注册
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
+            //DI
             IServiceCollection services = new ServiceCollection();
             ConfigureServices(services);
-
             var provider = services.BuildServiceProvider();
 
             #region 初始化配置
