@@ -18,26 +18,26 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 Bilibili账号操作Api。  
 （2）BilibiliLiveCategoryList  
 直播分区获取获取工具，可以通过此工具获取直播分区。  
-（3）BilibiliLiveTools  
+（3）BilibiliLiver  
 一键开启直播工具。  
 [![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")
 
 #### 如何使用（树莓派）
 1. 获取程序  
 ```shell
-wget https://github.com/withsalt/BilibiliLiveTools/releases/download/1.5.0/BilibiliLiveTools_Linux_ARM32.zip
+wget https://github.com/withsalt/BilibiliLiveTools/releases/download/2.0.1/BilibiliLiver_Linux_ARM.zip
 ```
 
 2. 解压并授权
 ```shell
-unzip BilibiliLiveTools_Linux_ARM32.zip && chmod -R 775  BilibiliLiveTools_Linux_ARM32 && chmod +x BilibiliLiveTools_Linux_ARM32/BilibiliLiveTools
+unzip BilibiliLiver_Linux_ARM.zip && chmod -R 755 BilibiliLiver_Linux_ARM && chmod +x BilibiliLiver_Linux_ARM/BilibiliLiver
 ```
 
 3. 编辑配置文件  
 编辑用户配置文件appsettings.json  
 ```shell
-cd BilibiliLiveTools_Linux_ARM32
-nano appsettings.json  #输入用户名和密码
+cd BilibiliLiver_Linux_ARM/
+nano appsettings.json
 ```
 
 编辑直播配置文件  
@@ -45,6 +45,7 @@ nano appsettings.json  #输入用户名和密码
 ```json
 {
   "AppSetting": {
+    //加密密钥，一般不需要修改，要修改的话，至少需要16位
     "Key": "ac131de1-ed20-499f-8fdf-dede054dbaad"
   },
   "LiveSetting": {
@@ -67,19 +68,19 @@ nano appsettings.json  #输入用户名和密码
 }
 ```
 
-由于推流方式不同以及FFmpeg配置的问题，这里采用直接填写推流命令的方式。建议填写之前先测试推流命令能否正确执行。
+由于推流方式不同以及FFmpeg配置的多边性，这里采用直接填写推流命令的方式。建议填写之前先测试推流命令能否正确执行。默认的推流命令设配树莓派官方系统，且摄像头设备为‘/dev/video0’，其它系统可能不适用，需要自己修改。  
 
-推流命令（CmdString）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。
+推流命令（FFmpegCmd）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。推流命令中注意半角双引号需要用符号‘\’来进行转义。  
 
-4. 跑起来
+4. 跑起来  
 ```shell
-sudo ./BilibiliLiveTools
+sudo ./BilibiliLiver
 ```
 
-详情可以查看：https://www.quarkbook.com/?p=733
+配置系统服务等，可以查看：https://www.quarkbook.com/?p=733
 
 #### 直播分区
-开播时需要将ID填写到LiveSetting.json中的LiveCategory中。
+开播时需要将ID填写到LiveSetting中的LiveCategory中。请注意正确填写分区ID，不然会有被封的风险。
 
 |  ID | 分类名称  | 分区名称  |
 | :------------ | :------------ | :------------ |
