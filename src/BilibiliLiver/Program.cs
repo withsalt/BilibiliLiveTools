@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,8 @@ namespace BilibiliLiver
     {
         static async Task Main(string[] args)
         {
+            Console.Title = "BilibiliLiver " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
             //编码注册
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             //DI

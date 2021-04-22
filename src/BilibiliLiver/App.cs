@@ -35,24 +35,31 @@ namespace BilibiliLiver
 
         public async Task Run(params string[] args)
         {
-            //登录
-            await LoginToBilibili();
-            _logger.LogInformation($"登录成功，登录账号为：{_config.UserSetting.Account}");
-            //获取直播间房间信息
-            LiveRoomStreamDataInfo liveRoomInfo = await _liveApi.GetRoomInfo(this._account);
-            if (liveRoomInfo == null)
+            try
             {
-                _logger.LogError($"开启直播失败，无法获取直播间信息！");
-                return;
+                //登录
+                await LoginToBilibili();
+                _logger.LogInformation($"登录成功，登录账号为：{_config.UserSetting.Account}");
+                //获取直播间房间信息
+                LiveRoomStreamDataInfo liveRoomInfo = await _liveApi.GetRoomInfo(this._account);
+                if (liveRoomInfo == null)
+                {
+                    _logger.LogError($"开启直播失败，无法获取直播间信息！");
+                    return;
+                }
+                //测试FFmpeg
+                if (!await FFmpegTest())
+                {
+                    _logger.LogError($"开启推流失败，未找到FFmpeg，请确认已经安装FFmpeg！");
+                    return;
+                }
+                //开始执行ffmpeg推流
+                await UseFFmpegLive(liveRoomInfo.Rtmp.Addr + liveRoomInfo.Rtmp.Code);
             }
-            //测试FFmpeg
-            if (!await FFmpegTest())
+            catch (Exception ex)
             {
-                _logger.LogError($"开启推流失败，未找到FFmpeg，请确认已经安装FFmpeg！");
-                return;
+                _logger.LogError(ex.Message, ex);
             }
-            //开始执行ffmpeg推流
-            await UseFFmpegLive(liveRoomInfo.Rtmp.Addr + liveRoomInfo.Rtmp.Code);
         }
 
         #region Private
@@ -134,7 +141,7 @@ namespace BilibiliLiver
                 {
                     throw new Exception("命令参数不能为空！");
                 }
-                
+
                 var psi = new ProcessStartInfo
                 {
                     FileName = cmdName,
@@ -252,6 +259,7 @@ namespace BilibiliLiver
                     await LoginByPassword();
                     return;
                 }
+                Account account = null;
                 try
                 {
                     string decodeStr = AES128.AESDecrypt(fileStr, _config.AppSetting.Key, "40863a4f-7cbe-4be2-bb54-765233c83d25");
@@ -260,37 +268,38 @@ namespace BilibiliLiver
                         await LoginByPassword();
                         return;
                     }
-                    Account account = JsonUtil.DeserializeJsonToObject<Account>(decodeStr);
-                    //判断AccessToken是否有效
-                    if (!ByPassword.IsTokenAvailable(account.AccessToken))
-                    {
-                        await LoginByPassword();
-                        return;
-                    }
-                    //判断AccessToken是否需要续期
-                    if (account.Expires_AccessToken != DateTime.MinValue
-                        && account.Expires_AccessToken.AddDays(-7) < DateTime.Now)
-                    {
-                        DateTime? dt = ByPassword.RefreshToken(account.AccessToken, account.RefreshToken);
-                        if (dt == null)
-                        {
-                            await LoginByPassword();
-                            return;
-                        }
-                        account.Expires_AccessToken = dt.Value;
-                        //更新
-                        await WriteLoginDataToFile(account);
-                        _account = account;
-                    }
-                    else
-                    {
-                        _account = account;
-                        return;
-                    }
+                    account = JsonUtil.DeserializeJsonToObject<Account>(decodeStr);
                 }
                 catch
                 {
                     await LoginByPassword();
+                    return;
+                }
+                //判断AccessToken是否有效
+                if (account == null || !ByPassword.IsTokenAvailable(account.AccessToken) || account.UserName != _config.UserSetting.Account)
+                {
+                    await LoginByPassword();
+                    return;
+                }
+                //判断AccessToken是否需要续期
+                if (account.Expires_AccessToken != DateTime.MinValue
+                    && account.Expires_AccessToken.AddDays(-7) < DateTime.Now)
+                {
+                    DateTime? dt = ByPassword.RefreshToken(account.AccessToken, account.RefreshToken);
+                    if (dt == null)
+                    {
+                        await LoginByPassword();
+                        return;
+                    }
+                    account.Expires_AccessToken = dt.Value;
+                    //更新
+                    await WriteLoginDataToFile(account);
+                    _account = account;
+                }
+                else
+                {
+                    _account = account;
+                    return;
                 }
             }
             catch (Exception ex)
