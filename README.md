@@ -25,7 +25,7 @@ Bilibili账号操作Api。
 #### 如何使用（树莓派）
 1. 获取程序  
 ```shell
-wget https://github.com/withsalt/BilibiliLiveTools/releases/download/2.0.1/BilibiliLiver_Linux_ARM.zip
+wget https://github.com/withsalt/BilibiliLiveTools/releases/download/2.0.2/BilibiliLiver_Linux_ARM.zip
 ```
 
 2. 解压并授权
