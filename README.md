@@ -18,7 +18,7 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 Bilibili账号操作Api。  
 （2）BilibiliLiveCategoryList  
 直播分区获取获取工具，可以通过此工具获取直播分区。  
-（3）BilibiliLiveTools  
+（3）BilibiliLiver  
 一键开启直播工具。  
 [![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")
 
@@ -30,7 +30,7 @@ wget https://github.com/withsalt/BilibiliLiveTools/releases/download/2.0.1/Bilib
 
 2. 解压并授权
 ```shell
-unzip BilibiliLiver_Linux_ARM.zip && chmod -R 775  BilibiliLiver_Linux_ARM && chmod +x BilibiliLiver_Linux_ARM/BilibiliLiver
+unzip BilibiliLiver_Linux_ARM.zip && chmod -R 755 BilibiliLiver_Linux_ARM && chmod +x BilibiliLiver_Linux_ARM/BilibiliLiver
 ```
 
 3. 编辑配置文件  
@@ -77,7 +77,7 @@ nano appsettings.json
 sudo ./BilibiliLiver
 ```
 
-详情可以查看：https://www.quarkbook.com/?p=733
+配置系统服务等，可以查看：https://www.quarkbook.com/?p=733
 
 #### 直播分区
 开播时需要将ID填写到LiveSetting.json中的LiveCategory中。
