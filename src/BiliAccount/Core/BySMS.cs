@@ -3,7 +3,14 @@ using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+
+#if NETSTANDARD2_0 || NETCORE3_0
 using Newtonsoft.Json;
+#else
+
+using System.Web.Script.Serialization;
+
+#endif
 
 #pragma warning disable CS0649
 
@@ -45,7 +52,11 @@ namespace BiliAccount.Core
             param += $"&sign={GetSign(param)}";
 
             string str = Http.PostBody("https://passport.bilibili.com/x/passport-login/login/sms", param,null, $"BiliAccount/{Config.Dll_Version}");
+#if NETSTANDARD2_0 || NETCORE3_0
             Login_DataTemplete obj = JsonConvert.DeserializeObject<Login_DataTemplete>(str);
+#else
+            Login_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<Login_DataTemplete>(str);
+#endif
             if (obj.code == 0)
             {
                 account.Uid = obj.data.token_info.mid;
@@ -82,7 +93,11 @@ namespace BiliAccount.Core
             string param = $"appkey={Config.Instance.Appkey}&build={Config.Instance.Build}&channel=bili&cid=86&mobi_app=android&platform=android&statistics=%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%22{Config.Instance.Version}%22%2C%22abtest%22%3A%22%22%7D&tel={tel}&ts={TimeStamp}";
             param += $"&sign={GetSign(param)}";
             string str = Http.PostBody("https://passport.bilibili.com/x/passport-login/sms/send", param,null, $"BiliAccount/{Config.Dll_Version}");
+#if NETSTANDARD2_0 || NETCORE3_0
             SMS_Send_DataTemplete obj = JsonConvert.DeserializeObject<SMS_Send_DataTemplete>(str);
+#else
+            SMS_Send_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<SMS_Send_DataTemplete>(str);
+#endif
             if (obj.code == 0)
             {
                 if (string.IsNullOrEmpty(obj.data.recaptcha_url))

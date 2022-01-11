@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Newtonsoft.Json;
 
-
 #pragma warning disable CS0649
 
 namespace BiliAccount.Core
@@ -50,7 +49,12 @@ namespace BiliAccount.Core
             string str = Http.PostBodyOutCookies("https://passport.bilibili.com/x/passport-login/oauth2/login ", out account.Cookies, parm, null, "application/x-www-form-urlencoded;charset=utf-8", "", $"BiliAccount/{Config.Dll_Version}");
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 DoLogin_DataTemplete obj = JsonConvert.DeserializeObject<DoLogin_DataTemplete>(str);
+#else
+                DoLogin_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<DoLogin_DataTemplete>(str);
+#endif
+
                 switch (obj.code)
                 {
                     case 0://初步登录成功
@@ -87,7 +91,11 @@ namespace BiliAccount.Core
             string str = Http.PostBodyOutCookies("https://passport.bilibili.com/x/passport-login/oauth2/login", out account.Cookies, parm, account.Cookies, "application/x-www-form-urlencoded;charset=utf-8", "", $"BiliAccount/{Config.Dll_Version}");
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 DoLogin_DataTemplete obj = JsonConvert.DeserializeObject<DoLogin_DataTemplete>(str);
+#else
+                DoLogin_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<DoLogin_DataTemplete>(str);
+#endif
                 switch (obj.code)
                 {
                     case 0://登录成功
@@ -150,7 +158,11 @@ namespace BiliAccount.Core
             string str = Http.PostBodyOutCookies("http://passport.bilibili.com/api/oauth2/getKey", out cookies, parm);
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 GetKey_DataTemplete obj = JsonConvert.DeserializeObject<GetKey_DataTemplete>(str);
+#else
+                GetKey_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<GetKey_DataTemplete>(str);
+#endif
                 if (obj.code == 0)
                 {
                     hash = obj.data.hash;
@@ -177,7 +189,12 @@ namespace BiliAccount.Core
 
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 IsTokenAvailable_DataTemplete obj = JsonConvert.DeserializeObject<IsTokenAvailable_DataTemplete>(str);
+#else
+                IsTokenAvailable_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<IsTokenAvailable_DataTemplete>(str);
+#endif
+
                 if (obj.code == 0 && obj.data.expires_in > 0)
                 {
                     return true;
@@ -200,7 +217,11 @@ namespace BiliAccount.Core
 
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 RefreshToken_DataTemplete obj = JsonConvert.DeserializeObject<RefreshToken_DataTemplete>(str);
+#else
+                RefreshToken_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<RefreshToken_DataTemplete>(str);
+#endif
                 if (obj.code == 0)
                 {
                     return DateTime.Parse("1970-01-01 08:00:00").AddSeconds(obj.ts + obj.data.expires_in);
@@ -367,7 +388,8 @@ namespace BiliAccount.Core
                     account.LoginStatus = Account.LoginStatusEnum.NeedTelVerify;
                     break;
 
-                case 3://设备登录验证
+                case 2://设备登录验证
+                case 3:
                     account.Url = obj.data.url;
                     account.LoginStatus = Account.LoginStatusEnum.NeedSafeVerify;
                     break;

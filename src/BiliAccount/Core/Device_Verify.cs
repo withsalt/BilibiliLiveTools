@@ -3,7 +3,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Net;
+
+#if NETSTANDARD2_0 || NETCORE3_0
 using Newtonsoft.Json;
+#else
+
+using System.Web.Script.Serialization;
+
+#endif
 
 #pragma warning disable CS0649
 
@@ -44,7 +51,11 @@ namespace BiliAccount.Core
             string str = Http.GetBody($"https://passport.bilibili.com/api/v2/oauth2/access_token?{param}", null, "", $"BiliAccount/{Config.Dll_Version}", headers);
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 GetAccount_DataTemplete obj = JsonConvert.DeserializeObject<GetAccount_DataTemplete>(str);
+#else
+                GetAccount_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<GetAccount_DataTemplete>(str);
+#endif
                 if (obj.code == 0)
                 {
                     account.Uid = obj.data.token_info.mid;
@@ -105,7 +116,11 @@ namespace BiliAccount.Core
             string str = Http.PostBody("https://passport.bilibili.com/api/login/verify_device", param,null, $"BiliAccount/{Config.Dll_Version}");
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 Verify_DataTemplete obj = JsonConvert.DeserializeObject<Verify_DataTemplete>(str);
+#else
+                Verify_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<Verify_DataTemplete>(str);
+#endif
                 if (obj.code == 0)
                 {
                     return obj.data.code;

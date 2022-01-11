@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Reflection;
+
+#if NETSTANDARD2_0 || NETCORE3_0
 using Newtonsoft.Json;
+#else
+using System.Web.Script.Serialization;
+#endif
 
 #pragma warning disable CS0649
 
@@ -41,7 +46,11 @@ namespace BiliAccount.Core
 
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 Init_DataTemplete obj = JsonConvert.DeserializeObject<Init_DataTemplete>(str);
+#else
+                Init_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<Init_DataTemplete>(str);
+#endif
                 Appkey = obj.appkey;
                 Appsecret = obj.appsecret;
                 Build = obj.build;
@@ -57,7 +66,11 @@ namespace BiliAccount.Core
         {
             if (!string.IsNullOrEmpty(str))
             {
+#if NETSTANDARD2_0 || NETCORE3_0
                 Init_DataTemplete obj = JsonConvert.DeserializeObject<Init_DataTemplete>(str);
+#else
+                Init_DataTemplete obj = (new JavaScriptSerializer()).Deserialize<Init_DataTemplete>(str);
+#endif
                 Appkey = obj.appkey;
                 Appsecret = obj.appsecret;
                 Build = obj.build;
