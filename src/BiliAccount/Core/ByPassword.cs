@@ -6,7 +6,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+
+#if NETSTANDARD2_0 || NETCORE3_0
 using Newtonsoft.Json;
+#else
+
+using System.Web.Script.Serialization;
+
+#endif
 
 #pragma warning disable CS0649
 
