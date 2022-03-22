@@ -16,15 +16,15 @@ using System.Threading.Tasks;
 
 namespace BilibiliLiver
 {
-    class App
+    class PushStreamService
     {
-        private readonly ILogger<App> _logger;
+        private readonly ILogger<PushStreamService> _logger;
         private readonly ConfigManager _config;
         private readonly LiveApi _liveApi;
         private readonly string _dataFilePath = Path.Combine(AppContext.BaseDirectory, "bilibili.dat");
         private Account _account = null;
 
-        public App(ILogger<App> logger
+        public PushStreamService(ILogger<PushStreamService> logger
             , ConfigManager config
             , LiveApi liveApi)
         {
@@ -35,6 +35,8 @@ namespace BilibiliLiver
 
         public async Task Run(params string[] args)
         {
+            _config.Load();
+
             try
             {
                 //登录

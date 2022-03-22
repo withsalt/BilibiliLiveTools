@@ -1,7 +1,9 @@
 ﻿using BilibiliLiver.Api;
 using BilibiliLiver.Config;
+using BilibiliLiver.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -13,59 +15,24 @@ namespace BilibiliLiver
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            Console.Title = "BilibiliLiver " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-            //编码注册
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            //DI
-            IServiceCollection services = new ServiceCollection();
-            ConfigureServices(services);
-            var provider = services.BuildServiceProvider();
-
-            #region 初始化配置
-
-            ConfigManager config = provider.GetRequiredService<ConfigManager>();
-            config.Load();
-
-            #endregion
-
-            #region Main App
-
-            var app = provider.GetRequiredService<App>();
-            await app.Run(args);
-
-            #endregion
+            CreateHostBuilder(args).Build().Run();
         }
 
-        static void ConfigureServices(IServiceCollection services)
-        {
-            // 创建 config
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false)
-                .AddEnvironmentVariables()
-                .Build();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureServices((hostContext, services) =>
+                {
+                    // 添加配置管理器
+                    services.AddConfig();
+                    // 添加 app
+                    services.AddTransient<PushStreamService>();
 
-            services.AddSingleton<IConfiguration>(configuration);
+                    services.AddTransient<LiveApi>();
 
-            // 配置日志
-            services.AddLogging(builder =>
-            {
-                builder.AddConsole();
-                builder.AddDebug();
-            });
-            // 添加配置管理器
-            services.AddConfig();
-            // 添加 app
-            services.AddTransient<App>();
-
-            #region 注册API
-
-            services.AddTransient<LiveApi>();
-
-            #endregion
-        }
+                    //配置并启动服务
+                    services.AddHostedService<ConfigureService>();
+                });
     }
 }
