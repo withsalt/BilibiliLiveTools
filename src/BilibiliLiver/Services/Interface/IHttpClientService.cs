@@ -1,14 +1,11 @@
-﻿using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using BilibiliLiver.Model.Enums;
+using RestSharp;
 using System.Threading.Tasks;
 
-namespace BilibiliLiver.Services
+namespace BilibiliLiver.Services.Interface
 {
     public interface IHttpClientService
     {
-        Task<T> Execute<T>(string url, Method method, object body = null) where T : class;
+        Task<T> Execute<T>(string url, Method method, object body = null, BodyFormat format = BodyFormat.Json) where T : class;
     }
 }

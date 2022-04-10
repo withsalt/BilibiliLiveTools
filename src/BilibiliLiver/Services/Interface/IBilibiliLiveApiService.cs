@@ -1,11 +1,8 @@
 ﻿using BilibiliLiver.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BilibiliLiver.Services
+namespace BilibiliLiver.Services.Interface
 {
     public interface IBilibiliLiveApiService
     {
@@ -22,5 +19,19 @@ namespace BilibiliLiver.Services
         /// <param name="name"></param>
         /// <returns></returns>
         Task<bool> UpdateLiveRoomName(int roomId, string title);
+
+        /// <summary>
+        /// 获取直播间分类
+        /// </summary>
+        /// <returns></returns>
+        Task<List<LiveCategoryItem>> GetLiveCategories();
+
+        /// <summary>
+        /// 开始直播
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
+        Task<StartLiveInfo> StartLive(int roomId, string categoryId);
     }
 }

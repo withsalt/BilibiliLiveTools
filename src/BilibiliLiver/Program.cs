@@ -1,4 +1,5 @@
-﻿using BilibiliLiver.Services;
+﻿using BilibiliLiver.DependencyInjection;
+using BilibiliLiver.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

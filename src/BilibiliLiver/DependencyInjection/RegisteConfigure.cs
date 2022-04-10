@@ -1,8 +1,8 @@
-﻿using BilibiliLiver.Config;
+﻿using BilibiliLiver.Config.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace BilibiliLiver
+namespace BilibiliLiver.DependencyInjection
 {
     public static class RegisteConfigure
     {

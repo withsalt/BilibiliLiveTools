@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using BilibiliLiver.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BilibiliLiverTests;
+using BilibiliLiver.Services.Interface;
 
 namespace BilibiliLiver.Services.Tests
 {
@@ -35,7 +35,22 @@ namespace BilibiliLiver.Services.Tests
         {
             var info = await _apiService.GetLiveRoomInfo();
             bool reslt = await _apiService.UpdateLiveRoomName(info.room_id, info.title);
-            Assert.Fail();
+            Assert.IsTrue(reslt);
+        }
+
+        [TestMethod()]
+        public async Task GetLiveCategoriesTest()
+        {
+            var info = await _apiService.GetLiveCategories();
+            Assert.IsNotNull(info);
+        }
+
+        [TestMethod()]
+        public async Task StartLiveTest()
+        {
+            var info = await _apiService.GetLiveRoomInfo();
+            var reslt = await _apiService.StartLive(info.room_id, "369");
+            Assert.IsNotNull(reslt);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿
-
-namespace BilibiliLiver.Model
+﻿namespace BilibiliLiver.Model.Base
 {
     public class ResultModel<T> where T : class
     {

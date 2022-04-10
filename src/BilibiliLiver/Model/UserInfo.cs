@@ -5,7 +5,7 @@ namespace BilibiliLiver.Model
     /// <summary>
     /// 账户信息
     /// </summary>
-    public class UserInfo 
+    public class UserInfo
     {
         /// <summary>
         /// 用户Id

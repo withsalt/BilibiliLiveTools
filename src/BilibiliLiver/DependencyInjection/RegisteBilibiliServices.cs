@@ -1,7 +1,8 @@
 ﻿using BilibiliLiver.Services;
+using BilibiliLiver.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BilibiliLiver
+namespace BilibiliLiver.DependencyInjection
 {
     public static class RegisteBilibiliServices
     {
