@@ -2,7 +2,8 @@
 
 Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、树莓派等设备无人值守直播。
 
-**因为B站修改了登录接口，目前无法登陆B站。等待BiliAccount解决登录问题。具体信息：https://github.com/LeoChen98/BiliAccount/issues/96**
+**因为B站修改了登录接口，目前无法登陆B站。等待BiliAccount解决登录问题。具体信息：https://github.com/LeoChen98/BiliAccount/issues/96**  
+**重构中，这次尝试直接使用Cookie，比通过账号密码登录麻烦一点，但也是一种解决办法**
 
 #### 注意
 因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。API也是本人参考github其他项目来的，未深入了解过B站APP，所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。
