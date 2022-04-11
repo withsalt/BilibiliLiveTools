@@ -83,142 +83,109 @@ namespace BilibiliLiver.Services
         /// <returns></returns>
         public async Task<bool> StartPush()
         {
-            //获取直播间信息
-            var liveRoomInfo = await _api.GetLiveRoomInfo();
-            //如果在直播中，先关闭直播间
-            if (liveRoomInfo.live_status == 1)
-            {
-                _logger.LogInformation("当前直播间已经开启，关闭直播间中...");
-                await _api.StopLive(liveRoomInfo.room_id);
-                _logger.LogInformation("直播间已关闭！");
-            }
-            //开启直播
-            StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
-            string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                _logger.ThrowLogError("获取推流地址失败，请重试！");
-            }
-            _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
-
-            string newCmd = _liveSetting.FFmpegCmd.Replace("[[URL]]", $"\"{url}\"");
-            int firstNullChar = newCmd.IndexOf((char)32);
-            if (firstNullChar < 0)
-            {
-                throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
-            }
-            string cmdName = newCmd.Substring(0, firstNullChar);
-            string cmdArgs = newCmd.Substring(firstNullChar);
-            if (string.IsNullOrEmpty(cmdArgs))
-            {
-                throw new Exception("命令参数不能为空！");
-            }
-
-            var psi = new ProcessStartInfo
-            {
-                FileName = cmdName,
-                Arguments = cmdArgs,
-                RedirectStandardOutput = true,
-                RedirectStandardError = false,
-                UseShellExecute = false,
-                CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
-            };
+            ProcessStartInfo psi = null;
             bool isAutoRestart = true;
-            //while (isAutoRestart)
-            //{
-            //    isAutoRestart = _config.LiveSetting.AutoRestart;
-            //    //check network
-            //    while (!await NetworkUtil.NetworkCheck())
-            //    {
-            //        _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
-            //        await Task.Delay(10000);
-            //    }
-            //    //check token is available
-            //    if (!ByPassword.IsTokenAvailable(_account.AccessToken))
-            //    {
-            //        await LoginToBilibili();
-            //    }
-            //    //start live
-            //    StartLiveDataInfo liveInfo = await StartLive();
-            //    if (liveInfo == null)
-            //    {
-            //        _logger.LogError($"开启B站直播间失败，无法获取推流地址。");
-            //        return false;
-            //    }
-            //    _logger.LogInformation("正在初始化推流指令...");
-            //    //启动
-            //    using (var proc = Process.Start(psi))
-            //    {
-            //        if (proc == null || proc.Id <= 0)
-            //        {
-            //            throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
-            //        }
-            //        //退出检测
-            //        if (!Console.IsInputRedirected)
-            //        {
-            //            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
-            //            {
-            //                isAutoRestart = false;
-            //            };
-            //        }
-            //        await proc.WaitForExitAsync();
-            //        if (isAutoRestart)
-            //        {
-            //            _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
-            //        }
-            //        else
-            //        {
-            //            _logger.LogWarning($"FFmpeg异常退出。");
-            //        }
-            //    }
-            //    if (isAutoRestart)
-            //    {
-            //        _logger.LogWarning($"等待重新推流...");
-            //        //如果开启了自动重试，那么等待60s后再次尝试
-            //        await Task.Delay(60000);
-            //    }
-
-            //}
+            while (isAutoRestart)
+            {
+                isAutoRestart = _liveSetting.AutoRestart;
+                //check network
+                while (!await NetworkUtil.NetworkCheck())
+                {
+                    _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
+                    await Task.Delay(10000);
+                }
+                //start live
+                psi = await InitLiveProcessStartInfo(true);
+                if (psi == null)
+                {
+                    _logger.LogError($"初始化直播参数失败。");
+                    return false;
+                }
+                _logger.LogInformation("正在初始化推流指令...");
+                //启动
+                using (var proc = Process.Start(psi))
+                {
+                    if (proc == null || proc.Id <= 0)
+                    {
+                        throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
+                    }
+                    await proc.WaitForExitAsync();
+                    if (isAutoRestart)
+                    {
+                        _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"FFmpeg异常退出。");
+                    }
+                }
+                if (isAutoRestart)
+                {
+                    _logger.LogWarning($"等待重新推流...");
+                    //如果开启了自动重试，那么等待60s后再次尝试
+                    await Task.Delay(60000);
+                }
+            }
             return true;
         }
 
-        ///// <summary>
-        ///// 开启
-        ///// </summary>
-        ///// <param name="user"></param>
-        ///// <returns></returns>
-        //private async Task<StartLiveDataInfo> StartLive()
-        //{
-        //    try
-        //    {
-        //        //修改直播间名称
-        //        if (await _liveApi.UpdateLiveRoomName(this._account, _config.LiveSetting.LiveRoomName))
-        //        {
-        //            _logger.LogInformation($"成功修改直播间名称，直播间名称：{_config.LiveSetting.LiveRoomName}");
-        //        }
-        //        //更新分类
-        //        if (await _liveApi.UpdateLiveCategory(this._account, _config.LiveSetting.LiveCategory))
-        //        {
-        //            _logger.LogInformation($"成功修改直播间分类，直播间分类ID：{_config.LiveSetting.LiveCategory}");
-        //        }
-        //        StartLiveDataInfo liveInfo = await _liveApi.StartLive(this._account, _config.LiveSetting.LiveCategory);
-        //        if (liveInfo == null)
-        //        {
-        //            throw new Exception("获取直播信息失败！");
-        //        }
-        //        _logger.LogInformation("开启直播成功！");
-        //        _logger.LogInformation($"我的直播间地址：http://live.bilibili.com/{liveInfo.RoomId}");
-        //        _logger.LogInformation($"推流地址：{liveInfo.Rtmp.Addr}{liveInfo.Rtmp.Code}");
-        //        return liveInfo;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"开启直播失败！错误：{ex.Message}", ex);
-        //        return null;
-        //    }
-        //}
 
-        //#endregion
+        private async Task<ProcessStartInfo> InitLiveProcessStartInfo(bool isRestart = false)
+        {
+            try
+            {
+                //检查Cookie是否有效
+                UserInfo userInfo = await _account.Login();
+                if (userInfo == null || !userInfo.IsLogin)
+                {
+                    throw new Exception("登录失败，Cookie已失效");
+                }
+                //获取直播间信息
+                var liveRoomInfo = await _api.GetLiveRoomInfo();
+                //如果在直播中，先关闭直播间
+                if (liveRoomInfo.live_status == 1 && !isRestart)
+                {
+                    _logger.LogInformation("当前直播间已经开启，关闭直播间中...");
+                    await _api.StopLive(liveRoomInfo.room_id);
+                    _logger.LogInformation("直播间已关闭！");
+                }
+                //开启直播
+                StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
+                string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
+                if (string.IsNullOrWhiteSpace(url))
+                {
+                    _logger.ThrowLogError("获取推流地址失败，请重试！");
+                }
+                _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
 
+                string newCmd = _liveSetting.FFmpegCmd.Replace("[[URL]]", $"\"{url}\"");
+                int firstNullChar = newCmd.IndexOf((char)32);
+                if (firstNullChar < 0)
+                {
+                    throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
+                }
+                string cmdName = newCmd.Substring(0, firstNullChar);
+                string cmdArgs = newCmd.Substring(firstNullChar);
+                if (string.IsNullOrEmpty(cmdArgs))
+                {
+                    throw new Exception("命令参数不能为空！");
+                }
+                var psi = new ProcessStartInfo
+                {
+                    FileName = cmdName,
+                    Arguments = cmdArgs,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = false,
+                    UseShellExecute = false,
+                    CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
+                };
+                return psi;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "初始化直播参数时遇到错误。");
+                return null;
+            }
+        }
     }
 }

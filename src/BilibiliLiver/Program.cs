@@ -2,6 +2,8 @@
 using BilibiliLiver.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Reflection;
 
 namespace BilibiliLiver
 {
@@ -9,6 +11,8 @@ namespace BilibiliLiver
     {
         static void Main(string[] args)
         {
+            Console.Title = $"Bilibili直播工具 v{Assembly.GetExecutingAssembly().GetName().Version} By withsalt(https://github.com/withsalt)";
+
             CreateHostBuilder(args).Build().Run();
         }
 
