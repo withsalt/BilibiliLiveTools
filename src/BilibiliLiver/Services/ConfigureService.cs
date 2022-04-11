@@ -17,18 +17,21 @@ namespace BilibiliLiver.Services
         private readonly IBilibiliAccountService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IBilibiliCookieService _cookie;
+        private readonly IPushStreamService _push;
         private readonly LiveSetting _liveSetting;
 
         public ConfigureService(ILogger<ConfigureService> logger
             , IBilibiliAccountService account
             , IBilibiliLiveApiService api
             , IBilibiliCookieService cookie
+            , IPushStreamService push
             , IOptions<LiveSetting> liveSettingOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
+            _push = push ?? throw new ArgumentNullException(nameof(push));
             _liveSetting = liveSettingOptions.Value ?? throw new ArgumentNullException(nameof(liveSettingOptions));
         }
 
@@ -56,6 +59,13 @@ namespace BilibiliLiver.Services
                 _logger.ThrowLogError("当前用户未开启直播间！");
             }
             _logger.LogInformation($"获取直播间信息成功，当前直播间名称：{liveRoomInfo.title}，分区：{liveRoomInfo.parent_name}·{liveRoomInfo.area_v2_name}，直播状态：{(liveRoomInfo.live_status == 1 ? "直播中" : "未开启")}");
+            //检查FFMpeg
+            if(!await _push.FFmpegTest())
+            {
+                _logger.ThrowLogError("未找到FFmpeg，请先安装FFmpeg！");
+            }
+            //开始推流
+            await _push.StartPush();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -70,9 +80,9 @@ namespace BilibiliLiver.Services
         /// </summary>
         private void CheckLiveSetting()
         {
-            if (string.IsNullOrWhiteSpace(_liveSetting.LiveAreaId))
+            if (_liveSetting.LiveAreaId <= 0)
             {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveAreaId不能为空！");
+                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveAreaId填写错误！");
             }
             if (string.IsNullOrWhiteSpace(_liveSetting.LiveRoomName))
             {
@@ -81,6 +91,15 @@ namespace BilibiliLiver.Services
             if (string.IsNullOrWhiteSpace(_liveSetting.FFmpegCmd))
             {
                 _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.FFmpegCmd不能为空！");
+            }
+            int markIndex = _liveSetting.FFmpegCmd.IndexOf("[[URL]]");
+            if (markIndex < 5)
+            {
+                throw new Exception("配置文件appsettings.json中，LiveSetting.FFmpegCmd不正确，命令中未找到 '[[URL]]'标记。");
+            }
+            if (_liveSetting.FFmpegCmd[markIndex - 1] == '\"')
+            {
+                throw new Exception("配置文件appsettings.json中，LiveSetting.FFmpegCmd不正确， '[[URL]]'标记前后无需“\"”。");
             }
         }
 

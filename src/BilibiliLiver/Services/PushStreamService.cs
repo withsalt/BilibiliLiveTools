@@ -1,4 +1,6 @@
 ﻿using BilibiliLiver.Config.Models;
+using BilibiliLiver.Extensions;
+using BilibiliLiver.Model;
 using BilibiliLiver.Services.Interface;
 using BilibiliLiver.Utils;
 using Microsoft.Extensions.Logging;
@@ -30,37 +32,6 @@ namespace BilibiliLiver.Services
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _liveSetting = liveSettingOptions.Value ?? throw new ArgumentNullException(nameof(liveSettingOptions));
         }
-
-        //public async Task Run(params string[] args)
-        //{
-        //    try
-        //    {
-        //        //登录
-        //        await LoginToBilibili();
-        //        _logger.LogInformation($"登录成功，登录账号为：{_config.UserSetting.Account}");
-        //        //获取直播间房间信息
-        //        LiveRoomStreamDataInfo liveRoomInfo = await _liveApi.GetRoomInfo(this._account);
-        //        if (liveRoomInfo == null)
-        //        {
-        //            _logger.LogError($"开启直播失败，无法获取直播间信息！");
-        //            return;
-        //        }
-        //        //测试FFmpeg
-        //        if (!await FFmpegTest())
-        //        {
-        //            _logger.LogError($"开启推流失败，未找到FFmpeg，请确认已经安装FFmpeg！");
-        //            return;
-        //        }
-        //        //开始执行ffmpeg推流
-        //        await UseFFmpegLive(liveRoomInfo.Rtmp.Addr + liveRoomInfo.Rtmp.Code);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex.Message, ex);
-        //    }
-        //}
-
-        //#region Private
 
         /// <summary>
         /// 测试FFmpeg
@@ -104,115 +75,112 @@ namespace BilibiliLiver.Services
             }
         }
 
-        ///// <summary>
-        ///// 开始推流
-        ///// </summary>
-        ///// <param name="setting"></param>
-        ///// <param name="url"></param>
-        ///// <returns></returns>
-        //private async Task<bool> UseFFmpegLive(string url)
-        //{
-        //    try
-        //    {
-        //        if (string.IsNullOrEmpty(_config.LiveSetting.FFmpegCmd))
-        //        {
-        //            throw new Exception("推流命令不能为空。");
-        //        }
-        //        int markIndex = _config.LiveSetting.FFmpegCmd.IndexOf("[[URL]]");
-        //        if (markIndex < 5)
-        //        {
-        //            throw new Exception("在填写的命令中未找到 '[[URL]]'标记。");
-        //        }
-        //        if (_config.LiveSetting.FFmpegCmd[markIndex - 1] == '\"')
-        //        {
-        //            throw new Exception(" '[[URL]]'标记前后无需“\"”。");
-        //        }
-        //        string newCmd = _config.LiveSetting.FFmpegCmd.Replace("[[URL]]", $"\"{url}\"");
-        //        int firstNullChar = newCmd.IndexOf((char)32);
-        //        if (firstNullChar < 0)
-        //        {
-        //            throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
-        //        }
-        //        string cmdName = newCmd.Substring(0, firstNullChar);
-        //        string cmdArgs = newCmd.Substring(firstNullChar);
-        //        if (string.IsNullOrEmpty(cmdArgs))
-        //        {
-        //            throw new Exception("命令参数不能为空！");
-        //        }
+        /// <summary>
+        /// 开始推流
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public async Task<bool> StartPush()
+        {
+            //获取直播间信息
+            var liveRoomInfo = await _api.GetLiveRoomInfo();
+            //如果在直播中，先关闭直播间
+            if (liveRoomInfo.live_status == 1)
+            {
+                _logger.LogInformation("当前直播间已经开启，关闭直播间中...");
+                await _api.StopLive(liveRoomInfo.room_id);
+                _logger.LogInformation("直播间已关闭！");
+            }
+            //开启直播
+            StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
+            string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                _logger.ThrowLogError("获取推流地址失败，请重试！");
+            }
+            _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
 
-        //        var psi = new ProcessStartInfo
-        //        {
-        //            FileName = cmdName,
-        //            Arguments = cmdArgs,
-        //            RedirectStandardOutput = true,
-        //            RedirectStandardError = false,
-        //            UseShellExecute = false,
-        //            CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
-        //        };
-        //        bool isAutoRestart = true;
-        //        while (isAutoRestart)
-        //        {
-        //            isAutoRestart = _config.LiveSetting.AutoRestart;
-        //            //check network
-        //            while (!await NetworkUtil.NetworkCheck())
-        //            {
-        //                _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
-        //                await Task.Delay(10000);
-        //            }
-        //            //check token is available
-        //            if (!ByPassword.IsTokenAvailable(_account.AccessToken))
-        //            {
-        //                await LoginToBilibili();
-        //            }
-        //            //start live
-        //            StartLiveDataInfo liveInfo = await StartLive();
-        //            if (liveInfo == null)
-        //            {
-        //                _logger.LogError($"开启B站直播间失败，无法获取推流地址。");
-        //                return false;
-        //            }
-        //            _logger.LogInformation("正在初始化推流指令...");
-        //            //启动
-        //            using (var proc = Process.Start(psi))
-        //            {
-        //                if (proc == null || proc.Id <= 0)
-        //                {
-        //                    throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
-        //                }
-        //                //退出检测
-        //                if (!Console.IsInputRedirected)
-        //                {
-        //                    Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
-        //                    {
-        //                        isAutoRestart = false;
-        //                    };
-        //                }
-        //                await proc.WaitForExitAsync();
-        //                if (isAutoRestart)
-        //                {
-        //                    _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
-        //                }
-        //                else
-        //                {
-        //                    _logger.LogWarning($"FFmpeg异常退出。");
-        //                }
-        //            }
-        //            if (isAutoRestart)
-        //            {
-        //                _logger.LogWarning($"等待重新推流...");
-        //                //如果开启了自动重试，那么等待60s后再次尝试
-        //                await Task.Delay(60000);
-        //            }
+            string newCmd = _liveSetting.FFmpegCmd.Replace("[[URL]]", $"\"{url}\"");
+            int firstNullChar = newCmd.IndexOf((char)32);
+            if (firstNullChar < 0)
+            {
+                throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
+            }
+            string cmdName = newCmd.Substring(0, firstNullChar);
+            string cmdArgs = newCmd.Substring(firstNullChar);
+            if (string.IsNullOrEmpty(cmdArgs))
+            {
+                throw new Exception("命令参数不能为空！");
+            }
 
-        //        }
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex.Message, ex);
-        //        return false;
-        //    }
-        //}
+            var psi = new ProcessStartInfo
+            {
+                FileName = cmdName,
+                Arguments = cmdArgs,
+                RedirectStandardOutput = true,
+                RedirectStandardError = false,
+                UseShellExecute = false,
+                CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
+            };
+            bool isAutoRestart = true;
+            //while (isAutoRestart)
+            //{
+            //    isAutoRestart = _config.LiveSetting.AutoRestart;
+            //    //check network
+            //    while (!await NetworkUtil.NetworkCheck())
+            //    {
+            //        _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
+            //        await Task.Delay(10000);
+            //    }
+            //    //check token is available
+            //    if (!ByPassword.IsTokenAvailable(_account.AccessToken))
+            //    {
+            //        await LoginToBilibili();
+            //    }
+            //    //start live
+            //    StartLiveDataInfo liveInfo = await StartLive();
+            //    if (liveInfo == null)
+            //    {
+            //        _logger.LogError($"开启B站直播间失败，无法获取推流地址。");
+            //        return false;
+            //    }
+            //    _logger.LogInformation("正在初始化推流指令...");
+            //    //启动
+            //    using (var proc = Process.Start(psi))
+            //    {
+            //        if (proc == null || proc.Id <= 0)
+            //        {
+            //            throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
+            //        }
+            //        //退出检测
+            //        if (!Console.IsInputRedirected)
+            //        {
+            //            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
+            //            {
+            //                isAutoRestart = false;
+            //            };
+            //        }
+            //        await proc.WaitForExitAsync();
+            //        if (isAutoRestart)
+            //        {
+            //            _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
+            //        }
+            //        else
+            //        {
+            //            _logger.LogWarning($"FFmpeg异常退出。");
+            //        }
+            //    }
+            //    if (isAutoRestart)
+            //    {
+            //        _logger.LogWarning($"等待重新推流...");
+            //        //如果开启了自动重试，那么等待60s后再次尝试
+            //        await Task.Delay(60000);
+            //    }
+
+            //}
+            return true;
+        }
 
         ///// <summary>
         ///// 开启

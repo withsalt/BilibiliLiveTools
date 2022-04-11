@@ -105,7 +105,7 @@ namespace BilibiliLiver.Services
             return result.Code == 0;
         }
 
-        public async Task<bool> UpdateLiveRoomArea(int roomId, string areaId)
+        public async Task<bool> UpdateLiveRoomArea(int roomId, int areaId)
         {
             _ = await CheckArea(areaId);
             var postData = new
@@ -127,7 +127,7 @@ namespace BilibiliLiver.Services
             return result.Code == 0;
         }
 
-        public async Task<StartLiveInfo> StartLive(int roomId, string areaId)
+        public async Task<StartLiveInfo> StartLive(int roomId, int areaId)
         {
             var areaItem = await CheckArea(areaId);
             var postData = new
@@ -183,7 +183,7 @@ namespace BilibiliLiver.Services
         /// <param name="source"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        private LiveAreaItem FindItemFromLiveAreaTree(List<LiveAreaItem> source, string id)
+        private LiveAreaItem FindItemFromLiveAreaTree(List<LiveAreaItem> source, int id)
         {
             foreach (var item in source)
             {
@@ -210,9 +210,9 @@ namespace BilibiliLiver.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="Exception"></exception>
-        private async Task<LiveAreaItem> CheckArea(string areaId)
+        private async Task<LiveAreaItem> CheckArea(int areaId)
         {
-            if (string.IsNullOrWhiteSpace(areaId))
+            if (areaId <= 0)
             {
                 throw new ArgumentNullException(nameof(areaId), "直播间分类不能为空！");
             }

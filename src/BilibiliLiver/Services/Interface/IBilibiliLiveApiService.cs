@@ -32,7 +32,7 @@ namespace BilibiliLiver.Services.Interface
         /// <param name="roomId"></param>
         /// <param name="areaId"></param>
         /// <returns></returns>
-        Task<bool> UpdateLiveRoomArea(int roomId, string areaId);
+        Task<bool> UpdateLiveRoomArea(int roomId, int areaId);
 
         /// <summary>
         /// 开始直播
@@ -40,7 +40,7 @@ namespace BilibiliLiver.Services.Interface
         /// <param name="roomId"></param>
         /// <param name="categoryId"></param>
         /// <returns></returns>
-        Task<StartLiveInfo> StartLive(int roomId, string categoryId);
+        Task<StartLiveInfo> StartLive(int roomId, int areaId);
 
         /// <summary>
         /// 停止直播

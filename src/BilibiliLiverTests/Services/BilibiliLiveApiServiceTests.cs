@@ -50,7 +50,7 @@ namespace BilibiliLiver.Services.Tests
         public async Task StartLiveTest()
         {
             var info = await _apiService.GetLiveRoomInfo();
-            var reslt = await _apiService.StartLive(info.room_id, "369");
+            var reslt = await _apiService.StartLive(info.room_id, 369);
             Assert.IsNotNull(reslt);
         }
 
@@ -73,7 +73,7 @@ namespace BilibiliLiver.Services.Tests
         public async Task UpdateLiveRoomAreaTest()
         {
             var info = await _apiService.GetLiveRoomInfo();
-            var reslt = await _apiService.UpdateLiveRoomArea(info.room_id, "369");
+            var reslt = await _apiService.UpdateLiveRoomArea(info.room_id, 369);
             Assert.IsTrue(reslt);
         }
     }

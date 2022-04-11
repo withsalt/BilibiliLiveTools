@@ -7,12 +7,12 @@ namespace BilibiliLiver.Model
         /// <summary>
         /// 
         /// </summary>
-        public string id { get; set; }
+        public int id { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string parent_id { get; set; }
+        public int parent_id { get; set; }
 
         /// <summary>
         /// 

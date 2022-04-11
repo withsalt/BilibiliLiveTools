@@ -13,5 +13,11 @@ namespace BilibiliLiver.Services.Interface
         /// </summary>
         /// <returns></returns>
         Task<bool> FFmpegTest();
+
+        /// <summary>
+        /// 开启推流
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> StartPush();
     }
 }
