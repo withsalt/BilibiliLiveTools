@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BilibiliLiver.Services
 {
-    public class BilibiliAccountService : IAccountService
+    public class BilibiliAccountService : IBilibiliAccountService
     {
         private string _navApi = "https://api.bilibili.com/x/web-interface/nav";
 

@@ -13,11 +13,11 @@ namespace BilibiliLiver.Services.Tests
     [TestClass()]
     public class AccountServiceTests : BilibiliLiverTestsBase
     {
-        private readonly IAccountService _accountService;
+        private readonly IBilibiliAccountService _accountService;
 
         public AccountServiceTests()
         {
-            _accountService = (IAccountService)ServiceProvider.GetService(typeof(IAccountService));
+            _accountService = (IBilibiliAccountService)ServiceProvider.GetService(typeof(IBilibiliAccountService));
             if (_accountService == null)
             {
                 Assert.Fail();

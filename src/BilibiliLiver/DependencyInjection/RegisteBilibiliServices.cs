@@ -10,12 +10,14 @@ namespace BilibiliLiver.DependencyInjection
         {
             //Cookie模块
             services.AddSingleton<IBilibiliCookieService, BilibiliCookieService>();
+            //Http请求相关
             services.AddTransient<IHttpClientService, HttpClientService>();
-            services.AddTransient<IAccountService, BilibiliAccountService>();
+            //账号
+            services.AddTransient<IBilibiliAccountService, BilibiliAccountService>();
+            //直播的API
             services.AddTransient<IBilibiliLiveApiService, BilibiliLiveApiService>();
-
             //推流相关
-            //services.AddTransient<PushStreamService>();
+            services.AddTransient<IPushStreamService, PushStreamService>();
 
             return services;
         }

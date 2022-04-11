@@ -11,11 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Data\demo_music.m4a" />
+    <None Remove="data\demo_music.m4a" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Data\demo_music.m4a">
+    <Content Include="data\demo_music.m4a">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

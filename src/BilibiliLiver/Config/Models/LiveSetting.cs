@@ -2,7 +2,7 @@
 {
     public class LiveSetting
     {
-        public string LiveCategory { get; set; }
+        public string LiveAreaId { get; set; }
 
         public string LiveRoomName { get; set; }
 

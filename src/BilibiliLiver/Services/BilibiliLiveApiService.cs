@@ -175,6 +175,8 @@ namespace BilibiliLiver.Services
             return result.Data;
         }
 
+        #region private
+
         /// <summary>
         /// 根据Id获取分区
         /// </summary>
@@ -226,5 +228,7 @@ namespace BilibiliLiver.Services
             }
             return areaItem;
         }
+
+        #endregion
     }
 }
