@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using BilibiliLiver.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,9 +40,9 @@ namespace BilibiliLiver.Services.Tests
         }
 
         [TestMethod()]
-        public async Task GetLiveCategoriesTest()
+        public async Task GetLiveAreasTest()
         {
-            var info = await _apiService.GetLiveCategories();
+            var info = await _apiService.GetLiveAreas();
             Assert.IsNotNull(info);
         }
 
@@ -51,6 +52,29 @@ namespace BilibiliLiver.Services.Tests
             var info = await _apiService.GetLiveRoomInfo();
             var reslt = await _apiService.StartLive(info.room_id, "369");
             Assert.IsNotNull(reslt);
+        }
+
+        [TestMethod()]
+        public async Task StopLiveTest()
+        {
+            var info = await _apiService.GetLiveRoomInfo();
+            var reslt = await _apiService.StopLive(info.room_id);
+
+            var liveRoomInfo = await _apiService.GetLiveRoomInfo();
+            if(liveRoomInfo.live_status != 0)
+            {
+                Assert.Fail();
+            }
+
+            Assert.IsNotNull(reslt);
+        }
+
+        [TestMethod()]
+        public async Task UpdateLiveRoomAreaTest()
+        {
+            var info = await _apiService.GetLiveRoomInfo();
+            var reslt = await _apiService.UpdateLiveRoomArea(info.room_id, "369");
+            Assert.IsTrue(reslt);
         }
     }
 }

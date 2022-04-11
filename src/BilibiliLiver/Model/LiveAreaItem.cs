@@ -2,7 +2,7 @@
 
 namespace BilibiliLiver.Model
 {
-    public class LiveCategoryItem
+    public class LiveAreaItem
     {
         /// <summary>
         /// 
@@ -64,6 +64,6 @@ namespace BilibiliLiver.Model
         /// </summary>
         public int area_type { get; set; }
 
-        public List<LiveCategoryItem> list { get; set; }
+        public List<LiveAreaItem> list { get; set; }
     }
 }

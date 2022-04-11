@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using BilibiliLiver.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,12 +28,18 @@ namespace BilibiliLiver.Services.Tests
         public async Task LoginTest()
         {
             var result = await _accountService.Login();
-            if(result == null)
+            if (result == null)
             {
                 Assert.Fail();
                 return;
             }
             Assert.IsTrue(result.IsLogin);
+        }
+
+        [TestMethod()]
+        public async Task HeartBeatTest()
+        {
+            await _accountService.HeartBeat();
         }
     }
 }

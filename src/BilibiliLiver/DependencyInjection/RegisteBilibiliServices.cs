@@ -11,7 +11,7 @@ namespace BilibiliLiver.DependencyInjection
             //Cookie模块
             services.AddSingleton<IBilibiliCookieService, BilibiliCookieService>();
             services.AddTransient<IHttpClientService, HttpClientService>();
-            services.AddTransient<IAccountService, AccountService>();
+            services.AddTransient<IAccountService, BilibiliAccountService>();
             services.AddTransient<IBilibiliLiveApiService, BilibiliLiveApiService>();
 
             //推流相关

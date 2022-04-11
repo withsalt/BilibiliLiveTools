@@ -24,7 +24,15 @@ namespace BilibiliLiver.Services.Interface
         /// 获取直播间分类
         /// </summary>
         /// <returns></returns>
-        Task<List<LiveCategoryItem>> GetLiveCategories();
+        Task<List<LiveAreaItem>> GetLiveAreas();
+
+        /// <summary>
+        /// 更新直播间分区
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <param name="areaId"></param>
+        /// <returns></returns>
+        Task<bool> UpdateLiveRoomArea(int roomId, string areaId);
 
         /// <summary>
         /// 开始直播
@@ -33,5 +41,12 @@ namespace BilibiliLiver.Services.Interface
         /// <param name="categoryId"></param>
         /// <returns></returns>
         Task<StartLiveInfo> StartLive(int roomId, string categoryId);
+
+        /// <summary>
+        /// 停止直播
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        Task<StopLiveInfo> StopLive(int roomId);
     }
 }

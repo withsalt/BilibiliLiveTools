@@ -34,6 +34,11 @@ namespace BilibiliLiver.Services
         /// </summary>
         private const string _startLiveApi = "https://api.live.bilibili.com/room/v1/Room/startLive";
 
+        /// <summary>
+        /// 停止直播
+        /// </summary>
+        private const string _stopLiveApi = "https://api.live.bilibili.com/room/v1/Room/stopLive";
+
         private readonly ILogger<BilibiliLiveApiService> _logger;
         private readonly IHttpClientService _httpClient;
         private readonly IBilibiliCookieService _cookie;
@@ -61,16 +66,16 @@ namespace BilibiliLiver.Services
             return result.Data;
         }
 
-        public async Task<List<LiveCategoryItem>> GetLiveCategories()
+        public async Task<List<LiveAreaItem>> GetLiveAreas()
         {
-            var result = await _httpClient.Execute<ResultModel<List<LiveCategoryItem>>>(_getLiveCategoryApi, Method.Get);
+            var result = await _httpClient.Execute<ResultModel<List<LiveAreaItem>>>(_getLiveCategoryApi, Method.Get);
             if (result == null)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, "返回内容为空");
+                throw new ApiRequestException(_getLiveCategoryApi, Method.Get, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, result.Message);
+                throw new ApiRequestException(_getLiveCategoryApi, Method.Get, result.Message);
             }
             return result.Data;
         }
@@ -91,47 +96,56 @@ namespace BilibiliLiver.Services
             var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, Method.Post, postData, BodyFormat.Form);
             if (result == null)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, "返回内容为空");
+                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, result.Message);
+                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, result.Message);
             }
             return result.Code == 0;
         }
 
-        public async Task<StartLiveInfo> StartLive(int roomId, string categoryId)
+        public async Task<bool> UpdateLiveRoomArea(int roomId, string areaId)
         {
-            if (string.IsNullOrWhiteSpace(categoryId))
+            _ = await CheckArea(areaId);
+            var postData = new
             {
-                throw new ArgumentNullException(nameof(categoryId), "直播间分类不能为空！");
-            }
-            List<LiveCategoryItem> liveCategories = await GetLiveCategories();
-            if (liveCategories == null || !liveCategories.Any())
+                room_id = roomId,
+                area_id = areaId,
+                csrf_token = _cookie.GetCsrf(),
+                csrf = _cookie.GetCsrf(),
+            };
+            var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, Method.Post, postData, BodyFormat.Form);
+            if (result == null)
             {
-                throw new Exception("获取直播间分类信息失败！");
+                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, "返回内容为空");
             }
-            LiveCategoryItem categoryItem = FindItemFromLiveCategoryTree(liveCategories, categoryId);
-            if (categoryItem == null)
+            if (result.Code != 0)
             {
-                throw new Exception($"根据Id[{categoryItem.id}]获取直播间分类信息失败！");
+                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, result.Message);
             }
+            return result.Code == 0;
+        }
+
+        public async Task<StartLiveInfo> StartLive(int roomId, string areaId)
+        {
+            var areaItem = await CheckArea(areaId);
             var postData = new
             {
                 room_id = roomId,
                 platform = "pc",
-                area_v2 = categoryItem.id,
+                area_v2 = areaItem.id,
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
             var result = await _httpClient.Execute<ResultModel<StartLiveInfo>>(_startLiveApi, Method.Post, postData, BodyFormat.Form);
             if (result == null)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, "返回内容为空");
+                throw new ApiRequestException(_startLiveApi, Method.Post, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, result.Message);
+                throw new ApiRequestException(_startLiveApi, Method.Post, result.Message);
             }
             if (result.Data.need_face_auth)
             {
@@ -140,8 +154,34 @@ namespace BilibiliLiver.Services
             return result.Data;
         }
 
+        public async Task<StopLiveInfo> StopLive(int roomId)
+        {
+            var postData = new
+            {
+                room_id = roomId,
+                platform = "pc",
+                csrf_token = _cookie.GetCsrf(),
+                csrf = _cookie.GetCsrf(),
+            };
+            var result = await _httpClient.Execute<ResultModel<StopLiveInfo>>(_stopLiveApi, Method.Post, postData, BodyFormat.Form);
+            if (result == null)
+            {
+                throw new ApiRequestException(_stopLiveApi, Method.Post, "返回内容为空");
+            }
+            if (result.Code != 0)
+            {
+                throw new ApiRequestException(_stopLiveApi, Method.Post, result.Message);
+            }
+            return result.Data;
+        }
 
-        private LiveCategoryItem FindItemFromLiveCategoryTree(List<LiveCategoryItem> source, string id)
+        /// <summary>
+        /// 根据Id获取分区
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private LiveAreaItem FindItemFromLiveAreaTree(List<LiveAreaItem> source, string id)
         {
             foreach (var item in source)
             {
@@ -151,7 +191,7 @@ namespace BilibiliLiver.Services
                 }
                 if (item.list != null && item.list.Any())
                 {
-                    var result = FindItemFromLiveCategoryTree(item.list, id);
+                    var result = FindItemFromLiveAreaTree(item.list, id);
                     if (result != null)
                     {
                         return result;
@@ -159,6 +199,32 @@ namespace BilibiliLiver.Services
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// 验证直播分区是否正确
+        /// </summary>
+        /// <param name="areaId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="Exception"></exception>
+        private async Task<LiveAreaItem> CheckArea(string areaId)
+        {
+            if (string.IsNullOrWhiteSpace(areaId))
+            {
+                throw new ArgumentNullException(nameof(areaId), "直播间分类不能为空！");
+            }
+            List<LiveAreaItem> liveAreas = await GetLiveAreas();
+            if (liveAreas == null || !liveAreas.Any())
+            {
+                throw new Exception("获取直播间分区信息失败！");
+            }
+            LiveAreaItem areaItem = FindItemFromLiveAreaTree(liveAreas, areaId);
+            if (areaItem == null)
+            {
+                throw new Exception($"根据Id[{areaItem.id}]获取直播间分区信息失败！");
+            }
+            return areaItem;
         }
     }
 }
