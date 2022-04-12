@@ -43,6 +43,11 @@ namespace BilibiliLiver.Services
             CheckCookie();
             //检查直播间信息
             await CheckLiveRoom();
+            //检查FFMpeg
+            if (!await _push.FFmpegTest())
+            {
+                _logger.ThrowLogError("未找到FFmpeg，请先安装FFmpeg！");
+            }
             //开始推流
             await _push.StartPush();
         }
@@ -124,7 +129,7 @@ namespace BilibiliLiver.Services
             {
                 _logger.ThrowLogError("登录失败，Cookie无效或已过期，请重新配置Cookie！");
             }
-            _logger.LogInformation($"用户{userInfo.Uname}登录成功！");
+            _logger.LogInformation($"用户{userInfo.Uname}，登录成功！");
             //获取直播间信息
             var liveRoomInfo = await _api.GetLiveRoomInfo();
             if (liveRoomInfo == null)
@@ -133,20 +138,28 @@ namespace BilibiliLiver.Services
             }
             if (liveRoomInfo.room_id == 0 || liveRoomInfo.have_live == 0)
             {
-                _logger.ThrowLogError("当前用户未开启直播间！");
+                _logger.ThrowLogError("当前用户未开通直播间！");
             }
             _logger.LogInformation($"获取直播间信息成功，当前直播间地址：http://live.bilibili.com/{liveRoomInfo.room_id}，名称：{liveRoomInfo.title}，分区：{liveRoomInfo.parent_name}·{liveRoomInfo.area_v2_name}，直播状态：{(liveRoomInfo.live_status == 1 ? "直播中" : "未开启")}");
-            //检查FFMpeg
-            if (!await _push.FFmpegTest())
+            //检查名称
+            if (liveRoomInfo.title != _liveSetting.LiveRoomName)
             {
-                _logger.ThrowLogError("未找到FFmpeg，请先安装FFmpeg！");
+                bool result = await _api.UpdateLiveRoomName(liveRoomInfo.room_id, _liveSetting.LiveRoomName);
+                if (!result)
+                {
+                    _logger.ThrowLogError($"修改直播间名称为【{_liveSetting.LiveRoomName}】失败！");
+                }
+                _logger.LogInformation($"修改直播间名称为：{_liveSetting.LiveRoomName}，成功！");
             }
-            //开启直播的情况下，检查是否需要重启直播
-            if (liveRoomInfo.live_status == 1 && liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
+            //检查分区
+            if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
             {
-                _logger.LogInformation("当前直播间已经开启且分区与配置文件中分区Id不同，关闭直播间中...");
-                await _api.StopLive(liveRoomInfo.room_id);
-                _logger.LogInformation("直播间已关闭！");
+                bool result = await _api.UpdateLiveRoomArea(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
+                if (!result)
+                {
+                    _logger.ThrowLogError($"修改直播间分区为【{_liveSetting.LiveAreaId}】失败！");
+                }
+                _logger.LogInformation($"修改直播间分区为：{_liveSetting.LiveAreaId}，成功！");
             }
         }
 
