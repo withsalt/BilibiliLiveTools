@@ -1,71 +1,33 @@
-﻿using BilibiliLiver.Api;
-using BilibiliLiver.Config;
-using Microsoft.Extensions.Configuration;
+﻿using BilibiliLiver.DependencyInjection;
+using BilibiliLiver.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using System;
-using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BilibiliLiver
 {
-    class Program
+    public class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            Console.Title = "BilibiliLiver " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Console.Title = $"Bilibili直播工具 v{Assembly.GetExecutingAssembly().GetName().Version} By withsalt(https://github.com/withsalt)";
 
-            //编码注册
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            //DI
-            IServiceCollection services = new ServiceCollection();
-            ConfigureServices(services);
-            var provider = services.BuildServiceProvider();
-
-            #region 初始化配置
-
-            ConfigManager config = provider.GetRequiredService<ConfigManager>();
-            config.Load();
-
-            #endregion
-
-            #region Main App
-
-            var app = provider.GetRequiredService<App>();
-            await app.Run(args);
-
-            #endregion
+            CreateHostBuilder(args).Build().Run();
         }
 
-        static void ConfigureServices(IServiceCollection services)
-        {
-            // 创建 config
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false)
-                .AddEnvironmentVariables()
-                .Build();
-
-            services.AddSingleton<IConfiguration>(configuration);
-
-            // 配置日志
-            services.AddLogging(builder =>
-            {
-                builder.AddConsole();
-                builder.AddDebug();
-            });
-            // 添加配置管理器
-            services.AddConfig();
-            // 添加 app
-            services.AddTransient<App>();
-
-            #region 注册API
-
-            services.AddTransient<LiveApi>();
-
-            #endregion
-        }
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureServices((hostContext, services) =>
+                {
+                    //配置初始化
+                    services.ConfigureSettings(hostContext);
+                    //缓存
+                    services.AddMemoryCache();
+                    //添加Bilibili相关的服务
+                    services.AddBilibiliServices();
+                    //配置并启动服务
+                    services.AddHostedService<ConfigureService>();
+                });
     }
 }

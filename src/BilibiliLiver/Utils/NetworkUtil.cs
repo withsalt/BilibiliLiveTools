@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BilibiliLiver.Utils
@@ -19,7 +17,7 @@ namespace BilibiliLiver.Utils
         /// 通过Ping验证网络是否断开
         /// </summary>
         /// <returns></returns>
-        public static async Task<bool> NetworkCheck()
+        public static async Task<bool> Ping()
         {
             try
             {

@@ -23,7 +23,7 @@ Bilibili账号操作Api。
 直播分区获取获取工具，可以通过此工具获取直播分区。  
 （3）BilibiliLiver  
 一键开启直播工具。  
-[![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/doc/demo.jpg "Demo")
+[![Demo](https://github.com/withsalt/BilibiliLiveTools/blob/master/docs/demo.jpg "Demo")](https://github.com/withsalt/BilibiliLiveTools/blob/master/docs/demo.jpg "Demo")
 
 #### 如何使用（树莓派）
 1. 获取程序  
