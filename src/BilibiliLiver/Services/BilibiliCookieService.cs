@@ -37,6 +37,10 @@ namespace BilibiliLiver.Services
                     throw new FileNotFoundException("File 'cookie.txt' not fount.");
                 }
                 string result = File.ReadAllText(_cookiePath);
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    throw new Exception("'cookie.txt'文件为空，请按照教程获取Bilibili Cookie之后放入程序目录下面的cookie.txt中");
+                }
                 if (!CookieHeaderValue.TryParse(result, out _))
                 {
                     throw new Exception("Parse cookie failed.");
