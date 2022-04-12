@@ -16,7 +16,7 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 （2）BilibiliLiver  
 一键开启直播工具。  
 
-![](https://docs.geeiot.net/server/index.php?s=/api/attachment/visitFile&sign=a5be015c03ef9a11c777553159dca229)
+![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/1.png)
 
 ### 教程
 
@@ -28,9 +28,9 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 
 2. 开启开发者选项  
 登录后在浏览页面按F12（或者Ctrl+Shift+I），打开开发者选项。如图所示：  
-![](https://docs.geeiot.net/server/index.php?s=/api/attachment/visitFile&sign=9dd72961b3d01f0e80e8018183e76000)
+![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/2.png)
 选择“Network”，然后在地址栏输入`https://api.bilibili.com/x/web-interface/nav`。  
-![](https://docs.geeiot.net/server/index.php?s=/api/attachment/visitFile&sign=8eb59a850800fa97fbae4aaeb7040b0d)
+![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/3.png)
 打开之后，会看到一大串Json。然后点击右侧的nav（序号3），将图中序号4中cookie中的内容拷贝出来，粘贴到程序目录下面的`cookie.txt`文件即可。  
 
 #### Linux系统（树莓派）
