@@ -18,6 +18,12 @@ namespace BilibiliLiver.Services.Interface
         /// 开启推流
         /// </summary>
         /// <returns></returns>
-        Task<bool> StartPush();
+        Task StartPush();
+
+        /// <summary>
+        /// 结束推流
+        /// </summary>
+        /// <returns></returns>
+        Task StopPush();
     }
 }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BilibiliLiver.Services.Interface;
 using BilibiliLiverTests;
+using BilibiliLiver.Utils;
 
 namespace BilibiliLiver.Services.Tests
 {
@@ -29,6 +30,13 @@ namespace BilibiliLiver.Services.Tests
         {
             bool result = await _pushStream.FFmpegTest();
             Assert.Fail();
+        }
+
+        [TestMethod()]
+        public async Task NetworkCheckTest()
+        {
+            bool result = await NetworkUtil.Ping();
+            Assert.IsTrue(result);
         }
     }
 }

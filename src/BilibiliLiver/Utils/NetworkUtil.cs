@@ -17,7 +17,7 @@ namespace BilibiliLiver.Utils
         /// 通过Ping验证网络是否断开
         /// </summary>
         /// <returns></returns>
-        public static async Task<bool> NetworkCheck()
+        public static async Task<bool> Ping()
         {
             try
             {

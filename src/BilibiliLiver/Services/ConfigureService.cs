@@ -41,36 +41,15 @@ namespace BilibiliLiver.Services
             CheckLiveSetting();
             //检查Cookie
             CheckCookie();
-            //登录
-            var userInfo = await _account.Login();
-            if (userInfo == null || !userInfo.IsLogin)
-            {
-                _logger.ThrowLogError("登录失败，Cookie无效或已过期，请重新配置Cookie！");
-            }
-            _logger.LogInformation($"用户{userInfo.Uname}登录成功！");
-            //获取直播间信息
-            var liveRoomInfo = await _api.GetLiveRoomInfo();
-            if (liveRoomInfo == null)
-            {
-                _logger.ThrowLogError("获取直播间信息失败！");
-            }
-            if (liveRoomInfo.room_id == 0 || liveRoomInfo.have_live == 0)
-            {
-                _logger.ThrowLogError("当前用户未开启直播间！");
-            }
-            _logger.LogInformation($"获取直播间信息成功，当前直播间地址：http://live.bilibili.com/{liveRoomInfo.room_id}，名称：{liveRoomInfo.title}，分区：{liveRoomInfo.parent_name}·{liveRoomInfo.area_v2_name}，直播状态：{(liveRoomInfo.live_status == 1 ? "直播中" : "未开启")}");
-            //检查FFMpeg
-            if (!await _push.FFmpegTest())
-            {
-                _logger.ThrowLogError("未找到FFmpeg，请先安装FFmpeg！");
-            }
+            //检查直播间信息
+            await CheckLiveRoom();
             //开始推流
             await _push.StartPush();
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            await _push.StopPush();
         }
 
         #region private
@@ -131,6 +110,43 @@ namespace BilibiliLiver.Services
             {
                 _cookie.Init();
                 _logger.ThrowLogError($"cookie.txt未正确配置，错误：{ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 检查直播间信息
+        /// </summary>
+        private async Task CheckLiveRoom()
+        {
+            //登录
+            var userInfo = await _account.Login();
+            if (userInfo == null || !userInfo.IsLogin)
+            {
+                _logger.ThrowLogError("登录失败，Cookie无效或已过期，请重新配置Cookie！");
+            }
+            _logger.LogInformation($"用户{userInfo.Uname}登录成功！");
+            //获取直播间信息
+            var liveRoomInfo = await _api.GetLiveRoomInfo();
+            if (liveRoomInfo == null)
+            {
+                _logger.ThrowLogError("获取直播间信息失败！");
+            }
+            if (liveRoomInfo.room_id == 0 || liveRoomInfo.have_live == 0)
+            {
+                _logger.ThrowLogError("当前用户未开启直播间！");
+            }
+            _logger.LogInformation($"获取直播间信息成功，当前直播间地址：http://live.bilibili.com/{liveRoomInfo.room_id}，名称：{liveRoomInfo.title}，分区：{liveRoomInfo.parent_name}·{liveRoomInfo.area_v2_name}，直播状态：{(liveRoomInfo.live_status == 1 ? "直播中" : "未开启")}");
+            //检查FFMpeg
+            if (!await _push.FFmpegTest())
+            {
+                _logger.ThrowLogError("未找到FFmpeg，请先安装FFmpeg！");
+            }
+            //开启直播的情况下，检查是否需要重启直播
+            if (liveRoomInfo.live_status == 1 && liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
+            {
+                _logger.LogInformation("当前直播间已经开启且分区与配置文件中分区Id不同，关闭直播间中...");
+                await _api.StopLive(liveRoomInfo.room_id);
+                _logger.LogInformation("直播间已关闭！");
             }
         }
 

@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BilibiliLiver.Services
@@ -21,6 +22,9 @@ namespace BilibiliLiver.Services
         private readonly IBilibiliAccountService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly LiveSetting _liveSetting;
+
+        private CancellationTokenSource _tokenSource;
+        private Task _mainTask;
 
         public PushStreamService(ILogger<PushStreamService> logger
             , IBilibiliAccountService account
@@ -81,56 +85,62 @@ namespace BilibiliLiver.Services
         /// <param name="setting"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        public async Task<bool> StartPush()
+        public async Task StartPush()
         {
-            ProcessStartInfo psi = null;
-            bool isAutoRestart = true;
-            while (isAutoRestart)
+            if (_mainTask != null)
             {
-                isAutoRestart = _liveSetting.AutoRestart;
-                //check network
-                while (!await NetworkUtil.NetworkCheck())
-                {
-                    _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
-                    await Task.Delay(10000);
-                }
-                //start live
-                psi = await InitLiveProcessStartInfo(true);
-                if (psi == null)
-                {
-                    _logger.LogError($"初始化直播参数失败。");
-                    return false;
-                }
-                _logger.LogInformation("正在初始化推流指令...");
-                //启动
-                using (var proc = Process.Start(psi))
-                {
-                    if (proc == null || proc.Id <= 0)
-                    {
-                        throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
-                    }
-                    await proc.WaitForExitAsync();
-                    if (isAutoRestart)
-                    {
-                        _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
-                    }
-                    else
-                    {
-                        _logger.LogWarning($"FFmpeg异常退出。");
-                    }
-                }
-                if (isAutoRestart)
-                {
-                    _logger.LogWarning($"等待重新推流...");
-                    //如果开启了自动重试，那么等待60s后再次尝试
-                    await Task.Delay(60000);
-                }
+                await StopPush();
             }
-            return true;
+            if (_tokenSource != null)
+            {
+                _tokenSource.Cancel();
+                _tokenSource.Dispose();
+                _tokenSource = null;
+            }
+            _tokenSource = new CancellationTokenSource();
+            _mainTask = Task.Run(async () =>
+            {
+                await PushStream();
+            });
         }
 
+        /// <summary>
+        /// 停止推流
+        /// </summary>
+        /// <returns></returns>
+        public async Task StopPush()
+        {
+            if (_mainTask == null)
+            {
+                return;
+            }
+            if (_tokenSource == null || _tokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+            _logger.LogWarning("结束推流中...");
+            _tokenSource.Cancel();
+            Stopwatch sw = Stopwatch.StartNew();
+            //3s等待下线
+            while (sw.ElapsedMilliseconds < 3000
+                && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+            {
+                await Task.Delay(10);
+            }
+            sw.Stop();
+            //Dispose
+            _mainTask.Dispose();
+            _tokenSource.Dispose();
+            _mainTask = null;
+            _tokenSource = null;
+            _logger.LogWarning("推流中已停止。");
+        }
 
-        private async Task<ProcessStartInfo> InitLiveProcessStartInfo(bool isRestart = false)
+        /// <summary>
+        /// 初始化推流
+        /// </summary>
+        /// <returns></returns>
+        private async Task<ProcessStartInfo> InitLiveProcessStartInfo()
         {
             try
             {
@@ -142,13 +152,6 @@ namespace BilibiliLiver.Services
                 }
                 //获取直播间信息
                 var liveRoomInfo = await _api.GetLiveRoomInfo();
-                //如果在直播中，先关闭直播间
-                if (liveRoomInfo.live_status == 1 && !isRestart)
-                {
-                    _logger.LogInformation("当前直播间已经开启，关闭直播间中...");
-                    await _api.StopLive(liveRoomInfo.room_id);
-                    _logger.LogInformation("直播间已关闭！");
-                }
                 //开启直播
                 StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
                 string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
@@ -185,6 +188,80 @@ namespace BilibiliLiver.Services
             {
                 _logger.LogError(ex, "初始化直播参数时遇到错误。");
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 开启推流
+        /// </summary>
+        /// <returns></returns>
+        private async Task PushStream()
+        {
+            ProcessStartInfo psi = null;
+            bool isAutoRestart = true;
+
+            while (isAutoRestart && !_tokenSource.IsCancellationRequested)
+            {
+                try
+                {
+                    isAutoRestart = _liveSetting.AutoRestart;
+                    //check network
+                    while (!await NetworkUtil.Ping())
+                    {
+                        _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
+                        await Task.Delay(10000, _tokenSource.Token);
+                    }
+                    //start live
+                    psi = await InitLiveProcessStartInfo();
+                    if (psi == null)
+                    {
+                        _logger.LogError($"初始化直播参数失败。");
+                        return;
+                    }
+                    _logger.LogInformation("正在初始化推流指令...");
+                    //启动
+                    using (var proc = Process.Start(psi))
+                    {
+                        if (proc == null || proc.Id <= 0)
+                        {
+                            throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
+                        }
+                        await proc.WaitForExitAsync(_tokenSource.Token);
+                        proc.Kill();
+                        //delay 100ms的原因是ffmpeg本身也会接收ctrl-c，但是C#的控制台要比ffmpeg慢一点。
+                        //就导致ffmpeg退出要早一点
+                        await Task.Delay(100);
+                        if (!_tokenSource.IsCancellationRequested)
+                        {
+                            if (isAutoRestart)
+                            {
+                                _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"FFmpeg异常退出。");
+                            }
+                        }
+                    }
+                    if (isAutoRestart && !_tokenSource.IsCancellationRequested)
+                    {
+                        _logger.LogWarning($"等待重新推流...");
+                        //如果开启了自动重试，那么等待60s后再次尝试
+                        await Task.Delay(60000, _tokenSource.Token);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
+                    _logger.LogWarning($"等待重新推流...");
+
+                    //如果开启了自动重试，那么等待60s后再次尝试
+                    await Task.Delay(60000, _tokenSource.Token);
+                }
             }
         }
     }
