@@ -12,10 +12,12 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 - 推流默认使用FFmpeg，树莓派官方系统默认安装了的，我就不再赘述，其它系统请自行安装。  
 
 ### 项目说明
-（1）BilibiliLiveAreaTool  
+1. BilibiliLiveAreaTool  
 直播分区获取获取工具，可以通过此工具获取直播分区。  
-（2）BilibiliLiver  
+2. BilibiliLiver  
 一键开启直播工具。  
+3. BilibiliLiverTests
+单元测试神马的。
 
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/1.png)
 
