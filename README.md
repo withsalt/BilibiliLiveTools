@@ -1,9 +1,6 @@
 # BilibiliLiveTools
 
-Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、树莓派等设备无人值守直播。
-
-### 注意
-因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。API也是本人参考github其他项目来的，未深入了解过B站APP，所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。
+Bilibili（B站）直播工具。自动登录并获取推流地址，可以用于电脑、树莓派等设备**无人值守直播**。
 
 ### 前提条件
 - 网络良好，能正常访问B站，上传速度过得去。    
@@ -154,6 +151,10 @@ Windows版本随程序包发布有一个ffmpeg（解压后程序根目录），�
 3. 通过Cookie登录失败  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/6.png)
 cookie过期了，重新获取吧。  
+
+### 题外话
+因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。API也是本人参考github其他项目来的，未深入了解过B站APP，所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。  
+还有种情况是，我本人也不用了。也就不更新了.....
 
 #### 直播分区  
 开播时需要将ID填写到LiveSetting中的LiveAreaId中。  
