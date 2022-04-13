@@ -138,24 +138,24 @@ nano appsettings.json
 Windows版本随程序包发布有一个ffmpeg（解压后程序根目录），可以不用单独安装ffmpeg。  
 
 5. 跑起来  
-在地址栏输入cmd，如图所示：
+在地址栏输入cmd，如图所示：  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/4.png)
 打开命令行之后，输入`BilibiliLiver.exe`。Enjoy it!
 
 #### 常见问题
 
-1. cookie.txt未正确配置
-巧妇难为无米之炊，按照教程，配置cookie.txt
+1. cookie.txt未正确配置  
+巧妇难为无米之炊，请按照教程，配置cookie.txt  
 
-2. FFmpeg报错
+2. FFmpeg报错  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/5.png)
-肯定是你的ffmpeg指令有问题。这个工具严格意义上来说就是一个ffmpeg调用工具，ffmpeg的使用，全靠你自己。
+肯定是你的ffmpeg指令有问题。这个工具严格意义上来说就是一个ffmpeg调用工具，ffmpeg的使用，全靠你自己。  
 
-3. 通过Cookie登录失败
+3. 通过Cookie登录失败  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/6.png)
-cookie过期了，重新获取吧。
+cookie过期了，重新获取吧。  
 
-#### 直播分区
+#### 直播分区  
 开播时需要将ID填写到LiveSetting中的LiveAreaId中。  
 **请注意正确填写分区ID，不然会有被封的风险。**
 
