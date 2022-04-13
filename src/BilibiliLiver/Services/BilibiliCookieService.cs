@@ -14,7 +14,7 @@ namespace BilibiliLiver.Services
         private readonly ILogger<BilibiliCookieService> _logger;
         private readonly IMemoryCache _cache;
 
-        private string _cookiePath = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "cookie.txt");
+        private string _cookiePath = Path.Combine(Environment.CurrentDirectory, "cookie.txt");
 
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
             , IMemoryCache cache)
