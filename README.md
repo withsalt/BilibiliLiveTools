@@ -36,7 +36,7 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/3.png)
 打开之后，会看到一大串Json，不用管内容。然后点击右侧的nav（序号3），将图中序号4中cookie中的值拷贝出来，粘贴到程序目录下面的`cookie.txt`文件即可。  
 
-#### Linux系统（树莓派）
+#### 在Linux上面推流（这里以树莓派为例）
 1. 获取程序  
 ```shell
 wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Linux_ARM.zip --no-check-certificate
@@ -97,7 +97,7 @@ sudo ./BilibiliLiver
 
 **配置系统服务等，可以查看：https://www.quarkbook.com/?p=733**
 
-#### Windows系统
+#### 在Windows系统上面推流
 
 1. 获取程序  
 点击链接：[https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip](https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip "https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip")
