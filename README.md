@@ -6,9 +6,9 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。API也是本人参考github其他项目来的，未深入了解过B站APP，所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。
 
 ### 前提条件
-（1）. 首先要有一个连接了摄像头的Linux/Windows系统。并能够访问网络。  
-（2）. 在Bilibili中通过实名认证，并开通了直播间。[点击连接](https://link.bilibili.com/p/center/index "点击连接")开通直播间（很简单的，实名认证通过后直接就可以开通了）  
-（3）. 推流默认使用FFmpeg，树莓派官方系统默认安装了的，我就不再赘述，其它系统请自行安装。  
+- 首先要有一个连接了摄像头的Linux/Windows系统。并能够访问网络。  
+- 在Bilibili中通过实名认证，并开通了直播间。[点击连接](https://link.bilibili.com/p/center/index "点击连接")开通直播间（很简单的，实名认证通过后直接就可以开通了）  
+- 推流默认使用FFmpeg，树莓派官方系统默认安装了的，我就不再赘述，其它系统请自行安装。  
 
 ### 项目说明
 （1）BilibiliLiveAreaTool  
@@ -23,20 +23,20 @@ Bilibili直播工具。自动登录并获取推流地址，可以用于电脑、
 #### 如何获取Bilibili Cookie
 由于B站登录接口越来越难搞，无奈之下只有用Cookie了。幸运的是，B站的Cookie很容易就能获取到（理论上网站Cookie都能很容易拿到）。
 
-1. 浏览器打开B站，并**登陆**  
-这就不用多说了吧  
+1. 浏览器打开B站，并登陆  
+一定要先登录，一定要先登录，一定要先登录！
 
 2. 开启开发者选项  
 登录后在浏览页面按F12（或者Ctrl+Shift+I），打开开发者选项。如图所示：  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/2.png)
-选择“Network”，然后在地址栏输入`https://api.bilibili.com/x/web-interface/nav`。  
+选择“Network”，然后在地址栏打开：[https://api.bilibili.com/x/web-interface/nav](https://api.bilibili.com/x/web-interface/nav "https://api.bilibili.com/x/web-interface/nav")。  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/3.png)
-打开之后，会看到一大串Json。然后点击右侧的nav（序号3），将图中序号4中cookie中的内容拷贝出来，粘贴到程序目录下面的`cookie.txt`文件即可。  
+打开之后，会看到一大串Json，不用管内容。然后点击右侧的nav（序号3），将图中序号4中cookie中的值拷贝出来，粘贴到程序目录下面的`cookie.txt`文件即可。  
 
 #### Linux系统（树莓派）
 1. 获取程序  
 ```shell
-wget https://github.com/withsalt/BilibiliLiveTools/releases/download/2.0.2/BilibiliLiver_Linux_ARM.zip
+wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Linux_ARM.zip --no-check-certificate
 ```
 
 2. 解压并授权
@@ -44,15 +44,76 @@ wget https://github.com/withsalt/BilibiliLiveTools/releases/download/2.0.2/Bilib
 unzip BilibiliLiver_Linux_ARM.zip && chmod -R 755 BilibiliLiver_Linux_ARM && chmod +x BilibiliLiver_Linux_ARM/BilibiliLiver
 ```
 
-3. 编辑配置文件  
-编辑用户配置文件appsettings.json  
+3. 设置Cookie
+```shell
+cd BilibiliLiver_Linux_ARM
+nano cookie.txt
+```
+然后编辑cookie.txt，并将上面获取到cookie粘贴进去。
+
+4. 编辑直播设置  
+编辑配置文件appsettings.json  
 ```shell
 cd BilibiliLiver_Linux_ARM/
 nano appsettings.json
 ```
+配置文件如下所示，按照提示修改为自己的分区和直播间名称。
+```json
+{
+  "LiveSetting": {
+    //直播间分类
+    "LiveAreaId": 369,
+    //直播间名称
+    "LiveRoomName": "【24H】小金鱼啦~",
+    //FFmpeg推流命令，请自行填写对应操作系统和设备的推流命令
+    //填写到此处时，请注意将命令中‘"’用‘\’进行转义，将推流的rtmp连接替换为[[URL]]，[[URL]]不需要双引号。
+    //下面推流指令默认适配设备树莓派，使用USB摄像头，设备为/dev/video0
+    "FFmpegCmd": "ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Data/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv [[URL]]",
+    //ffmpeg异常退出后，是否自动重新启动
+    "AutoRestart": true
+  }
+}
+```
+由于推流方式不同以及FFmpeg配置的多样性，不同的平台、不同的硬件的参数都不相同（主要是懒，懒得去写FFmpeg的适配了，直接调用多巴适）。这里采用直接填写推流命令的方式。
+建议填写之前先测试推流命令能否正确执行。默认的推流命令设配树莓派官方系统，并且使用USB摄像头，设备Id为'/dev/video0'，其它系统可能不适用，需要自己修改。详情可以访问下发的博客连接。  
+推流命令（FFmpegCmd）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。推流命令中注意半角双引号需要用符号‘\’来进行转义。  
 
-编辑直播配置文件  
+5. 安装FFmpeg（可选）
+为什么是可选？因为树莓派官方系统已经默认内置了ffmpeg，不用自行安装。但是对于一些其他的linux发行版。可能没有安装ffmpeg，所以需要用户自行安装ffmpeg。这里只讨论debian系的linux，即使用apt作为包管理的发行版。
+```shell
+# 安装，就这一行命令
+sudo apt install ffmpeg
+# 测试是否安装，有输出表示安装完成
+ffmpeg -version
+```
 
+6. 跑起来  
+```shell
+sudo ./BilibiliLiver
+```
+
+**配置系统服务等，可以查看：https://www.quarkbook.com/?p=733**
+
+#### Windows系统
+
+1. 获取程序  
+点击链接：[https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip](https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip "https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip")
+下载最新的适用于Windows系统的发布包。  
+
+2. 设置Cookie  
+```shell
+cd BilibiliLiver_Linux_ARM
+nano cookie.txt
+```
+然后编辑cookie.txt，并将上面获取到cookie粘贴进去。  
+
+3. 编辑直播设置  
+编辑配置文件appsettings.json  
+```shell
+cd BilibiliLiver_Linux_ARM/
+nano appsettings.json
+```
+配置文件如下所示，按照提示修改为自己的分区和直播间名称。  
 ```json
 {
   "LiveSetting": {
@@ -70,20 +131,13 @@ nano appsettings.json
 }
 ```
 
-由于推流方式不同以及FFmpeg配置的多边性，这里采用直接填写推流命令的方式。建议填写之前先测试推流命令能否正确执行。默认的推流命令设配树莓派官方系统，且摄像头设备为‘/dev/video0’，其它系统可能不适用，需要自己修改。  
+4. 安装FFmpeg（可选）  
+Windows版本随程序包发布有一个ffmpeg（解压后程序根目录），可以不用单独安装ffmpeg。  
 
-推流命令（FFmpegCmd）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。推流命令中注意半角双引号需要用符号‘\’来进行转义。  
-
-4. 跑起来  
-```shell
-sudo ./BilibiliLiver
-```
-
-**配置系统服务等，可以查看：https://www.quarkbook.com/?p=733**
-
-#### Windows系统
-
-未完待续...
+5. 跑起来  
+在地址栏输入cmd，如图所示：
+![](https://docs.geeiot.net/server/index.php?s=/api/attachment/visitFile&sign=8825ce8595d017c02287f683a8ece1e1)
+打开命令行之后，输入`BilibiliLiver.exe`。Enjoy it!
 
 #### 直播分区
 开播时需要将ID填写到LiveSetting中的LiveAreaId中。  
