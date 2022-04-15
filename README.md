@@ -9,6 +9,10 @@ Bilibili（B站）直播工具。自动登录并获取推流地址，可以用�
 ### 项目说明
 1. BilibiliLiveAreaTool  
 直播分区获取获取工具，可以通过此工具获取直播分区。  
+使用方法：  
+```shell
+./BilibiliLiveAreaTool [-save filename]
+```
 2. BilibiliLiver  
 一键开启直播工具。  
 3. BilibiliLiverTests
