@@ -3,6 +3,7 @@ using BilibiliLiver.Model.Base;
 using BilibiliLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace BilibiliLiver.Services
@@ -25,7 +26,7 @@ namespace BilibiliLiver.Services
 
         public async Task<UserInfo> Login()
         {
-            var result = await _httpClient.Execute<ResultModel<UserInfo>>(_navApi, RestSharp.Method.Get);
+            var result = await _httpClient.Execute<ResultModel<UserInfo>>(_navApi, HttpMethod.Get);
             if (result == null || result.Data == null)
             {
                 throw new Exception("通过Cookie登录失败，返回结果为空！");
@@ -39,7 +40,7 @@ namespace BilibiliLiver.Services
 
         public async Task HeartBeat()
         {
-            var result = await _httpClient.Execute<ResultModel<HeartBeat>>(_heartBeatApi, RestSharp.Method.Get);
+            var result = await _httpClient.Execute<ResultModel<HeartBeat>>(_heartBeatApi, HttpMethod.Get);
             if (result == null || result.Code != 0)
             {
                 _logger.LogWarning($"心跳请求失败，错误代码：{result.Code}，{result.Message}");

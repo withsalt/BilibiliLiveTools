@@ -4,10 +4,10 @@ using BilibiliLiver.Model.Enums;
 using BilibiliLiver.Model.Exceptions;
 using BilibiliLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
-using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace BilibiliLiver.Services
@@ -54,28 +54,28 @@ namespace BilibiliLiver.Services
 
         public async Task<LiveRoomInfo> GetLiveRoomInfo()
         {
-            var result = await _httpClient.Execute<ResultModel<LiveRoomInfo>>(_getLiveRoomInfoApi, Method.Get);
+            var result = await _httpClient.Execute<ResultModel<LiveRoomInfo>>(_getLiveRoomInfoApi, HttpMethod.Get);
             if (result == null)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, "返回内容为空");
+                throw new ApiRequestException(_getLiveRoomInfoApi, HttpMethod.Get, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, Method.Get, result.Message);
+                throw new ApiRequestException(_getLiveRoomInfoApi, HttpMethod.Get, result.Message);
             }
             return result.Data;
         }
 
         public async Task<List<LiveAreaItem>> GetLiveAreas()
         {
-            var result = await _httpClient.Execute<ResultModel<List<LiveAreaItem>>>(_getLiveCategoryApi, Method.Get);
+            var result = await _httpClient.Execute<ResultModel<List<LiveAreaItem>>>(_getLiveCategoryApi, HttpMethod.Get);
             if (result == null)
             {
-                throw new ApiRequestException(_getLiveCategoryApi, Method.Get, "返回内容为空");
+                throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_getLiveCategoryApi, Method.Get, result.Message);
+                throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, result.Message);
             }
             return result.Data;
         }
@@ -93,14 +93,14 @@ namespace BilibiliLiver.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, Method.Post, postData, BodyFormat.Form);
+            var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
             if (result == null)
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, "返回内容为空");
+                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, result.Message);
+                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, result.Message);
             }
             return result.Code == 0;
         }
@@ -115,14 +115,14 @@ namespace BilibiliLiver.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, Method.Post, postData, BodyFormat.Form);
+            var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
             if (result == null)
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, "返回内容为空");
+                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, Method.Post, result.Message);
+                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, result.Message);
             }
             return result.Code == 0;
         }
@@ -138,14 +138,14 @@ namespace BilibiliLiver.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<StartLiveInfo>>(_startLiveApi, Method.Post, postData, BodyFormat.Form);
+            var result = await _httpClient.Execute<ResultModel<StartLiveInfo>>(_startLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
             if (result == null)
             {
-                throw new ApiRequestException(_startLiveApi, Method.Post, "返回内容为空");
+                throw new ApiRequestException(_startLiveApi, HttpMethod.Post, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_startLiveApi, Method.Post, result.Message);
+                throw new ApiRequestException(_startLiveApi, HttpMethod.Post, result.Message);
             }
             if (result.Data.need_face_auth)
             {
@@ -163,14 +163,14 @@ namespace BilibiliLiver.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<StopLiveInfo>>(_stopLiveApi, Method.Post, postData, BodyFormat.Form);
+            var result = await _httpClient.Execute<ResultModel<StopLiveInfo>>(_stopLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
             if (result == null)
             {
-                throw new ApiRequestException(_stopLiveApi, Method.Post, "返回内容为空");
+                throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_stopLiveApi, Method.Post, result.Message);
+                throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, result.Message);
             }
             return result.Data;
         }

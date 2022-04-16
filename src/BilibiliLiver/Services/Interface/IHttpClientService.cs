@@ -1,11 +1,11 @@
 ﻿using BilibiliLiver.Model.Enums;
-using RestSharp;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace BilibiliLiver.Services.Interface
 {
     public interface IHttpClientService
     {
-        Task<T> Execute<T>(string url, Method method, object body = null, BodyFormat format = BodyFormat.Json) where T : class;
+        Task<T> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json) where T : class;
     }
 }

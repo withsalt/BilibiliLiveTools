@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Web;
 
 namespace BilibiliLiver.Services
 {
@@ -36,11 +37,12 @@ namespace BilibiliLiver.Services
                 {
                     throw new FileNotFoundException("File 'cookie.txt' not fount.");
                 }
-                string result = File.ReadAllText(_cookiePath);
+                string result = File.ReadAllText(_cookiePath)?.Trim('\r', '\n', ' ');
                 if (string.IsNullOrWhiteSpace(result))
                 {
                     throw new Exception("'cookie.txt'文件为空，请按照教程获取Bilibili Cookie之后放入程序目录下面的cookie.txt中");
                 }
+                result = HttpUtility.UrlEncode(result);
                 if (!CookieHeaderValue.TryParse(result, out _))
                 {
                     throw new Exception("Parse cookie failed.");

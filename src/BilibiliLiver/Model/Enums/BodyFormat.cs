@@ -4,6 +4,8 @@
     {
         Form = 1,
 
-        Json = 2
+        Form_UrlEncoded = 2,
+
+        Json = 3
     }
 }

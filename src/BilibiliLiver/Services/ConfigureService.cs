@@ -150,6 +150,7 @@ namespace BilibiliLiver.Services
                     _logger.ThrowLogError($"修改直播间名称为【{_liveSetting.LiveRoomName}】失败！");
                 }
                 _logger.LogInformation($"修改直播间名称为：{_liveSetting.LiveRoomName}，成功！");
+                await Task.Delay(1000);
             }
             //检查分区
             if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
@@ -160,6 +161,7 @@ namespace BilibiliLiver.Services
                     _logger.ThrowLogError($"修改直播间分区为【{_liveSetting.LiveAreaId}】失败！");
                 }
                 _logger.LogInformation($"修改直播间分区为：{_liveSetting.LiveAreaId}，成功！");
+                await Task.Delay(1000);
             }
         }
 
