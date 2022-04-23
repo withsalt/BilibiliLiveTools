@@ -1,5 +1,6 @@
-﻿using BilibiliLiver.Model;
-using BilibiliLiver.Model.Base;
+﻿using BilibiliLiveCommon.Model;
+using BilibiliLiveCommon.Model.Base;
+using BilibiliLiveCommon.Services.Interface;
 using BilibiliLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
 using System;

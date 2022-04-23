@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveAreaTool", "Bil
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveMonitor", "BilibiliLiveMonitor\BilibiliLiveMonitor.csproj", "{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliLiveCommon", "BilibiliLiveCommon\BilibiliLiveCommon.csproj", "{42D02825-BB33-43AB-B798-07017B205DF2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42D02825-BB33-43AB-B798-07017B205DF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42D02825-BB33-43AB-B798-07017B205DF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42D02825-BB33-43AB-B798-07017B205DF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42D02825-BB33-43AB-B798-07017B205DF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

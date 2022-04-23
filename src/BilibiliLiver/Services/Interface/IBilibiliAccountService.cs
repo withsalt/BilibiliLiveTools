@@ -1,4 +1,4 @@
-﻿using BilibiliLiver.Model;
+﻿using BilibiliLiveCommon.Model;
 using System.Threading.Tasks;
 
 namespace BilibiliLiver.Services.Interface

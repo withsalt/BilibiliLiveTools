@@ -4,7 +4,7 @@ using System;
 using BilibiliLiveMonitor.Jobs;
 using BilibiliLiveMonitor.Services;
 
-namespace BilibiliLiveMonitor
+namespace BilibiliLiveMonitor.DependencyInjection
 {
     public static class RegisteQuartz
     {

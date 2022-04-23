@@ -43,9 +43,11 @@ namespace BilibiliLiveMonitor.Services
         private JobDescribe CreateJobDescribe()
         {
             int interval = _appSettings.IntervalTime;
-            if (interval < 3 || interval > 43200)
+            if (interval < 60 || interval > 43200)
             {
-                throw new Exception("The interval must be less than 43200 and greater than 3 seconds");
+#if !DEBUG
+                throw new Exception("The interval must be less than 43200 and greater than 60 seconds");
+#endif
             }
             return new JobDescribe()
             {

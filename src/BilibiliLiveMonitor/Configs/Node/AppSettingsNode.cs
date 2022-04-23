@@ -10,8 +10,6 @@ namespace BilibiliLiveMonitor.Configs
     {
         public int IntervalTime { get; set; }
 
-        public string ApiHost { get; set; }
-
         public bool IsEnableEmailNotice { get; set; }
 
         public EmailConfigNode EmailConfig { get; set; }

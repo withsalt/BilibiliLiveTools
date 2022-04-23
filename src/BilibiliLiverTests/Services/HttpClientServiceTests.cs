@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using BilibiliLiverTests;
 using BilibiliLiver.Services.Interface;
 using System.Net.Http;
+using BilibiliLiveCommon.Services.Interface;
 
 namespace BilibiliLiver.Services.Tests
 {
@@ -30,7 +31,7 @@ namespace BilibiliLiver.Services.Tests
         {
             string url = "https://localhost:7174/WeatherForecast";
 
-            var result = await _apiService.Execute<TestData>(url, HttpMethod.Post, "{\"Id\":\"1\",\"Name\":\"111\"}", Model.Enums.BodyFormat.Json);
+            var result = await _apiService.Execute<TestData>(url, HttpMethod.Post, "{\"Id\":\"1\",\"Name\":\"111\"}", BilibiliLiveCommon.Model.Enums.BodyFormat.Json);
 
             Assert.IsNotNull(result);
         }

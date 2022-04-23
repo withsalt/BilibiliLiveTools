@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BilibiliLiverTests;
 using BilibiliLiver.Services.Interface;
+using BilibiliLiveCommon.Services.Interface;
 
 namespace BilibiliLiver.Services.Tests
 {

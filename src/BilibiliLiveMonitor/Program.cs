@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using BilibiliLiveMonitor.Configs;
 using BilibiliLiveMonitor.Services;
+using BilibiliLiveMonitor.DependencyInjection;
 
 namespace BilibiliLiveMonitor
 {
@@ -26,18 +26,15 @@ namespace BilibiliLiveMonitor
                 .UseNLog()
                 .ConfigureServices((hostContext, services) =>
                 {
-                    //配置文件
-                    services.Configure<AppSettingsNode>(hostContext.Configuration.GetSection(AppSettingsNode.Position));
-                    services.Configure<ShutdownSettingsNode>(hostContext.Configuration.GetSection(ShutdownSettingsNode.Position));
-                    //Http客户端
-                    services.AddHttpClient();
+                    //配置
+                    services.ConfigureSettings(hostContext);
                     //缓存
                     services.AddMemoryCache();
+                    //Bilibili相关API
+                    services.AddBilibiliServices();
                     //定时任务
                     services.AddQuartz();
-                    //配置并启动服务
-                    services.AddTransient<IEmailNoticeService, EmailNoticeService>();
-                    services.AddTransient<IShutdownService, ShutdownService>();
+                    //启动服务
                     services.AddHostedService<ConfigureService>();
                 });
     }

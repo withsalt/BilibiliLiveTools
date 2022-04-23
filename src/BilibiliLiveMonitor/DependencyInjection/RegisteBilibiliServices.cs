@@ -1,10 +1,9 @@
-﻿using BilibiliLiveCommon.Services;
+﻿using Microsoft.Extensions.DependencyInjection;
+using BilibiliLiveMonitor.Services;
 using BilibiliLiveCommon.Services.Interface;
-using BilibiliLiver.Services;
-using BilibiliLiver.Services.Interface;
-using Microsoft.Extensions.DependencyInjection;
+using BilibiliLiveCommon.Services;
 
-namespace BilibiliLiver.DependencyInjection
+namespace BilibiliLiveMonitor.DependencyInjection
 {
     public static class RegisteBilibiliServices
     {
@@ -14,13 +13,10 @@ namespace BilibiliLiver.DependencyInjection
             services.AddSingleton<IBilibiliCookieService, BilibiliCookieService>();
             //Http请求相关
             services.AddTransient<IHttpClientService, HttpClientService>();
-            //账号
-            services.AddTransient<IBilibiliAccountService, BilibiliAccountService>();
             //直播的API
             services.AddTransient<IBilibiliLiveApiService, BilibiliLiveApiService>();
-            //推流相关
-            services.AddTransient<IPushStreamService, PushStreamService>();
-
+            //邮件
+            services.AddTransient<IEmailNoticeService, EmailNoticeService>();
             return services;
         }
     }

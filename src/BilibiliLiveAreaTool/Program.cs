@@ -1,6 +1,6 @@
-﻿using BilibiliLiver;
-using BilibiliLiver.Model;
-using BilibiliLiver.Services.Interface;
+﻿using BilibiliLiveCommon.Model;
+using BilibiliLiveCommon.Services.Interface;
+using BilibiliLiver;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
