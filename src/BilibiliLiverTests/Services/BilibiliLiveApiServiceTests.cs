@@ -61,7 +61,7 @@ namespace BilibiliLiver.Services.Tests
             var reslt = await _apiService.StopLive(info.room_id);
 
             var liveRoomInfo = await _apiService.GetLiveRoomInfo();
-            if(liveRoomInfo.live_status != 0)
+            if (liveRoomInfo.live_status != 0)
             {
                 Assert.Fail();
             }
@@ -75,6 +75,13 @@ namespace BilibiliLiver.Services.Tests
             var info = await _apiService.GetLiveRoomInfo();
             var reslt = await _apiService.UpdateLiveRoomArea(info.room_id, 369);
             Assert.IsTrue(reslt);
+        }
+
+        [TestMethod()]
+        public async Task GetRoomPlayInfoTest()
+        {
+            var reslt = await _apiService.GetRoomPlayInfo(21614697);
+            Assert.IsNotNull(reslt);
         }
     }
 }

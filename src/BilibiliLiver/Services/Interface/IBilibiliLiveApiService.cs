@@ -24,7 +24,20 @@ namespace BilibiliLiver.Services.Interface
         /// 获取直播间分类
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// 无需登录
+        /// </remarks>
         Task<List<LiveAreaItem>> GetLiveAreas();
+
+        /// <summary>
+        /// 获取直播间信息
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// 无需登录
+        /// </remarks>
+        Task<RoomPlayInfo> GetRoomPlayInfo(int roomId);
 
         /// <summary>
         /// 更新直播间分区

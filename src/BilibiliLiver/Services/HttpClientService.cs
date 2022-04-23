@@ -26,7 +26,7 @@ namespace BilibiliLiver.Services
             _bilibiliCookie = bilibiliCookie ?? throw new ArgumentNullException(nameof(bilibiliCookie));
         }
 
-        public async Task<T> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json) where T : class
+        public async Task<T> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true) where T : class
         {
             using (HttpClient httpClient = new HttpClient(new HttpClientHandler()
             {
@@ -40,9 +40,12 @@ namespace BilibiliLiver.Services
                 httpClient.DefaultRequestHeaders.Add("origin", "https://www.bilibili.com");
                 httpClient.DefaultRequestHeaders.Add("referer", "https://www.bilibili.com/");
                 httpClient.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36");
-                httpClient.DefaultRequestHeaders.Add("cookie", _bilibiliCookie.Get());
                 httpClient.DefaultRequestHeaders.Add("accept", "*/*");
                 httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
+                if (withCookie)
+                {
+                    httpClient.DefaultRequestHeaders.Add("cookie", _bilibiliCookie.Get());
+                }
 
                 HttpResponseMessage response = null;
                 if (method == HttpMethod.Post)
