@@ -126,7 +126,7 @@ namespace BilibiliLiveCommon.Services
             }
             finally
             {
-                await Task.Delay(new Random().Next(5000, 10000));
+                await SlowDownOperation(nameof(UpdateLiveRoomName));
             }
         }
 
@@ -155,7 +155,7 @@ namespace BilibiliLiveCommon.Services
             }
             finally
             {
-                await Task.Delay(new Random().Next(5000, 10000));
+                await SlowDownOperation(nameof(UpdateLiveRoomArea));
             }
         }
 
@@ -189,9 +189,8 @@ namespace BilibiliLiveCommon.Services
             }
             finally
             {
-                await Task.Delay(new Random().Next(5000, 10000));
+                await SlowDownOperation(nameof(StartLive));
             }
-
         }
 
         public async Task<StopLiveInfo> StopLive(int roomId)
@@ -218,7 +217,7 @@ namespace BilibiliLiveCommon.Services
             }
             finally
             {
-                await Task.Delay(new Random().Next(5000, 10000));
+                await SlowDownOperation(nameof(StopLive));
             }
         }
 
@@ -274,6 +273,13 @@ namespace BilibiliLiveCommon.Services
                 throw new Exception($"根据Id[{areaId}]获取直播间分区信息失败！");
             }
             return areaItem;
+        }
+
+        private async Task SlowDownOperation(string operationName)
+        {
+            int sleepMsec = new Random().Next(5000, 10000);
+            _logger.LogInformation($"执行{operationName}操作完成，休眠{sleepMsec / 1000}秒（避免频繁操作）。");
+            await Task.Delay(sleepMsec);
         }
 
         #endregion
