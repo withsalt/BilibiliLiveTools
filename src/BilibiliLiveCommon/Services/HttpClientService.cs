@@ -1,6 +1,6 @@
 ﻿using BilibiliLiveCommon.Model.Enums;
 using BilibiliLiveCommon.Services.Interface;
-using BilibiliLiveCommon.Utils.Json;
+using BilibiliLiver.Utils;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Headers;
@@ -27,7 +27,7 @@ namespace BilibiliLiveCommon.Services
                 ServerCertificateCustomValidationCallback = delegate { return true; },
             })
             {
-                Timeout = TimeSpan.FromSeconds(5)
+                Timeout = TimeSpan.FromSeconds(60)
             })
             {
 
@@ -59,7 +59,7 @@ namespace BilibiliLiveCommon.Services
                                 }
                                 else
                                 {
-                                    postData = JsonUtil.SerializeToString(body);
+                                    postData = JsonUtil.SerializeObject(body);
                                 }
                                 using (StringContent content = new StringContent(postData))
                                 {
@@ -127,7 +127,7 @@ namespace BilibiliLiveCommon.Services
                 response.Dispose();
 
                 string data = resultStr.Replace("\"data\":[]", "\"data\":null");
-                return JsonUtil.DeserializeStringToObject<T>(data);
+                return JsonUtil.DeserializeJsonToObject<T>(data);
             }
         }
 

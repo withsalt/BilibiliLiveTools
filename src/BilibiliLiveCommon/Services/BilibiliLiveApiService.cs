@@ -111,16 +111,23 @@ namespace BilibiliLiveCommon.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
-            if (result == null)
+            try
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
+                var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                if (result == null)
+                {
+                    throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
+                }
+                if (result.Code != 0)
+                {
+                    throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, result.Message);
+                }
+                return result.Code == 0;
             }
-            if (result.Code != 0)
+            finally
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, result.Message);
+                await Task.Delay(new Random().Next(5000, 10000));
             }
-            return result.Code == 0;
         }
 
         public async Task<bool> UpdateLiveRoomArea(int roomId, int areaId)
@@ -133,16 +140,23 @@ namespace BilibiliLiveCommon.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
-            if (result == null)
+            try
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
+                var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                if (result == null)
+                {
+                    throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
+                }
+                if (result.Code != 0)
+                {
+                    throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, result.Message);
+                }
+                return result.Code == 0;
             }
-            if (result.Code != 0)
+            finally
             {
-                throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, result.Message);
+                await Task.Delay(new Random().Next(5000, 10000));
             }
-            return result.Code == 0;
         }
 
         public async Task<StartLiveInfo> StartLive(int roomId, int areaId)
@@ -156,20 +170,28 @@ namespace BilibiliLiveCommon.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<StartLiveInfo>>(_startLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
-            if (result == null)
+            try
             {
-                throw new ApiRequestException(_startLiveApi, HttpMethod.Post, "返回内容为空");
+                var result = await _httpClient.Execute<ResultModel<StartLiveInfo>>(_startLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                if (result == null)
+                {
+                    throw new ApiRequestException(_startLiveApi, HttpMethod.Post, "返回内容为空");
+                }
+                if (result.Code != 0)
+                {
+                    throw new ApiRequestException(_startLiveApi, HttpMethod.Post, result.Message);
+                }
+                if (result.Data.need_face_auth)
+                {
+                    throw new Exception("开启直播失败，需要进行人脸识别！");
+                }
+                return result.Data;
             }
-            if (result.Code != 0)
+            finally
             {
-                throw new ApiRequestException(_startLiveApi, HttpMethod.Post, result.Message);
+                await Task.Delay(new Random().Next(5000, 10000));
             }
-            if (result.Data.need_face_auth)
-            {
-                throw new Exception("开启直播失败，需要进行人脸识别！");
-            }
-            return result.Data;
+
         }
 
         public async Task<StopLiveInfo> StopLive(int roomId)
@@ -181,16 +203,23 @@ namespace BilibiliLiveCommon.Services
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
-            var result = await _httpClient.Execute<ResultModel<StopLiveInfo>>(_stopLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
-            if (result == null)
+            try
             {
-                throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, "返回内容为空");
+                var result = await _httpClient.Execute<ResultModel<StopLiveInfo>>(_stopLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                if (result == null)
+                {
+                    throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, "返回内容为空");
+                }
+                if (result.Code != 0)
+                {
+                    throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, result.Message);
+                }
+                return result.Data;
             }
-            if (result.Code != 0)
+            finally
             {
-                throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, result.Message);
+                await Task.Delay(new Random().Next(5000, 10000));
             }
-            return result.Data;
         }
 
         #region private

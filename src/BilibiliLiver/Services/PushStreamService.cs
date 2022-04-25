@@ -216,8 +216,7 @@ namespace BilibiliLiver.Services
                     psi = await InitLiveProcessStartInfo();
                     if (psi == null)
                     {
-                        _logger.LogError($"初始化直播参数失败。");
-                        return;
+                        throw new Exception($"初始化直播参数失败。");
                     }
                     _logger.LogInformation("正在初始化推流指令...");
                     //启动
@@ -258,7 +257,7 @@ namespace BilibiliLiver.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
-                    _logger.LogWarning($"等待重新推流...");
+                    _logger.LogWarning($"等待60s后重新推流...");
 
                     //如果开启了自动重试，那么等待60s后再次尝试
                     await Task.Delay(60000, _tokenSource.Token);

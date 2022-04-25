@@ -84,5 +84,21 @@ namespace BilibiliLiver.Services.Tests
             var reslt = await _apiService.GetRoomPlayInfo(21614697);
             Assert.IsNotNull(reslt);
         }
+
+        [TestMethod()]
+        public async Task Test1()
+        {
+            try
+            {
+                var info = await _apiService.GetLiveRoomInfo();
+                var r1 = await _apiService.UpdateLiveRoomArea(info.room_id, 33);
+                await Task.Delay(5000);
+                var r2 = await _apiService.UpdateLiveRoomName(info.room_id, "白噪音");
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
     }
 }
