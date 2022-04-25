@@ -1,13 +1,12 @@
 ﻿using BilibiliLiveCommon.Model;
 using BilibiliLiveCommon.Model.Base;
 using BilibiliLiveCommon.Services.Interface;
-using BilibiliLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace BilibiliLiver.Services
+namespace BilibiliLiveCommon.Services
 {
     public class BilibiliAccountService : IBilibiliAccountService
     {

@@ -1,7 +1,7 @@
 ﻿using BilibiliLiveCommon.Model;
 using System.Threading.Tasks;
 
-namespace BilibiliLiver.Services.Interface
+namespace BilibiliLiveCommon.Services.Interface
 {
     public interface IBilibiliAccountService
     {
