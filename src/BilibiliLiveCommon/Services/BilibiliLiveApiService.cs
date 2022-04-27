@@ -278,7 +278,7 @@ namespace BilibiliLiveCommon.Services
         private async Task SlowDownOperation(string operationName)
         {
             int sleepMsec = new Random().Next(5000, 10000);
-            _logger.LogInformation($"执行{operationName}操作完成，休眠{sleepMsec / 1000}秒（避免频繁操作）。");
+            _logger.LogDebug($"执行{operationName}操作完成，休眠{sleepMsec / 1000}秒，避免被B站频繁操作。");
             await Task.Delay(sleepMsec);
         }
 

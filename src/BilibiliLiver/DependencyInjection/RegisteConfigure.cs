@@ -8,7 +8,7 @@ namespace BilibiliLiver.DependencyInjection
     {
         public static IServiceCollection ConfigureSettings(this IServiceCollection services, HostBuilderContext hostContext)
         {
-            services.Configure<LiveSetting>(hostContext.Configuration.GetSection(LiveSetting.Position));
+            services.Configure<LiveSettings>(hostContext.Configuration.GetSection(LiveSettings.Position));
             return services;
         }
     }

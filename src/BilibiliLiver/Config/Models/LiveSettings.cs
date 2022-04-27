@@ -1,6 +1,6 @@
 ﻿namespace BilibiliLiver.Config.Models
 {
-    public class LiveSetting
+    public class LiveSettings
     {
         public int LiveAreaId { get; set; }
 
@@ -10,6 +10,8 @@
 
         public bool AutoRestart { get; set; }
 
-        public static string Position { get { return "LiveSetting"; } }
+        public int RepushFailedExitMinutes { get; set; }
+
+        public static string Position { get { return "LiveSettings"; } }
     }
 }

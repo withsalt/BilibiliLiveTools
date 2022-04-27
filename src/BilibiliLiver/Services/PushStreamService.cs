@@ -22,7 +22,7 @@ namespace BilibiliLiver.Services
         private readonly ILogger<PushStreamService> _logger;
         private readonly IBilibiliAccountService _account;
         private readonly IBilibiliLiveApiService _api;
-        private readonly LiveSetting _liveSetting;
+        private readonly LiveSettings _liveSetting;
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
@@ -30,7 +30,7 @@ namespace BilibiliLiver.Services
         public PushStreamService(ILogger<PushStreamService> logger
             , IBilibiliAccountService account
             , IBilibiliLiveApiService api
-            , IOptions<LiveSetting> liveSettingOptions)
+            , IOptions<LiveSettings> liveSettingOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
@@ -143,53 +143,55 @@ namespace BilibiliLiver.Services
         /// <returns></returns>
         private async Task<ProcessStartInfo> InitLiveProcessStartInfo()
         {
-            try
+            //检查Cookie是否有效
+            UserInfo userInfo = await _account.Login();
+            if (userInfo == null || !userInfo.IsLogin)
             {
-                //检查Cookie是否有效
-                UserInfo userInfo = await _account.Login();
-                if (userInfo == null || !userInfo.IsLogin)
-                {
-                    throw new Exception("登录失败，Cookie已失效");
-                }
-                //获取直播间信息
-                var liveRoomInfo = await _api.GetLiveRoomInfo();
-                //开启直播
-                StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
-                string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
-                if (string.IsNullOrWhiteSpace(url))
-                {
-                    _logger.ThrowLogError("获取推流地址失败，请重试！");
-                }
-                _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
+                throw new Exception("登录失败，Cookie已失效");
+            }
+            //获取直播间信息
+            var liveRoomInfo = await _api.GetLiveRoomInfo();
+            if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
+            {
+                await _api.UpdateLiveRoomArea(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
+            }
+            if (liveRoomInfo.title != _liveSetting.LiveRoomName)
+            {
+                await _api.UpdateLiveRoomName(liveRoomInfo.room_id, _liveSetting.LiveRoomName);
+            }
+            //开启直播
+            StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
+            string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                throw new Exception("获取推流地址失败，请重试！");
+            }
+            _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
 
-                string newCmd = _liveSetting.FFmpegCmd.Replace("[[URL]]", $"\"{url}\"");
-                int firstNullChar = newCmd.IndexOf((char)32);
-                if (firstNullChar < 0)
-                {
-                    throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
-                }
-                string cmdName = newCmd.Substring(0, firstNullChar);
-                string cmdArgs = newCmd.Substring(firstNullChar);
-                if (string.IsNullOrEmpty(cmdArgs))
-                {
-                    throw new Exception("命令参数不能为空！");
-                }
-                var psi = new ProcessStartInfo
-                {
-                    FileName = cmdName,
-                    Arguments = cmdArgs,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = false,
-                    UseShellExecute = false,
-                    CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
-                };
-                return psi;
-            }
-            catch (Exception ex)
+            string newCmd = _liveSetting.FFmpegCmd
+                .Trim('\r', '\n', ' ')
+                .Replace("[[URL]]", $"\"{url}\"");
+            int firstNullChar = newCmd.IndexOf((char)32);
+            if (firstNullChar < 0)
             {
-                _logger.LogError(ex, "初始化直播参数时遇到错误。");
-                return null;
+                throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
             }
+            string cmdName = newCmd.Substring(0, firstNullChar);
+            string cmdArgs = newCmd.Substring(firstNullChar);
+            if (string.IsNullOrEmpty(cmdArgs))
+            {
+                throw new Exception("命令参数不能为空！");
+            }
+            var psi = new ProcessStartInfo
+            {
+                FileName = cmdName,
+                Arguments = cmdArgs,
+                RedirectStandardOutput = true,
+                RedirectStandardError = false,
+                UseShellExecute = false,
+                CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
+            };
+            return psi;
         }
 
         /// <summary>
@@ -198,9 +200,7 @@ namespace BilibiliLiver.Services
         /// <returns></returns>
         private async Task PushStream()
         {
-            ProcessStartInfo psi = null;
             bool isAutoRestart = true;
-
             while (isAutoRestart && !_tokenSource.IsCancellationRequested)
             {
                 try
@@ -213,12 +213,8 @@ namespace BilibiliLiver.Services
                         await Task.Delay(10000, _tokenSource.Token);
                     }
                     //start live
-                    psi = await InitLiveProcessStartInfo();
-                    if (psi == null)
-                    {
-                        throw new Exception($"初始化直播参数失败。");
-                    }
-                    _logger.LogInformation("正在初始化推流指令...");
+                    ProcessStartInfo psi = await InitLiveProcessStartInfo();
+                    _logger.LogInformation("推流参数初始化完成，即将开始推流...");
                     //启动
                     using (var proc = Process.Start(psi))
                     {
@@ -233,20 +229,13 @@ namespace BilibiliLiver.Services
                         await Task.Delay(100);
                         if (!_tokenSource.IsCancellationRequested)
                         {
-                            if (isAutoRestart)
-                            {
-                                _logger.LogWarning($"FFmpeg异常退出，将在60秒后重试推流。");
-                            }
-                            else
-                            {
-                                _logger.LogWarning($"FFmpeg异常退出。");
-                            }
+                            _logger.LogWarning($"FFmpeg异常退出。");
                         }
                     }
+                    //如果开启了自动重试
                     if (isAutoRestart && !_tokenSource.IsCancellationRequested)
                     {
-                        _logger.LogWarning($"等待重新推流...");
-                        //如果开启了自动重试，那么等待60s后再次尝试
+                        _logger.LogWarning($"等待60s后重新推流...");
                         await Task.Delay(60000, _tokenSource.Token);
                     }
                 }
@@ -257,12 +246,15 @@ namespace BilibiliLiver.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
-                    _logger.LogWarning($"等待60s后重新推流...");
-
-                    //如果开启了自动重试，那么等待60s后再次尝试
-                    await Task.Delay(60000, _tokenSource.Token);
+                    //如果开启了自动重试
+                    if (isAutoRestart && !_tokenSource.IsCancellationRequested)
+                    {
+                        _logger.LogWarning($"等待60s后重新推流...");
+                        await Task.Delay(60000, _tokenSource.Token);
+                    }
                 }
             }
         }
+
     }
 }

@@ -19,14 +19,14 @@ namespace BilibiliLiver.Services
         private readonly IBilibiliLiveApiService _api;
         private readonly IBilibiliCookieService _cookie;
         private readonly IPushStreamService _push;
-        private readonly LiveSetting _liveSetting;
+        private readonly LiveSettings _liveSetting;
 
         public ConfigureService(ILogger<ConfigureService> logger
             , IBilibiliAccountService account
             , IBilibiliLiveApiService api
             , IBilibiliCookieService cookie
             , IPushStreamService push
-            , IOptions<LiveSetting> liveSettingOptions)
+            , IOptions<LiveSettings> liveSettingOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));

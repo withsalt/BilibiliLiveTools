@@ -2,6 +2,8 @@
 using BilibiliLiver.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NLog.Web;
 using System;
 using System.Reflection;
 
@@ -18,6 +20,14 @@ namespace BilibiliLiver
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    //移除已经注册的其他日志处理程序
+                    logging.ClearProviders();
+                    //设置最小的日志级别
+                    logging.SetMinimumLevel(LogLevel.Trace);
+                })
+                .UseNLog()
                 .ConfigureServices((hostContext, services) =>
                 {
                     //配置初始化
