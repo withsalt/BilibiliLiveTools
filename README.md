@@ -1,6 +1,6 @@
 # BilibiliLiveTools
 
-Bilibili（B站）直播工具。自动登录并获取推流地址，可以用于电脑、树莓派等设备**无人值守直播**。
+Bilibili（B站）直播工具。自动登录并获取推流地址，可以用于电脑、树莓派等设备无人值守直播。
 
 ### 前提条件  
 - 在Bilibili中通过实名认证，并开通了直播间。[点击连接](https://link.bilibili.com/p/center/index "点击连接")开通直播间（很简单的，实名认证通过后直接就可以开通了）  
