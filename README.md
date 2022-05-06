@@ -146,7 +146,7 @@ Windows版本随程序包发布有一个ffmpeg（解压后程序根目录），�
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/4.png)
 打开命令行之后，输入`BilibiliLiver.exe`。Enjoy it!
 
-#### 常见问题
+### 常见问题
 
 1. cookie.txt未正确配置  
 巧妇难为无米之炊，请按照教程，配置cookie.txt  
