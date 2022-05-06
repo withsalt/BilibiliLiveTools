@@ -15,9 +15,14 @@ Bilibili（B站）直播工具。自动登录并获取推流地址，可以用�
 ```
 2. BilibiliLiver  
 一键开启直播工具。  
-3. BilibiliLiverTests
-单元测试神马的。
+3. BilibiliLiveMonitor  
+直播监视工具。在直播开播或停播后可以发送邮件进行通知。  
+4. BilibiliLiverTests  
+单元测试神马的。  
 
+Tips: 除了开播工具BilibiliLiver外，其余工具没有编译二进制发行版本。如有需要，可以提交Issue或者自行下载编译。
+
+### Demo
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/1.png)
 
 ### 教程
