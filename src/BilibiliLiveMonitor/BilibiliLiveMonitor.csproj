@@ -8,11 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Quartz" Version="3.4.0" />
-		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.4.0" />
-		<PackageReference Include="Quartz.Plugins" Version="3.4.0" />
-		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.4.0" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="4.14.0" />
+		<PackageReference Include="Quartz" Version="3.5.0" />
+		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.5.0" />
+		<PackageReference Include="Quartz.Plugins" Version="3.5.0" />
+		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.5.0" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.1.4" />
 	</ItemGroup>
 
 	<ItemGroup>
