@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
 	</PropertyGroup>
@@ -12,7 +12,7 @@
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.5.0" />
 		<PackageReference Include="Quartz.Plugins" Version="3.5.0" />
 		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.5.0" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="5.1.4" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.1.5" />
 	</ItemGroup>
 
 	<ItemGroup>
