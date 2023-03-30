@@ -18,7 +18,7 @@ namespace BilibiliLiveCommon.Services.Interface
         /// <param name="roomId"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        Task<bool> UpdateLiveRoomName(int roomId, string title);
+        Task<bool> UpdateLiveRoomName(long roomId, string title);
 
         /// <summary>
         /// 获取直播间分类
@@ -37,7 +37,7 @@ namespace BilibiliLiveCommon.Services.Interface
         /// <remarks>
         /// 无需登录
         /// </remarks>
-        Task<RoomPlayInfo> GetRoomPlayInfo(int roomId);
+        Task<RoomPlayInfo> GetRoomPlayInfo(long roomId);
 
         /// <summary>
         /// 更新直播间分区
@@ -45,7 +45,7 @@ namespace BilibiliLiveCommon.Services.Interface
         /// <param name="roomId"></param>
         /// <param name="areaId"></param>
         /// <returns></returns>
-        Task<bool> UpdateLiveRoomArea(int roomId, int areaId);
+        Task<bool> UpdateLiveRoomArea(long roomId, int areaId);
 
         /// <summary>
         /// 开始直播
@@ -53,13 +53,13 @@ namespace BilibiliLiveCommon.Services.Interface
         /// <param name="roomId"></param>
         /// <param name="categoryId"></param>
         /// <returns></returns>
-        Task<StartLiveInfo> StartLive(int roomId, int areaId);
+        Task<StartLiveInfo> StartLive(long roomId, int areaId);
 
         /// <summary>
         /// 停止直播
         /// </summary>
         /// <param name="roomId"></param>
         /// <returns></returns>
-        Task<StopLiveInfo> StopLive(int roomId);
+        Task<StopLiveInfo> StopLive(long roomId);
     }
 }

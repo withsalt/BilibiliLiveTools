@@ -80,7 +80,7 @@ namespace BilibiliLiveCommon.Services
             return result.Data;
         }
 
-        public async Task<RoomPlayInfo> GetRoomPlayInfo(int roomId)
+        public async Task<RoomPlayInfo> GetRoomPlayInfo(long roomId)
         {
             if (roomId <= 0)
             {
@@ -98,7 +98,7 @@ namespace BilibiliLiveCommon.Services
             return result.Data;
         }
 
-        public async Task<bool> UpdateLiveRoomName(int roomId, string title)
+        public async Task<bool> UpdateLiveRoomName(long roomId, string title)
         {
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -130,7 +130,7 @@ namespace BilibiliLiveCommon.Services
             }
         }
 
-        public async Task<bool> UpdateLiveRoomArea(int roomId, int areaId)
+        public async Task<bool> UpdateLiveRoomArea(long roomId, int areaId)
         {
             _ = await CheckArea(areaId);
             var postData = new
@@ -159,7 +159,7 @@ namespace BilibiliLiveCommon.Services
             }
         }
 
-        public async Task<StartLiveInfo> StartLive(int roomId, int areaId)
+        public async Task<StartLiveInfo> StartLive(long roomId, int areaId)
         {
             var areaItem = await CheckArea(areaId);
             var postData = new
@@ -193,7 +193,7 @@ namespace BilibiliLiveCommon.Services
             }
         }
 
-        public async Task<StopLiveInfo> StopLive(int roomId)
+        public async Task<StopLiveInfo> StopLive(long roomId)
         {
             var postData = new
             {

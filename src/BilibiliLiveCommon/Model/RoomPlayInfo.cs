@@ -11,7 +11,7 @@ namespace BilibiliLiveCommon.Model
         /// <summary>
         /// 
         /// </summary>
-        public int room_id { get; set; }
+        public long room_id { get; set; }
 
         /// <summary>
         /// 
@@ -21,7 +21,7 @@ namespace BilibiliLiveCommon.Model
         /// <summary>
         /// 
         /// </summary>
-        public int uid { get; set; }
+        public long uid { get; set; }
 
         /// <summary>
         /// 

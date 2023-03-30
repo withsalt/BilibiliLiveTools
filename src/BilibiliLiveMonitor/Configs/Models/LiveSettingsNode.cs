@@ -8,7 +8,7 @@ namespace BilibiliLiveMonitor.Configs
 {
     public class LiveSettingsNode
     {
-        public int RoomId { get; set; }
+        public long RoomId { get; set; }
 
         public static string Position { get { return "LiveSettings"; } }
 
