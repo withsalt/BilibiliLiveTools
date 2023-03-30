@@ -42,6 +42,10 @@ namespace BilibiliLiveCommon.Services
                 {
                     throw new Exception("'cookie.txt'文件为空，请按照教程获取Bilibili Cookie之后放入程序目录下面的cookie.txt中");
                 }
+                if (result.StartsWith("cookie"))
+                {
+                    result = result[7..]?.Trim('\r', '\n', ' ');
+                }
                 if (!CookieHeaderValue.TryParse(result, out _))
                 {
                     throw new Exception("Parse cookie failed.");
