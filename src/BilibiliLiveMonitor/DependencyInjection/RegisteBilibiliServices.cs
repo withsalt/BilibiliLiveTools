@@ -10,7 +10,7 @@ namespace BilibiliLiveMonitor.DependencyInjection
         public static IServiceCollection AddBilibiliServices(this IServiceCollection services)
         {
             //Cookie模块
-            services.AddSingleton<IBilibiliCookieService, BilibiliCookieService>();
+            services.AddTransient<IBilibiliCookieService, BilibiliCookieService>();
             //Http请求相关
             services.AddTransient<IHttpClientService, HttpClientService>();
             //直播的API

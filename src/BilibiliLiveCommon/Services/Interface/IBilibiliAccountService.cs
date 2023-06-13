@@ -16,5 +16,10 @@ namespace BilibiliLiveCommon.Services.Interface
         /// </summary>
         /// <returns></returns>
         Task HeartBeat();
+
+        /// <summary>
+        /// 刷新Cookie
+        /// </summary>
+        Task<bool> Refesh();
     }
 }

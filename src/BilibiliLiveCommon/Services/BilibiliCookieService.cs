@@ -1,4 +1,6 @@
 ﻿using BilibiliLiveCommon.Config;
+using BilibiliLiveCommon.Model;
+using BilibiliLiveCommon.Model.Base;
 using BilibiliLiveCommon.Services.Interface;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -16,6 +18,8 @@ namespace BilibiliLiveCommon.Services
         private readonly IMemoryCache _cache;
 
         private string _cookiePath = Path.Combine(Environment.CurrentDirectory, "cookie.txt");
+
+        private const string _heartBeatApi = "https://api.live.bilibili.com/relation/v1/Feed/heartBeat";
 
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
             , IMemoryCache cache)

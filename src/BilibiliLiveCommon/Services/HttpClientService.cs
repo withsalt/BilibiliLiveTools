@@ -30,9 +30,6 @@ namespace BilibiliLiveCommon.Services
                 Timeout = TimeSpan.FromSeconds(60)
             })
             {
-
-                httpClient.DefaultRequestHeaders.Add("origin", "https://www.bilibili.com");
-                httpClient.DefaultRequestHeaders.Add("referer", "https://www.bilibili.com/");
                 httpClient.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36");
                 httpClient.DefaultRequestHeaders.Add("accept", "*/*");
                 httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
@@ -42,94 +39,126 @@ namespace BilibiliLiveCommon.Services
                 }
 
                 HttpResponseMessage response = null;
-                if (method == HttpMethod.Post)
+                try
                 {
-                    if (body == null)
+                    if (method == HttpMethod.Post)
                     {
-                        throw new ArgumentNullException(nameof(body));
-                    }
-                    switch (format)
-                    {
-                        case BodyFormat.Json:
-                            {
-                                string postData = null;
-                                if (body.GetType() == typeof(string))
+                        if (body == null)
+                        {
+                            throw new ArgumentNullException(nameof(body));
+                        }
+                        switch (format)
+                        {
+                            case BodyFormat.Json:
                                 {
-                                    postData = body.ToString();
-                                }
-                                else
-                                {
-                                    postData = JsonUtil.SerializeObject(body);
-                                }
-                                using (StringContent content = new StringContent(postData))
-                                {
-                                    content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(content.Headers.ContentType.MediaType));
-                                    response = await httpClient.PostAsync(url, content);
-                                }
-                            }
-                            break;
-                        case BodyFormat.Form:
-                            {
-                                if (body.GetType() == typeof(string))
-                                {
-                                    throw new Exception("When post body format is form, body can not string.");
-                                }
-                                Dictionary<string, string> @params = ObjectToMap(body);
-                                if (@params.Count == 0)
-                                {
-                                    throw new ArgumentNullException("Cannot convert body to dictionary data.", nameof(body));
-                                }
-                                using (MultipartFormDataContent content = new MultipartFormDataContent())
-                                {
-                                    foreach (var item in @params)
+                                    string postData = null;
+                                    if (body.GetType() == typeof(string))
                                     {
-                                        content.Add(new StringContent(item.Value), item.Key);
+                                        postData = body.ToString();
                                     }
-                                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(content.Headers.ContentType.MediaType));
-                                    response = await httpClient.PostAsync(url, content);
+                                    else
+                                    {
+                                        postData = JsonUtil.SerializeObject(body);
+                                    }
+                                    using (StringContent content = new StringContent(postData))
+                                    {
+                                        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                                        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(content.Headers.ContentType.MediaType));
+                                        response = await httpClient.PostAsync(url, content);
+                                    }
                                 }
-                            }
-                            break;
-                        case BodyFormat.Form_UrlEncoded:
-                            {
-                                if (typeof(bool) == typeof(string))
+                                break;
+                            case BodyFormat.Form:
                                 {
-                                    throw new Exception("When post body format is form-urlencoded, body can not string.");
+                                    if (body.GetType() == typeof(string))
+                                    {
+                                        throw new Exception("When post body format is form, body can not string.");
+                                    }
+                                    Dictionary<string, string> @params = ObjectToMap(body);
+                                    if (@params.Count == 0)
+                                    {
+                                        throw new ArgumentNullException("Cannot convert body to dictionary data.", nameof(body));
+                                    }
+                                    using (MultipartFormDataContent content = new MultipartFormDataContent())
+                                    {
+                                        foreach (var item in @params)
+                                        {
+                                            content.Add(new StringContent(item.Value), item.Key);
+                                        }
+                                        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(content.Headers.ContentType.MediaType));
+                                        response = await httpClient.PostAsync(url, content);
+                                    }
                                 }
-                                Dictionary<string, string> @params = ObjectToMap(body);
-                                using (FormUrlEncodedContent content = new FormUrlEncodedContent(@params))
+                                break;
+                            case BodyFormat.Form_UrlEncoded:
                                 {
-                                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(content.Headers.ContentType.MediaType));
-                                    response = await httpClient.PostAsync(url, content);
+                                    if (typeof(bool) == typeof(string))
+                                    {
+                                        throw new Exception("When post body format is form-urlencoded, body can not string.");
+                                    }
+                                    Dictionary<string, string> @params = ObjectToMap(body);
+                                    using (FormUrlEncodedContent content = new FormUrlEncodedContent(@params))
+                                    {
+                                        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(content.Headers.ContentType.MediaType));
+                                        response = await httpClient.PostAsync(url, content);
+                                    }
                                 }
-                            }
-                            break;
+                                break;
+                        }
                     }
+                    else if (method == HttpMethod.Get)
+                    {
+                        response = await httpClient.GetAsync(url);
+                    }
+                    else
+                    {
+                        throw new Exception($"Not support http method: {method.ToString()}");
+                    }
+                    if (response == null)
+                    {
+                        throw new Exception($"Http request failed, url: {url}, method: {method},  result is null.");
+                    }
+                    string resultStr = await TryGetStringResponse(response);
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        throw new Exception($"Http request failed, url: {url}, method: {method}, status code: {response.StatusCode}, result: {(string.IsNullOrEmpty(resultStr) ? "null" : resultStr)}");
+                    }
+                    string data = resultStr.Replace("\"data\":[]", "\"data\":null");
+                    return JsonUtil.DeserializeJsonToObject<T>(data);
                 }
-                else if (method == HttpMethod.Get)
-                {
-                    response = await httpClient.GetAsync(url);
+                finally 
+                { 
+                    if (response != null) 
+                    { 
+                        response.Dispose(); 
+                    } 
                 }
-                else
-                {
-                    throw new Exception($"Not support http method: {method.ToString()}");
-                }
-                if (response == null)
-                {
-                    throw new Exception($"Http request failed, url: {url}, method: {method},  result is null.");
-                }
-                string resultStr = await TryGetStringResponse(response);
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new Exception($"Http request failed, url: {url}, method: {method}, status code: {response.StatusCode}, result: {(string.IsNullOrEmpty(resultStr) ? "null" : resultStr)}");
-                }
-                response.Dispose();
-
-                string data = resultStr.Replace("\"data\":[]", "\"data\":null");
-                return JsonUtil.DeserializeJsonToObject<T>(data);
             }
         }
+
+        public async Task<string> Get(string url, bool withCookie = true)
+        {
+            using (HttpClient httpClient = new HttpClient(new HttpClientHandler()
+            {
+                ServerCertificateCustomValidationCallback = delegate { return true; },
+            })
+            {
+                Timeout = TimeSpan.FromSeconds(60)
+            })
+            { 
+                httpClient.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36");
+                httpClient.DefaultRequestHeaders.Add("accept", "*/*");
+                httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
+                if (withCookie)
+                {
+                    httpClient.DefaultRequestHeaders.Add("cookie", _bilibiliCookie.Get());
+                }
+
+                string resultStr = await httpClient.GetStringAsync(url);
+                return resultStr;
+            }
+        }
+
 
         /// <summary>
         /// Object转化为dictionory
