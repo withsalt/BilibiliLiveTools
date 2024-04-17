@@ -12,6 +12,16 @@
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="System.Security.Permissions" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="runtimes\linux-arm64\ffmpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="runtimes\linux-arm64\ffprobe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
