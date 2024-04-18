@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="SkiaSharp.QrCode" Version="0.7.0" />
     <PackageReference Include="System.Security.Permissions" Version="8.0.0" />
   </ItemGroup>
 

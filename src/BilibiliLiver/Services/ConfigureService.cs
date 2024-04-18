@@ -125,7 +125,7 @@ namespace BilibiliLiver.Services
         private async Task CheckLiveRoom()
         {
             //登录
-            var userInfo = await _account.Login();
+            var userInfo = await _account.LoginByCookie();
             if (userInfo == null || !userInfo.IsLogin)
             {
                 _logger.ThrowLogError("登录失败，Cookie无效或已过期，请重新配置Cookie！");

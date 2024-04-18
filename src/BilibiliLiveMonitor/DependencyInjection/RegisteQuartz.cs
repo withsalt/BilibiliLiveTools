@@ -19,7 +19,6 @@ namespace BilibiliLiveMonitor.DependencyInjection
             services.AddQuartz(q =>
             {
                 q.SchedulerId = $"BilibiliLiveMonitor";
-                q.UseMicrosoftDependencyInjectionJobFactory();
                 q.UseInMemoryStore();
                 q.UseDefaultThreadPool(tp =>
                 {

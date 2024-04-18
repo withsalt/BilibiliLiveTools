@@ -144,7 +144,7 @@ namespace BilibiliLiver.Services
         private async Task<ProcessStartInfo> InitLiveProcessStartInfo()
         {
             //检查Cookie是否有效
-            UserInfo userInfo = await _account.Login();
+            UserInfo userInfo = await _account.LoginByCookie();
             if (userInfo == null || !userInfo.IsLogin)
             {
                 throw new Exception("登录失败，Cookie已失效");

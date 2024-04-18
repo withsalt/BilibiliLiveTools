@@ -39,6 +39,9 @@ namespace BilibiliLiveCommon.Services
         /// </summary>
         private const string _getRoomPlayInfo = "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?room_id={0}&protocol=0,1&format=0,1,2&codec=0,1&qn=0&platform=web&ptype=8&dolby=5";
 
+
+        
+
         private readonly ILogger<BilibiliLiveApiService> _logger;
         private readonly IHttpClientService _httpClient;
         private readonly IBilibiliCookieService _cookie;
@@ -54,7 +57,7 @@ namespace BilibiliLiveCommon.Services
 
         public async Task<LiveRoomInfo> GetLiveRoomInfo()
         {
-            var result = await _httpClient.Execute<ResultModel<LiveRoomInfo>>(_getLiveRoomInfoApi, HttpMethod.Get);
+            var result = await _httpClient.Execute<LiveRoomInfo>(_getLiveRoomInfoApi, HttpMethod.Get);
             if (result == null)
             {
                 throw new ApiRequestException(_getLiveRoomInfoApi, HttpMethod.Get, "返回内容为空");
@@ -68,7 +71,7 @@ namespace BilibiliLiveCommon.Services
 
         public async Task<List<LiveAreaItem>> GetLiveAreas()
         {
-            var result = await _httpClient.Execute<ResultModel<List<LiveAreaItem>>>(_getLiveCategoryApi, HttpMethod.Get, null, BodyFormat.Json, false);
+            var result = await _httpClient.Execute<List<LiveAreaItem>>(_getLiveCategoryApi, HttpMethod.Get, null, BodyFormat.Json, false);
             if (result == null)
             {
                 throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, "返回内容为空");
@@ -86,7 +89,7 @@ namespace BilibiliLiveCommon.Services
             {
                 throw new ArgumentNullException(nameof(roomId));
             }
-            var result = await _httpClient.Execute<ResultModel<RoomPlayInfo>>(string.Format(_getRoomPlayInfo, roomId), HttpMethod.Get, null, BodyFormat.Json, false);
+            var result = await _httpClient.Execute<RoomPlayInfo>(string.Format(_getRoomPlayInfo, roomId), HttpMethod.Get, null, BodyFormat.Json, false);
             if (result == null)
             {
                 throw new ApiRequestException(string.Format(_getRoomPlayInfo, roomId), HttpMethod.Get, "返回内容为空");
@@ -113,7 +116,7 @@ namespace BilibiliLiveCommon.Services
             };
             try
             {
-                var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                var result = await _httpClient.Execute<object>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
                 if (result == null)
                 {
                     throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
@@ -172,7 +175,7 @@ namespace BilibiliLiveCommon.Services
             };
             try
             {
-                var result = await _httpClient.Execute<ResultModel<StartLiveInfo>>(_startLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                var result = await _httpClient.Execute<StartLiveInfo>(_startLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
                 if (result == null)
                 {
                     throw new ApiRequestException(_startLiveApi, HttpMethod.Post, "返回内容为空");
@@ -204,7 +207,7 @@ namespace BilibiliLiveCommon.Services
             };
             try
             {
-                var result = await _httpClient.Execute<ResultModel<StopLiveInfo>>(_stopLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                var result = await _httpClient.Execute<StopLiveInfo>(_stopLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
                 if (result == null)
                 {
                     throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, "返回内容为空");
