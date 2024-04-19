@@ -7,10 +7,22 @@ namespace BilibiliLiveCommon.Services.Interface
     public interface IBilibiliAccountService
     {
         /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <returns></returns>
+        Task<UserInfo> GetUserInfo();
+
+        /// <summary>
         /// 登录
         /// </summary>
         /// <returns></returns>
         Task<UserInfo> LoginByCookie();
+
+        /// <summary>
+        /// 通过APP扫描二维码登录
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> LoginQrCode();
 
         /// <summary>
         /// 生成登录二维码
@@ -30,5 +42,17 @@ namespace BilibiliLiveCommon.Services.Interface
         /// </summary>
         /// <returns></returns>
         Task HeartBeat();
+
+        /// <summary>
+        /// 刷新Cookie
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> RefreshCookie();
+
+        /// <summary>
+        /// 是否需要刷新Cookie
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> CookieNeedToRefresh();
     }
 }

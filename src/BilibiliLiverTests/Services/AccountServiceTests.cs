@@ -31,6 +31,22 @@ namespace BilibiliLiver.Services.Tests
         }
 
         [TestMethod()]
+        public async Task CookieNeedToRefreshTest()
+        {
+            var result = await _accountService.CookieNeedToRefresh();
+        }
+
+        [TestMethod()]
+        public async Task RefreshCookieTest()
+        {
+            UserInfo userInfo = await _accountService.LoginByCookie();
+
+            await _accountService.RefreshCookie();
+
+            userInfo = await _accountService.LoginByCookie();
+        }
+
+        [TestMethod()]
         public async Task LoginTest()
         {
             var result = await _accountService.LoginByCookie();
@@ -59,13 +75,11 @@ namespace BilibiliLiver.Services.Tests
         {
             QrCodeUrl qrCode = await _accountService.GenerateQrCode();
 
-            using (MemoryStream stream = QrCodeGenerator.Generate(qrCode.url))
+            byte[] qrCodeBytes = QrCode.Generate(qrCode.url);
             {
                 using (FileStream fileStream = new FileStream("qrcode.png", FileMode.Create))
                 {
-                    // 将内存流中的数据复制到文件流中
-                    stream.Seek(0, SeekOrigin.Begin); // 将内存流的位置设置为起始位置
-                    stream.CopyTo(fileStream);
+                    await fileStream.WriteAsync(qrCodeBytes, 0, qrCodeBytes.Length);
                 }
             }
             Stopwatch sw = Stopwatch.StartNew();

@@ -22,11 +22,12 @@ namespace BilibiliLiveCommon.Services
             _bilibiliCookie = bilibiliCookie ?? throw new ArgumentNullException(nameof(bilibiliCookie));
         }
 
-        public async Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true) where T : class
+        public async Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true, bool getRowData = false) where T : class
         {
             using (HttpClient httpClient = new HttpClient(new HttpClientHandler()
             {
                 ServerCertificateCustomValidationCallback = delegate { return true; },
+                AutomaticDecompression = DecompressionMethods.GZip
             })
             {
                 Timeout = TimeSpan.FromSeconds(60)
@@ -47,7 +48,7 @@ namespace BilibiliLiveCommon.Services
 
                 if (withCookie)
                 {
-                    httpClient.DefaultRequestHeaders.Add("cookie", _bilibiliCookie.Get());
+                    httpClient.DefaultRequestHeaders.Add("cookie", _bilibiliCookie.GetString());
                 }
 
                 HttpResponseMessage response = null;
@@ -137,7 +138,20 @@ namespace BilibiliLiveCommon.Services
                     }
                     response.Dispose();
                     string data = resultStr.Replace("\"data\":[]", "\"data\":null");
-                    ResultModel<T> resultObj = JsonUtil.DeserializeJsonToObject<ResultModel<T>>(data);
+                    ResultModel<T> resultObj = null;
+                    if (getRowData)
+                    {
+                        resultObj = new ResultModel<T>()
+                        {
+                            Code = 0,
+                            Message = "Success",
+                            RowData = resultStr
+                        };
+                    }
+                    else
+                    {
+                        resultObj = JsonUtil.DeserializeJsonToObject<ResultModel<T>>(data);
+                    }
                     //set cookie
                     IEnumerable<string> setCookies = response.Headers.SingleOrDefault(header => header.Key == "Set-Cookie").Value;
                     if (setCookies?.Any() == true)

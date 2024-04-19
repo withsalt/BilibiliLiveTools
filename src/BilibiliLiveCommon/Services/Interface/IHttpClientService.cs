@@ -7,6 +7,6 @@ namespace BilibiliLiveCommon.Services.Interface
 {
     public interface IHttpClientService
     {
-        Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true) where T : class;
+        Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true, bool getRowData = false) where T : class;
     }
 }

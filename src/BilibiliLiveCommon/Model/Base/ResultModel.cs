@@ -21,6 +21,11 @@ namespace BilibiliLiveCommon.Model.Base
         public T Data { get; set; }
 
         /// <summary>
+        /// 原始数据
+        /// </summary>
+        public string RowData { get; set; }
+
+        /// <summary>
         /// Cookies
         /// </summary>
         public ReadOnlyCollection<CookieHeaderValue> Cookies { get; set; }

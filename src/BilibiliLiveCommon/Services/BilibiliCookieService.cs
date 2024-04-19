@@ -1,12 +1,10 @@
 ﻿using BilibiliLiveCommon.Config;
+using BilibiliLiveCommon.Exceptions;
 using BilibiliLiveCommon.Services.Interface;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using System;
-using System.IO;
-using System.Linq;
+using Newtonsoft.Json;
 using System.Net.Http.Headers;
-using System.Web;
 
 namespace BilibiliLiveCommon.Services
 {
@@ -15,7 +13,7 @@ namespace BilibiliLiveCommon.Services
         private readonly ILogger<BilibiliCookieService> _logger;
         private readonly IMemoryCache _cache;
 
-        private string _cookiePath = Path.Combine(Environment.CurrentDirectory, "cookie.txt");
+        private string _cookiePath = Path.Combine(Environment.CurrentDirectory, "config.json");
 
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
             , IMemoryCache cache)
@@ -24,90 +22,93 @@ namespace BilibiliLiveCommon.Services
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        public string Get(bool force = false)
+        public async Task SaveCookie(IEnumerable<CookieHeaderValue> cookies, string refreshToken)
+        {
+            if (cookies?.Any() != true) throw new ArgumentNullException(nameof(cookies), "Cookie data can not null");
+            if (string.IsNullOrEmpty(refreshToken)) throw new ArgumentNullException(nameof(refreshToken), "Refresh token can not null.");
+            CookiesConfig cookiesConfig = new CookiesConfig()
+            {
+                Cookies = cookies,
+                RefreshToken = refreshToken
+            };
+            if (cookiesConfig.IsExpired) throw new ArgumentException("Cookie has expired");
+            string json = JsonConvert.SerializeObject(new CookiesJson(cookiesConfig));
+            await File.WriteAllTextAsync(_cookiePath, json);
+            _ = GetCookies(true);
+        }
+
+        public bool HasCookie()
+        {
+            CookiesConfig cookiesConfig = GetCookies();
+            if (cookiesConfig != null && !cookiesConfig.IsExpired)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public string GetString(bool force = false)
+        {
+            CookiesConfig cookiesConfig = GetCookies(force);
+            if (cookiesConfig != null)
+            {
+                return cookiesConfig.GetCookieString();
+            }
+            return null;
+        }
+
+        public CookiesConfig GetCookies(bool force = false)
         {
             if (force)
             {
                 _cache.Remove(CacheKeyConstant.COOKIE_KEY);
             }
-
-            return _cache.GetOrCreate<string>(CacheKeyConstant.COOKIE_KEY, entry =>
+            CookiesConfig cookiesConfig = _cache.GetOrCreate(CacheKeyConstant.COOKIE_KEY, entry =>
             {
                 if (!File.Exists(_cookiePath))
                 {
-                    throw new FileNotFoundException("File 'cookie.txt' not fount.");
+                    throw new CookieException("File 'cookie.json' not fount.");
                 }
                 string result = File.ReadAllText(_cookiePath)?.Trim('\r', '\n', ' ');
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    throw new Exception("'cookie.txt'文件为空，请按照教程获取Bilibili Cookie之后放入程序目录下面的cookie.txt中");
+                    throw new CookieException("'Cookie内容为空，请先登录");
                 }
-                if (result.StartsWith("cookie"))
+                CookiesJson cookiesJson = JsonConvert.DeserializeObject<CookiesJson>(result);
+                var cookies = cookiesJson.ConvertTo();
+                if (cookies.IsExpired)
                 {
-                    result = result[7..]?.Trim('\r', '\n', ' ');
+                    throw new CookieExpiredException("Cookie已过期");
                 }
-                if (!CookieHeaderValue.TryParse(result, out _))
-                {
-                    throw new Exception("Parse cookie failed.");
-                }
-                return result;
+                return cookies;
             });
-        }
-
-        public void Init()
-        {
-            if (!File.Exists(_cookiePath))
-            {
-                File.Create(_cookiePath);
-            }
-        }
-
-        public CookieHeaderValue CookieDeserialize(string cookieText)
-        {
-            if (string.IsNullOrEmpty(cookieText))
-            {
-                throw new ArgumentNullException(nameof(cookieText));
-            }
-            if (!CookieHeaderValue.TryParse(cookieText, out CookieHeaderValue value))
-            {
-                throw new Exception("Parse cookie failed.");
-            }
-            return value;
+            return cookiesConfig;
         }
 
         public string GetCsrf()
         {
-            string jct = GetValueFromCookie("bili_jct");
-            if (string.IsNullOrWhiteSpace(jct))
+            CookiesConfig cookies = GetCookies();
+            if (cookies?.TryGetValue("bili_jct", out string jct) == true)
             {
-                throw new Exception("Get csrf from cookie failed.");
+                return jct;
             }
-            return jct;
+            throw new Exception("Get csrf from cookie failed.");
         }
 
         public string GetUserId()
         {
-            string userId = GetValueFromCookie("DedeUserID");
-            if (string.IsNullOrWhiteSpace(userId))
+            CookiesConfig cookies = GetCookies();
+            if (cookies?.TryGetValue("DedeUserID", out string jct) == true)
             {
-                throw new Exception("Get userid from cookie failed.");
+                return jct;
             }
-            return userId;
+            throw new Exception("Get userid from cookie failed.");
         }
 
-        private string GetValueFromCookie(string key)
+        public string GetRefreshToken()
         {
-            CookieHeaderValue values = CookieDeserialize(Get());
-            if (!values.Cookies.Any(p => p.Name == key))
-            {
-                return null;
-            }
-            string result = values[key].Value;
-            if (string.IsNullOrWhiteSpace(result))
-            {
-                return null;
-            }
-            return result.Trim();
+            CookiesConfig cookies = GetCookies();
+            return cookies?.RefreshToken;
         }
     }
 }

@@ -95,17 +95,13 @@ namespace BilibiliLiver.Services
         {
             try
             {
-                string cookie = _cookie.Get();
+                string cookie = _cookie.GetString();
                 if (string.IsNullOrWhiteSpace(cookie))
                 {
-                    _cookie.Init();
                     _logger.ThrowLogError("cookie.txt文件为空，请按照教程获取Bilibili Cookie之后放入程序目录下面的cookie.txt中！");
                 }
-                var cookieValues = _cookie.CookieDeserialize(cookie);
-                if (cookieValues == null || cookieValues.Cookies.Count == 0)
-                {
-                    _logger.ThrowLogError("cookie.txt文件为空，请按照教程获取Bilibili Cookie之后放入程序目录下面的cookie.txt中！");
-                }
+                var cookieValues = _cookie.GetString();
+
                 string userid = _cookie.GetUserId();
                 if (string.IsNullOrEmpty(userid))
                 {
@@ -114,7 +110,6 @@ namespace BilibiliLiver.Services
             }
             catch (Exception ex)
             {
-                _cookie.Init();
                 _logger.ThrowLogError($"cookie.txt未正确配置，错误：{ex.Message}", ex);
             }
         }

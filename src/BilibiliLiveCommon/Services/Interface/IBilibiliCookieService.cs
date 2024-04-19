@@ -1,14 +1,17 @@
 ﻿using System.Net.Http.Headers;
+using BilibiliLiveCommon.Config;
 
 namespace BilibiliLiveCommon.Services.Interface
 {
     public interface IBilibiliCookieService
     {
-        void Init();
+        bool HasCookie();
 
-        string Get(bool force = false);
+        Task SaveCookie(IEnumerable<CookieHeaderValue> cookies, string refreshToken);
 
-        CookieHeaderValue CookieDeserialize(string cookieText);
+        string GetString(bool force = false);
+
+        CookiesConfig GetCookies(bool force = false);
 
         /// <summary>
         /// 获取Csrf
@@ -21,5 +24,11 @@ namespace BilibiliLiveCommon.Services.Interface
         /// </summary>
         /// <returns></returns>
         string GetUserId();
+
+        /// <summary>
+        /// 获取刷新token
+        /// </summary>
+        /// <returns></returns>
+        string GetRefreshToken();
     }
 }
