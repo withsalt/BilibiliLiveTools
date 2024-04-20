@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "BilibiliLiveAreaTool": {
-      "commandName": "Project",
-      "commandLineArgs": "-save 分区信息.md"
-    }
-  }
-}

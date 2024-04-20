@@ -8,10 +8,19 @@ namespace BilibiliLiveCommon.Services.Interface
         bool HasCookie();
 
         Task SaveCookie(IEnumerable<CookieHeaderValue> cookies, string refreshToken);
+        
+        Task RemoveCookie();
 
         string GetString(bool force = false);
 
         CookiesConfig GetCookies(bool force = false);
+
+        /// <summary>
+        /// 是否要过期了
+        /// </summary>
+        /// <param name="minHours"></param>
+        /// <returns></returns>
+        (bool, DateTimeOffset) WillExpired(int minHours = 24);
 
         /// <summary>
         /// 获取Csrf

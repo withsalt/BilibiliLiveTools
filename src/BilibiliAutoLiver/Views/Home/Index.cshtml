@@ -1,8 +1,49 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    IndexPageStatus status = ViewData[nameof(IndexPageStatus)] as IndexPageStatus;
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <div style="margin-top:60px"></div>
+    <img src="img/logon.jpg" alt="登录二维码" width="300" height="300" id="loginImg" style="@(status.LoginStatus.IsLogged ? $"" : "display: none;")">
+    <p style="font-size:20px" id="info">@(status.LoginStatus.IsLogged ? $"已登录，登录用户：{status.UserInfo.Uname}（{status.UserInfo.Mid}）" : "未登录")</p>
 </div>
+
+@section Scripts {
+    <script>
+        function update() {
+            $.ajax({
+                type: "post",
+                url: "Home/Status",
+                cache: false,
+                dataType: 'json', // 返回对象
+                success: function (data) {
+                    if (!data) {
+                        console.log("返回参数为空！");
+                    }
+                    if (data.loginStatus.isLogged) {
+                        $("#loginImg").show();
+                        $("#loginImg").attr("src", "img/logon.jpg");
+                        $("#info").html("已登录，登录用户：" + data.userInfo.uname + "（" + data.userInfo.mid + "）");
+                    }
+                    else {
+                        if (data.loginStatus.qrCode) {
+                            $("#loginImg").attr("src", data.loginStatus.qrCode);
+                            $("#loginImg").show();
+                        }
+                        if (data.loginStatus.isScaned) {
+                            $("#info").html("【已扫码】二维码剩余有效期" + data.loginStatus.qrCodeEffectiveTime + "秒");
+                        }
+                        else {
+                            $("#info").html("【未扫码】二维码剩余有效期" + data.loginStatus.qrCodeEffectiveTime + "秒");
+                        }
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        }
+
+        setInterval(update, 1000);
+    </script>
+}

@@ -22,7 +22,7 @@ namespace BilibiliLiveCommon.Services.Interface
         /// 通过APP扫描二维码登录
         /// </summary>
         /// <returns></returns>
-        Task<bool> LoginQrCode();
+        Task<UserInfo> LoginByQrCode();
 
         /// <summary>
         /// 生成登录二维码
@@ -35,7 +35,7 @@ namespace BilibiliLiveCommon.Services.Interface
         /// </summary>
         /// <param name="qrCodeKey"></param>
         /// <returns></returns>
-        Task<ResultModel<QrCodeScanResult>> QrCodeHasScaned(string qrCodeKey);
+        Task<ResultModel<QrCodeScanResult>> QrCodeScanStatus(string qrCodeKey);
 
         /// <summary>
         /// 心跳

@@ -145,7 +145,7 @@ namespace BilibiliLiveCommon.Services
                         {
                             Code = 0,
                             Message = "Success",
-                            RowData = resultStr
+                            Data = resultStr as T
                         };
                     }
                     else

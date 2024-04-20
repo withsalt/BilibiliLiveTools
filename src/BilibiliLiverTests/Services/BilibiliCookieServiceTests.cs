@@ -75,7 +75,7 @@ namespace BilibiliLiver.Services.Tests
             Stopwatch sw = Stopwatch.StartNew();
             while (true)
             {
-                var result = await _accountService.QrCodeHasScaned(qrCode.qrcode_key);
+                var result = await _accountService.QrCodeScanStatus(qrCode.qrcode_key);
                 if (result.Data.status == QrCodeStatus.Scaned)
                 {
                     return result;

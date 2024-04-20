@@ -7,13 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiver", "BilibiliLi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiverTests", "BilibiliLiverTests\BilibiliLiverTests.csproj", "{28F0ACCC-571A-4F28-B86D-E4EDD004ADC1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveAreaTool", "BilibiliLiveAreaTool\BilibiliLiveAreaTool.csproj", "{ACCB5EDC-D1A1-4B3A-9267-CE1FB8EE949B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveMonitor", "BilibiliLiveMonitor\BilibiliLiveMonitor.csproj", "{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiveCommon", "BilibiliLiveCommon\BilibiliLiveCommon.csproj", "{42D02825-BB33-43AB-B798-07017B205DF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliAutoLiver", "BilibiliAutoLiver\BilibiliAutoLiver.csproj", "{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliAutoLiver", "BilibiliAutoLiver\BilibiliAutoLiver.csproj", "{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliLive.Tool.UpdateArea", "BilibiliLive.Tool.UpdateArea\BilibiliLive.Tool.UpdateArea.csproj", "{B0C4C98B-21EE-4156-9339-45B49474C34C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,6 @@ Global
 		{28F0ACCC-571A-4F28-B86D-E4EDD004ADC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28F0ACCC-571A-4F28-B86D-E4EDD004ADC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28F0ACCC-571A-4F28-B86D-E4EDD004ADC1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ACCB5EDC-D1A1-4B3A-9267-CE1FB8EE949B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ACCB5EDC-D1A1-4B3A-9267-CE1FB8EE949B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ACCB5EDC-D1A1-4B3A-9267-CE1FB8EE949B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ACCB5EDC-D1A1-4B3A-9267-CE1FB8EE949B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D163A52-44D2-4BA8-BC40-3B15FCC6E52E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +41,10 @@ Global
 		{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

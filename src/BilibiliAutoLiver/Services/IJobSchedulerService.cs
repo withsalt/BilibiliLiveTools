@@ -2,7 +2,7 @@
 
 namespace BilibiliAutoLiver.Services
 {
-    interface IStartupService
+    interface IJobSchedulerService
     {
         Task Start();
     }

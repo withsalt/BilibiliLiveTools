@@ -40,8 +40,6 @@ namespace BilibiliLiveCommon.Services
         private const string _getRoomPlayInfo = "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?room_id={0}&protocol=0,1&format=0,1,2&codec=0,1&qn=0&platform=web&ptype=8&dolby=5";
 
 
-        
-
         private readonly ILogger<BilibiliLiveApiService> _logger;
         private readonly IHttpClientService _httpClient;
         private readonly IBilibiliCookieService _cookie;
@@ -280,7 +278,7 @@ namespace BilibiliLiveCommon.Services
 
         private async Task SlowDownOperation(string operationName)
         {
-            int sleepMsec = new Random().Next(5000, 10000);
+            int sleepMsec = new Random().Next(1000, 3000);
             _logger.LogDebug($"执行{operationName}操作完成，休眠{sleepMsec / 1000}秒，避免被B站频繁操作。");
             await Task.Delay(sleepMsec);
         }

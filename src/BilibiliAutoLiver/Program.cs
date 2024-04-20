@@ -1,6 +1,12 @@
+using System;
 using System.Reflection;
+using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Services;
 using BilibiliLiveCommon.Config;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NLog.Web;
 
 namespace BilibiliAutoLiver
@@ -17,7 +23,16 @@ namespace BilibiliAutoLiver
             builder.Logging.ClearProviders();
             builder.Logging.AddNLogWeb();
 
-            builder.Services.AddSingleton<IStartupService, StartupService>();
+            //配置初始化
+            builder.Services.ConfigureSettings(builder);
+            //缓存
+            builder.Services.AddMemoryCache();
+            //添加Bilibili相关的服务
+            builder.Services.AddBilibiliServices();
+            //定时任务
+            builder.Services.AddQuartz();
+
+            builder.Services.AddTransient<IStartupService, StartupService>();
 
             builder.Services.AddCors(options =>
             {
@@ -54,13 +69,12 @@ namespace BilibiliAutoLiver
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            IHostApplicationLifetime lifetime = app.Lifetime;
             IStartupService startService = app.Services.GetRequiredService<IStartupService>();
-
-            lifetime.ApplicationStarted.Register(() =>
+            app.Lifetime.ApplicationStarted.Register(() =>
             {
                 startService.Start();
             });
+            //定时任务
             app.Run();
         }
     }

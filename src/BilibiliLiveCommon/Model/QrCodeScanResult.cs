@@ -29,6 +29,8 @@ namespace BilibiliLiveCommon.Model
                         return QrCodeStatus.Expired;
                     case 86101:
                         return QrCodeStatus.WaitingScan;
+                    case 86090:
+                        return QrCodeStatus.ScanedWithoutLogin;
                     default:
                         return QrCodeStatus.Unknow;
                 }
@@ -47,6 +49,11 @@ namespace BilibiliLiveCommon.Model
         /// 已扫描
         /// </summary>
         Scaned,
+
+        /// <summary>
+        /// 已扫描，但是未确认
+        /// </summary>
+        ScanedWithoutLogin,
 
         /// <summary>
         /// 等待扫描
