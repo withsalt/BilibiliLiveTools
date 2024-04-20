@@ -1,5 +1,5 @@
-﻿using BilibiliAutoLiver.Services;
-using BilibiliLiveMonitor.Jobs;
+﻿using BilibiliAutoLiver.Jobs.Job;
+using BilibiliAutoLiver.Jobs.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using System;
@@ -34,7 +34,7 @@ namespace BilibiliAutoLiver.DependencyInjection
                 q.UseTimeZoneConverter();
             });
             //注册JobScheduler
-            services.AddSingleton<IJobSchedulerService, JobSchedulerService>();
+            services.AddSingleton<IRefreshCookieJobSchedulerService, RefreshCookieJobSchedulerService>();
             //add base job
             services.AddTransient<RefreshCookieJob>();
             // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle

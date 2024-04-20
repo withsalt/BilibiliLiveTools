@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Jobs.Scheduler;
 using BilibiliLiveCommon.Model;
 using BilibiliLiveCommon.Services.Interface;
 using Microsoft.Extensions.Logging;
@@ -10,11 +11,11 @@ namespace BilibiliAutoLiver.Services
     {
         private readonly ILogger<StartupService> _logger;
         private readonly IBilibiliAccountService _accountService;
-        private readonly IJobSchedulerService _jobScheduler;
+        private readonly IRefreshCookieJobSchedulerService _jobScheduler;
 
         public StartupService(ILogger<StartupService> logger
             , IBilibiliAccountService accountService
-            , IJobSchedulerService jobScheduler)
+            , IRefreshCookieJobSchedulerService jobScheduler)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 

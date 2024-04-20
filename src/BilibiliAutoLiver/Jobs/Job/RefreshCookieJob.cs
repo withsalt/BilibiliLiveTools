@@ -9,7 +9,7 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace BilibiliLiveMonitor.Jobs
+namespace BilibiliAutoLiver.Jobs.Job
 {
     [DisallowConcurrentExecution]
     public class RefreshCookieJob : IJob

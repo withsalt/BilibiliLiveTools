@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Jobs.Job;
 using BilibiliAutoLiver.Models;
-using BilibiliLiveMonitor.Jobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Quartz;
 
-namespace BilibiliAutoLiver.Services
+namespace BilibiliAutoLiver.Jobs.Scheduler
 {
-    class JobSchedulerService : IJobSchedulerService
+    class RefreshCookieJobSchedulerService : IRefreshCookieJobSchedulerService
     {
-        private readonly ILogger<JobSchedulerService> _logger;
+        private readonly ILogger<RefreshCookieJobSchedulerService> _logger;
         private readonly IScheduler _scheduler;
         private readonly ISchedulerFactory _schedulerFactory;
 
-        public JobSchedulerService(ILogger<JobSchedulerService> logger
+        public RefreshCookieJobSchedulerService(ILogger<RefreshCookieJobSchedulerService> logger
             , ISchedulerFactory schedulerFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -41,8 +40,8 @@ namespace BilibiliAutoLiver.Services
             {
                 Id = 1,
                 Name = nameof(RefreshCookieJob) + "Service",
-                IntervalTime = 20,
-                StartTime = DateTime.Now.AddSeconds(10)
+                IntervalTime = 120,
+                StartTime = DateTime.Now.AddSeconds(60)
             };
         }
 
