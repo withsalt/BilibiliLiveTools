@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Services;
+using BilibiliAutoLiver.Services.FFMpeg;
 using BilibiliLiveCommon.Config;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,8 @@ namespace BilibiliAutoLiver
             builder.Services.AddBilibiliServices();
             //定时任务
             builder.Services.AddQuartz();
+            //FFMpeg
+            builder.Services.AddFFmpegService();
 
             builder.Services.AddTransient<IStartupService, StartupService>();
 

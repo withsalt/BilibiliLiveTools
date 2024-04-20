@@ -16,8 +16,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BilibiliLiver\BilibiliLiver.csproj" />
-  </ItemGroup>
-
 </Project>

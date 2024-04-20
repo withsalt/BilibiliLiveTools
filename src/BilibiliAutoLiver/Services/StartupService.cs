@@ -12,15 +12,18 @@ namespace BilibiliAutoLiver.Services
         private readonly ILogger<StartupService> _logger;
         private readonly IBilibiliAccountService _accountService;
         private readonly IRefreshCookieJobSchedulerService _jobScheduler;
+        private readonly IPushStreamServiceV1 _pushServiceV1;
 
         public StartupService(ILogger<StartupService> logger
             , IBilibiliAccountService accountService
-            , IRefreshCookieJobSchedulerService jobScheduler)
+            , IRefreshCookieJobSchedulerService jobScheduler
+            , IPushStreamServiceV1 pushServiceV1)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _jobScheduler = jobScheduler ?? throw new ArgumentNullException(nameof(jobScheduler));
+            _pushServiceV1 = pushServiceV1 ?? throw new ArgumentNullException(nameof(pushServiceV1));
         }
 
         public async Task Start()
@@ -28,6 +31,8 @@ namespace BilibiliAutoLiver.Services
             var userInfo = await Login();
             //登录成功之后，启动定时任务
             await _jobScheduler.Start();
+            //开始推流
+            await StartPushV1();
         }
 
         public async Task<UserInfo> Login()
@@ -43,6 +48,23 @@ namespace BilibiliAutoLiver.Services
             }
             _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
             return userInfo;
+        }
+
+        public async Task StartPushV1()
+        {
+            try
+            {
+                await _pushServiceV1.CheckLiveSetting();
+                await _pushServiceV1.CheckLiveRoom();
+                await _pushServiceV1.CheckFFmpegBinary();
+
+                //开始推流
+                await _pushServiceV1.StartPush();
+            }
+            catch (Exception ex)
+            {
+                Environment.Exit(-1);
+            }
         }
     }
 }

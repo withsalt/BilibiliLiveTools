@@ -1,4 +1,5 @@
-﻿using BilibiliLiveCommon.Services;
+﻿using BilibiliAutoLiver.Services;
+using BilibiliLiveCommon.Services;
 using BilibiliLiveCommon.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,7 +18,7 @@ namespace BilibiliAutoLiver.DependencyInjection
             //直播的API
             services.AddTransient<IBilibiliLiveApiService, BilibiliLiveApiService>();
             //推流相关
-            //services.AddTransient<IPushStreamService, PushStreamService>();
+            services.AddTransient<IPushStreamServiceV1, PushStreamServiceV1>();
 
             return services;
         }
