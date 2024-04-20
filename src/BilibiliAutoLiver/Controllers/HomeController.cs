@@ -36,6 +36,20 @@ namespace BilibiliAutoLiver.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Refresh()
+        {
+            try
+            {
+                await _accountService.RefreshCookie();
+                return Content("Ë¢ÐÂ³É¹¦");
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
         [HttpPost]
         public async Task<IndexPageStatus> Status()
         {

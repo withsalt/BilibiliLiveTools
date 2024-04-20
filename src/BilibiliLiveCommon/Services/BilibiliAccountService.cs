@@ -121,7 +121,7 @@ namespace BilibiliLiveCommon.Services
                 {
                     throw new Exception("无法获取本地IP地址信息。");
                 }
-                _logger.LogInformation($"请在10分钟之内，在任意浏览器打开任意一个链接进行扫描登录：{Environment.NewLine}{JsonConvert.SerializeObject(endpoints)}");
+                _logger.LogInformation($"请在10分钟之内，在任意浏览器打开任意一个链接进行扫描登录：{JsonConvert.SerializeObject(endpoints)}");
 
                 int timeout = 10 * 60 * 1000;
                 int expTime = 180;
@@ -187,6 +187,7 @@ namespace BilibiliLiveCommon.Services
 
                     qrCodeExp.Stop();
                     hasCookie = _cookieService.HasCookie();
+                    genIndex++;
                 }
 
                 if (!hasCookie && (stopwatch.ElapsedMilliseconds >= timeout))
@@ -260,7 +261,7 @@ namespace BilibiliLiveCommon.Services
             ResultModel<object> confirmRefreshResult = await _httpClient.Execute<object>(_confirmRefresh, HttpMethod.Post, confirmRefreshModel, Model.Enums.BodyFormat.Form_UrlEncoded);
             if (confirmRefreshResult == null || confirmRefreshResult.Code != 0)
             {
-                throw new Exception($"确认刷新cookie失败。{confirmRefreshResult?.Message}");
+                throw new Exception($"刷新cookie失，确认更新失败。{confirmRefreshResult?.Message}");
             }
             return true;
         }
