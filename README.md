@@ -141,7 +141,11 @@ Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733
 
 2. 通过Cookie登录失败  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/6.png)
-长期未登录（至少半年），账号失效了？  
+长期未登录（至少半年），账号失效了？
+
+3. FFmpeg测试失败，An error occurred trying to start process...
+![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/not_install_ffmpeg.jpg)
+未安装ffmpeg。
 
 ### 题外话
 项目中所用的API都是各处扒拉来的野生API，非官方提供的API。因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。还有种情况是，我本人也不用了。也就不更新了.....  
