@@ -102,7 +102,7 @@ ffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec lib
 
 6. 跑起来  
 ```shell
-sudo ./BilibiliAutoLiver
+./BilibiliAutoLiver --urls="http://*:18686"
 ```
 第一次运行需要登录。如何登录查看下一小节。  
 
@@ -124,7 +124,7 @@ Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733
 目前已经支持扫码登录和自动维护Cookie。第一次运行程序时，会要求使用Bilibili移动端扫码登录。  
 运行程序：  
 ```shell
-./BilibiliAutoLiver
+./BilibiliAutoLiver --urls="http://*:18686"
 ```
 程序开始运行后，找到命令行中输出的地址信息，如下图所示：  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/use_qrcode_login.jpg)
