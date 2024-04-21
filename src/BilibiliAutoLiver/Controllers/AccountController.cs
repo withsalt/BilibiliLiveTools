@@ -27,6 +27,10 @@ namespace BilibiliAutoLiver.Controllers
             _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
         }
 
+        /// <summary>
+        /// 刷新Cookie
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Refresh()
         {
@@ -40,6 +44,19 @@ namespace BilibiliAutoLiver.Controllers
             {
                 return Content(ex.Message);
             }
+        }
+
+        /// <summary>
+        /// 重新登录
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> ReLogin()
+        {
+            await _cookieService.RemoveCookie();
+            _ = _accountService.LoginByQrCode();
+
+            return Content("重新扫码登录，请返回首页进行扫码登录。");
         }
     }
 }

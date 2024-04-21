@@ -122,7 +122,7 @@ namespace BilibiliAutoLiver.Services
             try
             {
                 await _cookieService.RemoveCookie();
-                _logger.LogInformation("使用Cookie登录失败，开始使用扫描二维码登录！");
+                _logger.LogInformation("开始使用扫描二维码登录！");
                 List<string> endpoints = GetEndpoint();
                 if (endpoints?.Any() != true)
                 {
