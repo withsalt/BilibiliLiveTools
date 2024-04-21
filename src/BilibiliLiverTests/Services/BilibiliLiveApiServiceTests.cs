@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using BilibiliLiverTests;
 using BilibiliAutoLiver.Services.Interface;
 
-namespace BilibiliLiver.Services.Tests
+namespace BilibiliLiverTests.Services
 {
     [TestClass()]
     public class BilibiliLiveApiServiceTests : BilibiliLiverTestsBase

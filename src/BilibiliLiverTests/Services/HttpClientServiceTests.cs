@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using BilibiliLiverTests;
 using System.Net.Http;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Model.Enums;
+using BilibiliAutoLiver.Models.Enums;
 
-namespace BilibiliLiver.Services.Tests
+namespace BilibiliLiverTests.Services
 {
     [TestClass()]
     public class HttpClientServiceTests : BilibiliLiverTestsBase

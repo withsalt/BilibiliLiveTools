@@ -2,16 +2,17 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Quartz;
-using BilibiliLiveMonitor.Configs;
-using BilibiliLiveMonitor.Services;
 using BilibiliAutoLiver.Services.Interface;
 using System;
 using System.Threading.Tasks;
-using BilibiliAutoLiver.Model;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Utils;
+using BilibiliLive.Tool.Monitor.Services.Interface;
+using BilibiliLive.Tool.Monitor.Configs.Models;
+using BilibiliLive.Tool.Monitor.Services;
+using BilibiliAutoLiver.Models;
 
-namespace BilibiliLiveMonitor.Jobs
+namespace BilibiliLive.Tool.Monitor.Jobs
 {
     [DisallowConcurrentExecution]
     public class MonitorClientJob : IJob
@@ -80,7 +81,7 @@ namespace BilibiliLiveMonitor.Jobs
             try
             {
                 _logger.LogInformation($"直播间{info.room_id}直播状态发生改变，发送通知邮件");
-                String reason = "";
+                string reason = "";
                 string cacheKey = string.Format(CacheKeyConstant.MAIL_SEND_CACHE_KEY, info.live_status);
                 if (info.is_living)
                 {

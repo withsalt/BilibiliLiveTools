@@ -1,6 +1,4 @@
-﻿using BilibiliAutoLiver.Model;
-
-namespace BilibiliAutoLiver.Models
+﻿namespace BilibiliAutoLiver.Models
 {
     public class IndexPageStatus
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BilibiliAutoLiver.Model
+namespace BilibiliAutoLiver.Models
 {
     public class LiveAreaItem
     {

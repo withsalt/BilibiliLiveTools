@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using BilibiliLive.Tool.Monitor.Services.Interface;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace BilibiliLiveMonitor.Services
+namespace BilibiliLive.Tool.Monitor.Services
 {
     public class ConfigureService : IHostedService
     {

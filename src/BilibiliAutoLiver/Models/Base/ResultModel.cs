@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 
-namespace BilibiliAutoLiver.Model.Base
+namespace BilibiliAutoLiver.Models.Base
 {
     public class ResultModel<T> where T : class
     {

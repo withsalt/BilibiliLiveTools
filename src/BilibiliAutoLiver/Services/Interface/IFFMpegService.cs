@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using BilibiliAutoLiver.Model;
+using BilibiliAutoLiver.Models;
 
-namespace BilibiliAutoLiver.Services.FFMpeg
+namespace BilibiliAutoLiver.Services.Interface
 {
     public interface IFFMpegService
     {

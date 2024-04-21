@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Exceptions;
-using BilibiliAutoLiver.Model;
-using BilibiliAutoLiver.Model.Base;
-using BilibiliAutoLiver.Model.Enums;
+using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Base;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
 

@@ -1,5 +1,5 @@
-﻿using BilibiliAutoLiver.Model;
-using BilibiliAutoLiver.Model.Base;
+﻿using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Base;
 using System.Threading.Tasks;
 
 namespace BilibiliAutoLiver.Services.Interface

@@ -3,13 +3,14 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using BilibiliAutoLiver.Model;
+using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Services.Interface;
 using CliWrap;
 using CliWrap.Buffered;
 using FFMpegCore;
 using Microsoft.Extensions.Logging;
 
-namespace BilibiliAutoLiver.Services.FFMpeg
+namespace BilibiliAutoLiver.Services
 {
     public class FFMpegService : BaseFFPlayService, IFFMpegService
     {
@@ -26,7 +27,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg
             {
                 throw new FileNotFoundException(nameof(filePath));
             }
-            bool snapshotResult = await FFMpegCore.FFMpeg.SnapshotAsync(filePath, outPath, new Size(width, height), TimeSpan.FromSeconds(cutTime));
+            bool snapshotResult = await FFMpeg.SnapshotAsync(filePath, outPath, new Size(width, height), TimeSpan.FromSeconds(cutTime));
             if (!snapshotResult)
             {
                 throw new Exception($"Snapshot in {cutTime} from video '{filePath}' failed.");

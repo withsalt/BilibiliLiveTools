@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Model;
+using BilibiliAutoLiver.Models;
 
 namespace BilibiliAutoLiver.Jobs.Job
 {

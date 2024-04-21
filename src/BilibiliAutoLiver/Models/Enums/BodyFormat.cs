@@ -1,4 +1,4 @@
-﻿namespace BilibiliAutoLiver.Model.Enums
+﻿namespace BilibiliAutoLiver.Models.Enums
 {
     public enum BodyFormat
     {

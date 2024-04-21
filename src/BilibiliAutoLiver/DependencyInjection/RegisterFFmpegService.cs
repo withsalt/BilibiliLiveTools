@@ -3,7 +3,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Text;
-using BilibiliAutoLiver.Services.FFMpeg;
+using BilibiliAutoLiver.Services;
+using BilibiliAutoLiver.Services.Interface;
 using FFMpegCore;
 using Microsoft.Extensions.DependencyInjection;
 

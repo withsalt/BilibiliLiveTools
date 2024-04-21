@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using BilibiliLiveMonitor.Services;
-using BilibiliLiveMonitor.DependencyInjection;
+using BilibiliLive.Tool.Monitor.Services;
+using BilibiliLive.Tool.Monitor.DependencyInjection;
 
-namespace BilibiliLiveMonitor
+namespace BilibiliLive.Tool.Monitor
 {
     public class Program
     {

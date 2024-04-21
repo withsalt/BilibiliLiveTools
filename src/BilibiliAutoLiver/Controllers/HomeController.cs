@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Model;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Mvc;

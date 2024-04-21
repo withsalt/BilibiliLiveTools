@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using System;
-using BilibiliLiveMonitor.Jobs;
-using BilibiliLiveMonitor.Services;
+using BilibiliLive.Tool.Monitor.Jobs;
+using BilibiliLive.Tool.Monitor.DependencyInjection;
+using BilibiliLive.Tool.Monitor.Services.Interface;
+using BilibiliLive.Tool.Monitor.Services;
 
-namespace BilibiliLiveMonitor.DependencyInjection
+namespace BilibiliLive.Tool.Monitor.DependencyInjection
 {
     public static class RegisteQuartz
     {

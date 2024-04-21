@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using BilibiliLiveMonitor.Services;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
+using BilibiliLive.Tool.Monitor.Services.Interface;
+using BilibiliLive.Tool.Monitor.Services;
 
-namespace BilibiliLiveMonitor.DependencyInjection
+namespace BilibiliLive.Tool.Monitor.DependencyInjection
 {
     public static class RegisteBilibiliServices
     {

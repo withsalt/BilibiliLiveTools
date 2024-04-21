@@ -5,10 +5,10 @@ using System.IO;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Model;
 using BilibiliAutoLiver.Utils;
+using BilibiliAutoLiver.Models;
 
-namespace BilibiliLiver.Services.Tests
+namespace BilibiliLiverTests.Services
 {
     [TestClass()]
     public class AccountServiceTests : BilibiliLiverTestsBase

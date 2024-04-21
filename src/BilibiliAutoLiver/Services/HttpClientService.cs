@@ -1,5 +1,5 @@
-﻿using BilibiliAutoLiver.Model.Base;
-using BilibiliAutoLiver.Model.Enums;
+﻿using BilibiliAutoLiver.Models.Base;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 using Microsoft.Extensions.Logging;

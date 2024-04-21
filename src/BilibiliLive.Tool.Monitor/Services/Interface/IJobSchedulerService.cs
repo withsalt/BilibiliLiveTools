@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BilibiliLiveMonitor.Services
+namespace BilibiliLive.Tool.Monitor.Services.Interface
 {
     public interface IJobSchedulerService
     {

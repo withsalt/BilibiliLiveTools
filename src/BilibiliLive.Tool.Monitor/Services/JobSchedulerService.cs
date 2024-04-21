@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Quartz;
-using BilibiliLiveMonitor.Configs;
-using BilibiliLiveMonitor.Jobs;
-using BilibiliLiveMonitor.Models;
 using System;
 using System.Threading.Tasks;
+using BilibiliLive.Tool.Monitor.Jobs;
+using BilibiliLive.Tool.Monitor.Models;
+using BilibiliLive.Tool.Monitor.Services.Interface;
+using BilibiliLive.Tool.Monitor.Configs.Models;
 
-namespace BilibiliLiveMonitor.Services
+namespace BilibiliLive.Tool.Monitor.Services
 {
     public class JobSchedulerService : IJobSchedulerService
     {

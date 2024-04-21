@@ -1,7 +1,7 @@
 ﻿using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Model;
-using BilibiliAutoLiver.Model.Base;
-using BilibiliAutoLiver.Model.Enums;
+using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Base;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 using Microsoft.AspNetCore.Hosting.Server;

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace BilibiliAutoLiver.Model
+namespace BilibiliAutoLiver.Models
 {
     /// <summary>
     /// 账户信息

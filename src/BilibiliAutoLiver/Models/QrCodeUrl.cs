@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Utils;
 
-namespace BilibiliAutoLiver.Model
+namespace BilibiliAutoLiver.Models
 {
     public class QrCodeUrl
     {

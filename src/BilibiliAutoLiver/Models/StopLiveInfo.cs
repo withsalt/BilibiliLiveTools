@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BilibiliAutoLiver.Model
+namespace BilibiliAutoLiver.Models
 {
     public class StopLiveInfo
     {

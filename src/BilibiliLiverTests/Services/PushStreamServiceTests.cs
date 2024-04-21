@@ -4,7 +4,7 @@ using BilibiliLiverTests;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 
-namespace BilibiliLiver.Services.Tests
+namespace BilibiliLiverTests.Services
 {
     [TestClass()]
     public class PushStreamServiceTests : BilibiliLiverTestsBase

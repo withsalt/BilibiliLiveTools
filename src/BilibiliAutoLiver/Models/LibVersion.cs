@@ -1,4 +1,4 @@
-﻿namespace BilibiliAutoLiver.Model
+﻿namespace BilibiliAutoLiver.Models
 {
     public class LibVersion
     {

@@ -1,5 +1,4 @@
-﻿using BilibiliAutoLiver.Model;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
@@ -9,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Models;
 
 namespace BilibiliLive.Tool.UpdateArea
 {

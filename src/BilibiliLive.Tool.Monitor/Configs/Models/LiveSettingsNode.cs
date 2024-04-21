@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BilibiliLiveMonitor.Configs
+namespace BilibiliLive.Tool.Monitor.Configs.Models
 {
     public class LiveSettingsNode
     {

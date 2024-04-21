@@ -5,11 +5,11 @@ using BilibiliLiverTests;
 using System.IO;
 using System.Diagnostics;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Model.Base;
-using BilibiliAutoLiver.Model;
 using BilibiliAutoLiver.Utils;
+using BilibiliAutoLiver.Models.Base;
+using BilibiliAutoLiver.Models;
 
-namespace BilibiliLiver.Services.Tests
+namespace BilibiliLiverTests.Services
 {
     [TestClass()]
     public class BilibiliCookieServiceTests : BilibiliLiverTestsBase
@@ -47,7 +47,7 @@ namespace BilibiliLiver.Services.Tests
             bool hasCookie = _cookieService.HasCookie();
             Assert.IsTrue(hasCookie);
 
-           
+
 
             cookies = _cookieService.GetCookies(true);
             cookieString = _cookieService.GetString(true);

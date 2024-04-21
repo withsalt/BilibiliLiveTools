@@ -1,8 +1,8 @@
-﻿using BilibiliLiveMonitor.Configs;
+﻿using BilibiliLive.Tool.Monitor.Configs.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace BilibiliLiveMonitor.DependencyInjection
+namespace BilibiliLive.Tool.Monitor.DependencyInjection
 {
     public static class RegisteConfigure
     {

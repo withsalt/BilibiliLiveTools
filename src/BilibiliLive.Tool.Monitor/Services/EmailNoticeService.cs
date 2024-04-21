@@ -3,11 +3,12 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Text.RegularExpressions;
-using BilibiliLiveMonitor.Configs;
 using System;
 using System.Threading.Tasks;
+using BilibiliLive.Tool.Monitor.Services.Interface;
+using BilibiliLive.Tool.Monitor.Configs.Models;
 
-namespace BilibiliLiveMonitor.Services
+namespace BilibiliLive.Tool.Monitor.Services
 {
     public class EmailNoticeService : IEmailNoticeService
     {
@@ -81,13 +82,13 @@ namespace BilibiliLiveMonitor.Services
             //开启了邮件发送才初始化
             if (_appSettings.IsEnableEmailNotice)
             {
-                this.SmtpServer = _appSettings.EmailConfig.SmtpServer;
-                this.SmtpPort = (int)_appSettings.EmailConfig.SmtpPort; 
-                this.SendMailAddress = _appSettings.EmailConfig.SendMailAddress; 
-                this.PassWord = _appSettings.EmailConfig.Password; 
-                this.ReceiveMailAddress = _appSettings.EmailConfig.ReceiveMailAddress.Split(',');
-                this.IsSSL = _appSettings.EmailConfig.SmtpSsl; 
-                this.SendMailName = _appSettings.EmailConfig.SendMailName;
+                SmtpServer = _appSettings.EmailConfig.SmtpServer;
+                SmtpPort = (int)_appSettings.EmailConfig.SmtpPort;
+                SendMailAddress = _appSettings.EmailConfig.SendMailAddress;
+                PassWord = _appSettings.EmailConfig.Password;
+                ReceiveMailAddress = _appSettings.EmailConfig.ReceiveMailAddress.Split(',');
+                IsSSL = _appSettings.EmailConfig.SmtpSsl;
+                SendMailName = _appSettings.EmailConfig.SendMailName;
             }
         }
 
@@ -107,26 +108,26 @@ namespace BilibiliLiveMonitor.Services
 
             #region 验证基本信息
 
-            Regex reg = new Regex(this.RegexText, RegexOptions.IgnoreCase);
+            Regex reg = new Regex(RegexText, RegexOptions.IgnoreCase);
             if (!IsUseDefaultCredentials) // 使用账号密码登陆Smtp服务
             {
-                if (!reg.IsMatch(this.SendMailAddress))
+                if (!reg.IsMatch(SendMailAddress))
                 {
                     return (SendStatus.SendMailAddressIsUnmatch, "发件地址未通过验证");
                 }
-                if (string.IsNullOrEmpty(this.PassWord))
+                if (string.IsNullOrEmpty(PassWord))
                 {
                     return (SendStatus.PassWordIsNull, "发件密码为空");
                 }
             }
 
-            if (this.ReceiveMailAddress == null || this.ReceiveMailAddress.Length <= 0)
+            if (ReceiveMailAddress == null || ReceiveMailAddress.Length <= 0)
             {
                 return (SendStatus.FromMailAddressIsUnmatch, "收件地址为空");
             }
 
             StringBuilder FailedELst = new StringBuilder();
-            foreach (string item in this.ReceiveMailAddress)
+            foreach (string item in ReceiveMailAddress)
             {
                 if (!reg.IsMatch(item))
                 {
@@ -141,34 +142,34 @@ namespace BilibiliLiveMonitor.Services
             #endregion 验证基本信息
 
             SmtpClient smtp = new SmtpClient(); //实例化一个Smtp
-            smtp.EnableSsl = this.IsSSL; //smtp服务器是否启用SSL加密
-            smtp.Host = this.SmtpServer; //指定 Smtp 服务器地址
-            smtp.Port = this.SmtpPort;  //指定 Smtp 服务器的端口，默认是465 ,587
+            smtp.EnableSsl = IsSSL; //smtp服务器是否启用SSL加密
+            smtp.Host = SmtpServer; //指定 Smtp 服务器地址
+            smtp.Port = SmtpPort;  //指定 Smtp 服务器的端口，默认是465 ,587
             if (IsUseDefaultCredentials)   // SMTP服务器是否不需要身份认证
                 smtp.UseDefaultCredentials = true;
             else
-                smtp.Credentials = new NetworkCredential(this.SendMailAddress, this.PassWord); // NetworkCredential("邮箱名", "密码");
+                smtp.Credentials = new NetworkCredential(SendMailAddress, PassWord); // NetworkCredential("邮箱名", "密码");
 
             MailMessage mm = new MailMessage
             {
                 //邮件的优先级
                 Priority = MailPriority.Normal,
                 //收件方看到的邮件来源；第一个参数是发信人邮件地址第二参数是发信人显示的名称第三个参数是, Encoding.GetEncoding(936) 第二个参数所使用的编码，如果指定不正确，则对方收到后显示乱码，936是简体中文的codepage值
-                From = new MailAddress(this.SendMailAddress, this.SendMailName, Encoding.UTF8)
+                From = new MailAddress(SendMailAddress, SendMailName, Encoding.UTF8)
             };
             //ReplyTo 表示对方回复邮件时默认的接收地址，即：你用一个邮箱发信，但却用另一个来收信后两个参数的意义， 同 From 的意义
-            mm.ReplyToList.Add(new MailAddress(this.SendMailAddress, this.SendMailName, Encoding.UTF8));
+            mm.ReplyToList.Add(new MailAddress(SendMailAddress, SendMailName, Encoding.UTF8));
 
             StringBuilder fmLst = new StringBuilder();
-            foreach (string item in this.ReceiveMailAddress)
+            foreach (string item in ReceiveMailAddress)
             {
                 fmLst.Append(item + ",");
             }
             mm.To.Add(fmLst.Remove(fmLst.Length - 1, 1).ToString()); //邮件的接收者，支持群发，多个地址之间用 半角逗号 分开
-            if (this.CarbonCopy != null && this.CarbonCopy.Length > 0 && this.IsCC) // 是否显示抄送
+            if (CarbonCopy != null && CarbonCopy.Length > 0 && IsCC) // 是否显示抄送
             {
                 StringBuilder ccLst = new StringBuilder();
-                foreach (string item in this.CarbonCopy)
+                foreach (string item in CarbonCopy)
                 {
                     ccLst.Append(item + ",");
                 }

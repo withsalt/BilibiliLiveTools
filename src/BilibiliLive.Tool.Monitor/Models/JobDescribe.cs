@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BilibiliLiveMonitor.Models
+namespace BilibiliLive.Tool.Monitor.Models
 {
     public class JobDescribe
     {
