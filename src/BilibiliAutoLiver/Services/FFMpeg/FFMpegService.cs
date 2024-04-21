@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using BilibiliLiveCommon.Model;
+using BilibiliAutoLiver.Model;
 using CliWrap;
 using CliWrap.Buffered;
 using FFMpegCore;

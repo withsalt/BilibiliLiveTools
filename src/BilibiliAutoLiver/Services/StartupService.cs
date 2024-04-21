@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Jobs.Scheduler;
-using BilibiliLiveCommon.Model;
-using BilibiliLiveCommon.Services.Interface;
+using BilibiliAutoLiver.Model;
+using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services

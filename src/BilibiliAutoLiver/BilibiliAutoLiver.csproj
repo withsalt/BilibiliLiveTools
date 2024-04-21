@@ -16,10 +16,10 @@
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.1" />
 		<PackageReference Include="Quartz.Plugins" Version="3.8.1" />
 		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.8.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\BilibiliLiveCommon\BilibiliLiveCommon.csproj" />
+		<PackageReference Include="CliWrap" Version="3.6.6" />
+		<PackageReference Include="FFMpegCore" Version="5.1.0" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
+		<PackageReference Include="SkiaSharp.QrCode" Version="0.7.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -27,21 +27,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Content\demo_music.m4a">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="runtimes\linux-arm64\ffmpeg">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="runtimes\linux-arm64\ffprobe">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="runtimes\win-x64\ffmpeg.exe">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="runtimes\win-x64\ffprobe.exe">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
+		<None Update="Content\demo_music.m4a">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="runtimes\linux-arm64\ffmpeg">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="runtimes\linux-arm64\ffprobe">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="runtimes\win-x64\ffmpeg.exe">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="runtimes\win-x64\ffprobe.exe">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 </Project>

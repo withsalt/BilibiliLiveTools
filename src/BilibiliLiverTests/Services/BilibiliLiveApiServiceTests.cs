@@ -1,13 +1,7 @@
-﻿using BilibiliLiver.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using BilibiliLiverTests;
-using BilibiliLiver.Services.Interface;
-using BilibiliLiveCommon.Services.Interface;
+using BilibiliAutoLiver.Services.Interface;
 
 namespace BilibiliLiver.Services.Tests
 {

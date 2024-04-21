@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Config;
+using BilibiliAutoLiver.Model;
 using BilibiliAutoLiver.Models;
-using BilibiliLiveCommon.Config;
-using BilibiliLiveCommon.Model;
-using BilibiliLiveCommon.Services.Interface;
+using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -34,20 +34,6 @@ namespace BilibiliAutoLiver.Controllers
             IndexPageStatus pageSatus = await Status();
             ViewData[nameof(IndexPageStatus)] = pageSatus;
             return View();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Refresh()
-        {
-            try
-            {
-                await _accountService.RefreshCookie();
-                return Content("Ë¢ÐÂ³É¹¦");
-            }
-            catch (Exception ex)
-            {
-                return Content(ex.Message);
-            }
         }
 
         [HttpPost]

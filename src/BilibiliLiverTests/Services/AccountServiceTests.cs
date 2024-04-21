@@ -1,18 +1,12 @@
-﻿using BilibiliLiver.Services;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using BilibiliLiverTests;
-using BilibiliLiver.Services.Interface;
-using BilibiliLiveCommon.Services.Interface;
-using BilibiliLiveCommon.Model;
-using BilibiliLiveCommon.Utils;
 using System.IO;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Model;
+using BilibiliAutoLiver.Utils;
 
 namespace BilibiliLiver.Services.Tests
 {

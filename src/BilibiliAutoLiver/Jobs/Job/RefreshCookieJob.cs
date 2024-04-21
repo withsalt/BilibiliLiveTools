@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Quartz;
-using BilibiliLiveCommon.Model;
-using BilibiliLiveCommon.Services.Interface;
-using BilibiliLiveCommon.Config;
-using BilibiliLiveCommon.Utils;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Config;
+using BilibiliAutoLiver.Model;
 
 namespace BilibiliAutoLiver.Jobs.Job
 {

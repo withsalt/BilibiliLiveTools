@@ -1,11 +1,9 @@
-﻿using BilibiliLiver;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Web;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using BilibiliAutoLiver.DependencyInjection;
 
 namespace BilibiliLiverTests
 {
@@ -15,7 +13,26 @@ namespace BilibiliLiverTests
 
         public BilibiliLiverTestsBase()
         {
-            this.ServiceProvider = Program.CreateHostBuilder(null).Build().Services;
+            var builder = WebApplication.CreateBuilder();
+
+            //Add NLog
+            builder.Logging.ClearProviders();
+            builder.Logging.AddNLogWeb();
+
+            //配置初始化
+            builder.Services.ConfigureSettings(builder);
+            //缓存
+            builder.Services.AddMemoryCache();
+            //添加Bilibili相关的服务
+            builder.Services.AddBilibiliServices();
+            //定时任务
+            builder.Services.AddQuartz();
+            //FFMpeg
+            builder.Services.AddFFmpegService();
+
+            builder.Build();
+
+            this.ServiceProvider = builder.Services.BuildServiceProvider();
         }
     }
 }

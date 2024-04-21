@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
+using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Services;
-using BilibiliAutoLiver.Services.FFMpeg;
-using BilibiliLiveCommon.Config;
+using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

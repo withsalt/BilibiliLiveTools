@@ -2,12 +2,12 @@
 using System;
 using System.Threading.Tasks;
 using BilibiliLiverTests;
-using BilibiliLiveCommon.Services.Interface;
-using BilibiliLiveCommon.Model;
-using BilibiliLiveCommon.Utils;
 using System.IO;
 using System.Diagnostics;
-using BilibiliLiveCommon.Model.Base;
+using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Model.Base;
+using BilibiliAutoLiver.Model;
+using BilibiliAutoLiver.Utils;
 
 namespace BilibiliLiver.Services.Tests
 {

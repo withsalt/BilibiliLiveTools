@@ -1,4 +1,4 @@
-﻿using BilibiliLiveCommon.Model;
+﻿using BilibiliAutoLiver.Model;
 
 namespace BilibiliAutoLiver.Models
 {

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using BilibiliLiveCommon.Model;
+using BilibiliAutoLiver.Model;
 
 namespace BilibiliAutoLiver.Services.FFMpeg
 {

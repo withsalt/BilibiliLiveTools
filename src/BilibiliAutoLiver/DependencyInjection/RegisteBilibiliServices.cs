@@ -1,6 +1,5 @@
 ﻿using BilibiliAutoLiver.Services;
-using BilibiliLiveCommon.Services;
-using BilibiliLiveCommon.Services.Interface;
+using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BilibiliAutoLiver.DependencyInjection
