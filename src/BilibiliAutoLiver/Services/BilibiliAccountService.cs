@@ -122,13 +122,13 @@ namespace BilibiliAutoLiver.Services
             try
             {
                 await _cookieService.RemoveCookie();
-                _logger.LogInformation("开始使用扫描二维码登录！");
+                _logger.LogWarning("开始使用扫描二维码登录！");
                 List<string> endpoints = GetEndpoint();
                 if (endpoints?.Any() != true)
                 {
                     throw new Exception("无法获取本地IP地址信息。");
                 }
-                _logger.LogInformation($"请在10分钟之内，在任意浏览器打开任意一个链接进行扫描登录：{JsonUtil.SerializeObject(endpoints)}");
+                _logger.LogWarning($"请在10分钟之内，在任意浏览器打开以下任意一个链接进行扫描登录：{JsonUtil.SerializeObject(endpoints)}");
 
                 int timeout = 10 * 60 * 1000;
                 int expTime = 180;

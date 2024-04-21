@@ -4,8 +4,10 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>disable</Nullable>
 		<ImplicitUsings>disable</ImplicitUsings>
+		<Version>4.0.1</Version>
+		<Description>B站无人值守直播工具。</Description>
 	</PropertyGroup>
-
+	
 	<ItemGroup>
 		<Content Remove="cookies.config" />
 	</ItemGroup>
