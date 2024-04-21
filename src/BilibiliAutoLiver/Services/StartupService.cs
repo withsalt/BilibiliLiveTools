@@ -63,6 +63,7 @@ namespace BilibiliAutoLiver.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"开启推流失败（{ex.Message}），应用程序退出。");
                 Environment.Exit(-1);
             }
         }
