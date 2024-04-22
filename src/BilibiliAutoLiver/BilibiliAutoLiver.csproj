@@ -20,9 +20,10 @@
 		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.8.1" />
 		<PackageReference Include="CliWrap" Version="3.6.6" />
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
-		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
-		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8" />
-		<PackageReference Include="SkiaSharp.QrCode" Version="0.7.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

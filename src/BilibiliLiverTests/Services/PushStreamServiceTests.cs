@@ -26,12 +26,5 @@ namespace BilibiliLiverTests.Services
             await _pushStream.CheckFFmpegBinary();
             Assert.Fail();
         }
-
-        [TestMethod()]
-        public async Task NetworkCheckTest()
-        {
-            bool result = await NetworkUtil.Ping();
-            Assert.IsTrue(result);
-        }
     }
 }

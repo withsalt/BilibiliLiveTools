@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using NLog.Web;
 using System;
 using BilibiliAutoLiver.DependencyInjection;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
 
 namespace BilibiliLiverTests
 {
@@ -24,7 +25,7 @@ namespace BilibiliLiverTests
             //缓存
             builder.Services.AddMemoryCache();
             //添加Bilibili相关的服务
-            builder.Services.AddBilibiliServices();
+            builder.Services.AddBilibiliApis();
             //定时任务
             builder.Services.AddQuartz();
             //FFMpeg

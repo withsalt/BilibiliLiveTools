@@ -1,8 +1,10 @@
-﻿namespace BilibiliAutoLiver.Models
+﻿using Bilibili.AspNetCore.Apis.Models;
+
+namespace BilibiliAutoLiver.Models
 {
     public class IndexPageStatus
     {
-        public LoginStatusCacheInfo LoginStatus { get; set; }
+        public QrCodeLoginStatus LoginStatus { get; set; }
 
         public UserInfo UserInfo { get; set; }
     }

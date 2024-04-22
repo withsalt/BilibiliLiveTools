@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using NLog.Web;
 using BilibiliLive.Tool.Monitor.Services;
 using BilibiliLive.Tool.Monitor.DependencyInjection;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
+using BilibiliLive.Tool.Monitor.Services.Interface;
 
 namespace BilibiliLive.Tool.Monitor
 {
@@ -31,9 +33,10 @@ namespace BilibiliLive.Tool.Monitor
                     //缓存
                     services.AddMemoryCache();
                     //Bilibili相关API
-                    services.AddBilibiliServices();
+                    services.AddBilibiliApis();
                     //定时任务
                     services.AddQuartz();
+                    services.AddTransient<IEmailNoticeService, EmailNoticeService>();
                     //启动服务
                     services.AddHostedService<ConfigureService>();
                 });

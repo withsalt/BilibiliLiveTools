@@ -4,10 +4,9 @@ using System.Threading.Tasks;
 using BilibiliLiverTests;
 using System.IO;
 using System.Diagnostics;
-using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Utils;
-using BilibiliAutoLiver.Models.Base;
-using BilibiliAutoLiver.Models;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models.Base;
+using Bilibili.AspNetCore.Apis.Models;
 
 namespace BilibiliLiverTests.Services
 {
@@ -65,13 +64,7 @@ namespace BilibiliLiverTests.Services
         {
             QrCodeUrl qrCode = await _accountService.GenerateQrCode();
 
-            byte[] qrCodeBytes = QrCode.Generate(qrCode.url);
-            {
-                using (FileStream fileStream = new FileStream("qrcode.png", FileMode.Create))
-                {
-                    await fileStream.WriteAsync(qrCodeBytes, 0, qrCodeBytes.Length);
-                }
-            }
+            byte[] qrCodeBytes = qrCode.GetBytes();
             Stopwatch sw = Stopwatch.StartNew();
             while (true)
             {

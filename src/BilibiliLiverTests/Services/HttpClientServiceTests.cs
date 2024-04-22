@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using BilibiliLiverTests;
 using System.Net.Http;
-using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Models.Enums;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models.Enums;
 
 namespace BilibiliLiverTests.Services
 {

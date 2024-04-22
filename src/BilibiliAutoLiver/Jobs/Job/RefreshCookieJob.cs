@@ -7,6 +7,8 @@ using System.Linq;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
 
 namespace BilibiliAutoLiver.Jobs.Job
 {

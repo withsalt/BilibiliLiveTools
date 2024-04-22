@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Interface;
@@ -39,7 +41,7 @@ namespace BilibiliAutoLiver.Controllers
         public async Task<IndexPageStatus> Status()
         {
             IndexPageStatus pageSatus = new IndexPageStatus();
-            LoginStatusCacheInfo loginInfo = _cache.Get<LoginStatusCacheInfo>(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY);
+            QrCodeLoginStatus loginInfo = _cache.Get<QrCodeLoginStatus>(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY);
             if (loginInfo != null)
             {
                 pageSatus.LoginStatus = loginInfo;
@@ -54,7 +56,7 @@ namespace BilibiliAutoLiver.Controllers
                         cacheEntry.AbsoluteExpiration = DateTime.UtcNow.AddMinutes(30);
 
                         var cachePageSatus = new IndexPageStatus();
-                        cachePageSatus.LoginStatus = new LoginStatusCacheInfo()
+                        cachePageSatus.LoginStatus = new QrCodeLoginStatus()
                         {
                             IsLogged = true
                         };
@@ -65,7 +67,7 @@ namespace BilibiliAutoLiver.Controllers
                 }
                 else
                 {
-                    pageSatus.LoginStatus = new LoginStatusCacheInfo();
+                    pageSatus.LoginStatus = new QrCodeLoginStatus();
                     pageSatus.LoginStatus.IsLogged = false;
                 }
             }

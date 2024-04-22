@@ -1,14 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
 using System;
+using Bilibili.AspNetCore.Apis.Interface;
+using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using BilibiliAutoLiver.DependencyInjection;
-using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Models;
 
 namespace BilibiliLive.Tool.UpdateArea
 {
@@ -112,12 +113,10 @@ namespace BilibiliLive.Tool.UpdateArea
             var builder = Host.CreateDefaultBuilder()
                 .ConfigureServices((hostContext, services) =>
                 {
-                    //配置
-                    services.ConfigureSettings(hostContext);
                     //缓存
                     services.AddMemoryCache();
                     //Bilibili相关API
-                    services.AddBilibiliServices();
+                    services.AddBilibiliApis();
                 });
             return builder.Build();
         }

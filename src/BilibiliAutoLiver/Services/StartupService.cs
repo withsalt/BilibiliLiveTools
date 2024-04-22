@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Jobs.Scheduler;
-using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
 
