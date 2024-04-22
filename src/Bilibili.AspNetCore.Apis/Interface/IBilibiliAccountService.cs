@@ -25,6 +25,14 @@ namespace Bilibili.AspNetCore.Apis.Interface
         Task<UserInfo> LoginByQrCode();
 
         /// <summary>
+        /// 尝试获取二维码扫描登录状态
+        /// 如果能获取到，表示正在进行二维码扫码登录
+        /// </summary>
+        /// <param name="loginStatus"></param>
+        /// <returns></returns>
+        bool TryGetQrCodeLoginStatus(out QrCodeLoginStatus loginStatus);
+
+        /// <summary>
         /// 生成登录二维码
         /// </summary>
         /// <returns></returns>

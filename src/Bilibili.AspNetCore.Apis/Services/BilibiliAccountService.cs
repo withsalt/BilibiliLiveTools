@@ -214,6 +214,16 @@ namespace Bilibili.AspNetCore.Apis.Services
             return userInfo;
         }
 
+        public bool TryGetQrCodeLoginStatus(out QrCodeLoginStatus loginStatus)
+        {
+            bool result = _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY, out loginStatus);
+            if (result && loginStatus != null)
+            {
+                return result;
+            }
+            return false;
+        }
+
         public async Task<bool> RefreshCookie()
         {
             if (!_cookieService.HasCookie())

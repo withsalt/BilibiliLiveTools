@@ -41,10 +41,9 @@ namespace BilibiliAutoLiver.Controllers
         public async Task<IndexPageStatus> Status()
         {
             IndexPageStatus pageSatus = new IndexPageStatus();
-            QrCodeLoginStatus loginInfo = _cache.Get<QrCodeLoginStatus>(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY);
-            if (loginInfo != null)
+            if (_accountService.TryGetQrCodeLoginStatus(out var loginStatus))
             {
-                pageSatus.LoginStatus = loginInfo;
+                pageSatus.LoginStatus = loginStatus;
                 pageSatus.LoginStatus.IsLogged = false;
             }
             else

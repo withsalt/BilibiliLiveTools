@@ -15,6 +15,9 @@
 		<PackageReference Include="Quartz.Plugins" Version="3.8.1" />
 		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.8.1" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.8" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

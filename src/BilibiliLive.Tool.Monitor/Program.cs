@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 using NLog.Web;
 using BilibiliLive.Tool.Monitor.Services;
 using BilibiliLive.Tool.Monitor.DependencyInjection;
-using Bilibili.AspNetCore.Apis.DependencyInjection;
 using BilibiliLive.Tool.Monitor.Services.Interface;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
 
 namespace BilibiliLive.Tool.Monitor
 {
