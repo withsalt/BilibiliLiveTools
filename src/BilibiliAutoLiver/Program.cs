@@ -1,10 +1,10 @@
 using System;
 using System.Reflection;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
-using Bilibili.AspNetCore.Apis.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

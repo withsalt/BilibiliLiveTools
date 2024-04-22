@@ -1,14 +1,11 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using Quartz;
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using System.Linq;
-using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Models;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
+using BilibiliAutoLiver.Config;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Quartz;
 
 namespace BilibiliAutoLiver.Jobs.Job
 {

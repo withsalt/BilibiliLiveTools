@@ -1,9 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
-using BilibiliLiverTests;
-using System.Net.Http;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Enums;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BilibiliLiverTests.Services
 {

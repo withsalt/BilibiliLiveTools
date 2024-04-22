@@ -1,8 +1,8 @@
-﻿using BilibiliAutoLiver.Jobs.Job;
+﻿using System;
+using BilibiliAutoLiver.Jobs.Job;
 using BilibiliAutoLiver.Jobs.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
-using System;
 
 namespace BilibiliAutoLiver.DependencyInjection
 {

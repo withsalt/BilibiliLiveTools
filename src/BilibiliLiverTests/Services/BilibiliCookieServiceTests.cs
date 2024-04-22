@@ -1,12 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Threading.Tasks;
-using BilibiliLiverTests;
-using System.IO;
+﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
-using Bilibili.AspNetCore.Apis.Models.Base;
 using Bilibili.AspNetCore.Apis.Models;
+using Bilibili.AspNetCore.Apis.Models.Base;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BilibiliLiverTests.Services
 {

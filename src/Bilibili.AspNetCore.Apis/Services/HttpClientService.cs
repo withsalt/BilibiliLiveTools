@@ -1,9 +1,4 @@
-﻿using Bilibili.AspNetCore.Apis.Interface;
-using Bilibili.AspNetCore.Apis.Models.Base;
-using Bilibili.AspNetCore.Apis.Models.Enums;
-using Bilibili.AspNetCore.Apis.Utils;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,6 +7,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models.Base;
+using Bilibili.AspNetCore.Apis.Models.Enums;
+using Bilibili.AspNetCore.Apis.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace Bilibili.AspNetCore.Apis.Services
 {

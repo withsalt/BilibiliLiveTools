@@ -5,7 +5,6 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models;
-using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;

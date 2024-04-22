@@ -1,15 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Bilibili.AspNetCore.Apis.DependencyInjection;
-using System;
-using Bilibili.AspNetCore.Apis.Interface;
-using System.Threading.Tasks;
-using Bilibili.AspNetCore.Apis.Models;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace BilibiliLive.Tool.UpdateArea
 {

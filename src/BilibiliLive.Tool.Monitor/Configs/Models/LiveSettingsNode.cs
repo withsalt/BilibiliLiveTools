@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BilibiliLive.Tool.Monitor.Configs.Models
+﻿namespace BilibiliLive.Tool.Monitor.Configs.Models
 {
     public class LiveSettingsNode
     {

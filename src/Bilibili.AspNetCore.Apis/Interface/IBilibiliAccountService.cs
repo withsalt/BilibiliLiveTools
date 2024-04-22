@@ -1,6 +1,6 @@
-﻿using Bilibili.AspNetCore.Apis.Models;
+﻿using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
-using System.Threading.Tasks;
 
 namespace Bilibili.AspNetCore.Apis.Interface
 {

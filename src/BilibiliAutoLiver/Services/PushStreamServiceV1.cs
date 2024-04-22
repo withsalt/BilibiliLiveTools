@@ -1,18 +1,17 @@
-﻿using Bilibili.AspNetCore.Apis.Interface;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
-using Bilibili.AspNetCore.Apis.Utils;
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BilibiliAutoLiver.Services
 {
@@ -133,7 +132,7 @@ namespace BilibiliAutoLiver.Services
                 }
                 throw new Exception("进程启用失败。");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.ThrowLogError($"FFmpeg测试失败，{ex.Message}");
             }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Text;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;

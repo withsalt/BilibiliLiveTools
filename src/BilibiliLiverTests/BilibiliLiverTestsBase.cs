@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
+using BilibiliAutoLiver.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using System;
-using BilibiliAutoLiver.DependencyInjection;
-using Bilibili.AspNetCore.Apis.DependencyInjection;
 
 namespace BilibiliLiverTests
 {
