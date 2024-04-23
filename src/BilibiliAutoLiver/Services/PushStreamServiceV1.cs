@@ -151,19 +151,28 @@ namespace BilibiliAutoLiver.Services
             {
                 _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveRoomName不能为空！");
             }
-            if (string.IsNullOrWhiteSpace(_liveSetting.FFmpegCmd))
+            if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v1)
             {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.FFmpegCmd不能为空！");
+                string cmd = _liveSetting.V1?.FFmpegCommands?.GetTargetOSPlatformCommand();
+                if (string.IsNullOrWhiteSpace(cmd))
+                {
+                    _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不能为空！");
+                }
+                int markIndex = cmd.IndexOf("[[URL]]");
+                if (markIndex < 5)
+                {
+                    throw new Exception("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确，命令中未找到 '[[URL]]'标记。");
+                }
+                if (cmd[markIndex - 1] == '\"')
+                {
+                    throw new Exception("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确， '[[URL]]'标记前后无需“\"”。");
+                }
             }
-            int markIndex = _liveSetting.FFmpegCmd.IndexOf("[[URL]]");
-            if (markIndex < 5)
+            else if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v2)
             {
-                throw new Exception("配置文件appsettings.json中，LiveSetting.FFmpegCmd不正确，命令中未找到 '[[URL]]'标记。");
+                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.Type目前仅支持v1！");
             }
-            if (_liveSetting.FFmpegCmd[markIndex - 1] == '\"')
-            {
-                throw new Exception("配置文件appsettings.json中，LiveSetting.FFmpegCmd不正确， '[[URL]]'标记前后无需“\"”。");
-            }
+
             return Task.CompletedTask;
         }
 
@@ -246,7 +255,7 @@ namespace BilibiliAutoLiver.Services
             }
             _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
 
-            string newCmd = _liveSetting.FFmpegCmd
+            string newCmd = _liveSetting.V1.FFmpegCommands.GetTargetOSPlatformCommand()
                 .Trim('\r', '\n', ' ')
                 .Replace("[[URL]]", $"\"{url}\"");
             int firstNullChar = newCmd.IndexOf((char)32);
@@ -278,12 +287,10 @@ namespace BilibiliAutoLiver.Services
         /// <returns></returns>
         private async Task PushStream()
         {
-            bool isAutoRestart = true;
-            while (isAutoRestart && !_tokenSource.IsCancellationRequested)
+            while (!_tokenSource.IsCancellationRequested)
             {
                 try
                 {
-                    isAutoRestart = _liveSetting.AutoRestart;
                     //check network
                     while (!await NetworkUtil.Ping())
                     {
@@ -311,7 +318,7 @@ namespace BilibiliAutoLiver.Services
                         }
                     }
                     //如果开启了自动重试
-                    if (isAutoRestart && !_tokenSource.IsCancellationRequested)
+                    if (!_tokenSource.IsCancellationRequested)
                     {
                         _logger.LogWarning($"等待60s后重新推流...");
                         await Task.Delay(60000, _tokenSource.Token);
@@ -325,7 +332,7 @@ namespace BilibiliAutoLiver.Services
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
                     //如果开启了自动重试
-                    if (isAutoRestart && !_tokenSource.IsCancellationRequested)
+                    if (!_tokenSource.IsCancellationRequested)
                     {
                         _logger.LogWarning($"等待60s后重新推流...");
                         await Task.Delay(60000, _tokenSource.Token);

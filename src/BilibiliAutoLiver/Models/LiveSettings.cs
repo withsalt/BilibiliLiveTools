@@ -1,4 +1,8 @@
-﻿namespace BilibiliAutoLiver.Models
+﻿using System;
+using System.Runtime.InteropServices;
+using BilibiliAutoLiver.Models.Enums;
+
+namespace BilibiliAutoLiver.Models
 {
     public class LiveSettings
     {
@@ -6,12 +10,47 @@
 
         public string LiveRoomName { get; set; }
 
-        public string FFmpegCmd { get; set; }
+        public PushStreamMethodType Type { get; set; }
 
-        public bool AutoRestart { get; set; }
+        public PushStreamV1Config V1 { get; set; }
 
-        public int RepushFailedExitMinutes { get; set; }
+        public PushStreamV2Config V2 { get; set; }
 
         public static string Position { get { return "LiveSettings"; } }
+    }
+
+    public class PushStreamV1Config
+    {
+        public FFmpegCommands FFmpegCommands { get; set; }
+    }
+
+    public class PushStreamV2Config
+    {
+
+    }
+
+    public class FFmpegCommands
+    {
+        public string Win { get; set; }
+
+        public string Linux { get; set; }
+
+        /// <summary>
+        /// 获取对应平台的ffmpeg命令
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="PlatformNotSupportedException"></exception>
+        public string GetTargetOSPlatformCommand()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return this.Win;
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return this.Linux;
+            }
+            throw new PlatformNotSupportedException("Not support your OS platform.");
+        }
     }
 }
