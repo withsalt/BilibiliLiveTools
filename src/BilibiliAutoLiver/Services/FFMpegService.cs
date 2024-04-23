@@ -65,51 +65,39 @@ namespace BilibiliAutoLiver.Services
 
         public async Task<LibVersion> GetVersion()
         {
-            LibVersion libVersion = new LibVersion()
+            LibVersion libVersion = new LibVersion();
+            var result = await Cli.Wrap(GetBinaryPath())
+                .WithArguments("-version")
+                .WithWorkingDirectory(GetBinaryFolder())
+                .WithValidation(CommandResultValidation.None)
+                .ExecuteBufferedAsync();
+            string output = result.StandardOutput;
+            if (result.ExitCode != 0)
             {
-                Status = false
-            };
-            try
-            {
-                var result = await Cli.Wrap(GetBinaryPath())
-                    .WithArguments("-version")
-                    .WithWorkingDirectory(GetBinaryFolder())
-                    .WithValidation(CommandResultValidation.None)
-                    .ExecuteBufferedAsync();
-                libVersion.Status = true;
-                string output = result.StandardOutput;
-                if (result.ExitCode != 0)
+                if (result.StandardError?.StartsWith("ffmpeg version ", StringComparison.Ordinal) == true)
                 {
-                    if (result.StandardError?.StartsWith("ffmpeg version ", StringComparison.Ordinal) == true)
-                    {
-                        output = result.StandardError;
-                    }
-                    else
-                    {
-                        return libVersion;
-                    }
+                    output = result.StandardError;
                 }
-
-                if (string.IsNullOrEmpty(output))
+                else
                 {
                     return libVersion;
                 }
-                if (output.StartsWith("ffmpeg version ", StringComparison.Ordinal))
-                {
-                    int startIndex = "ffmpeg version ".Length;
-                    var lastIndex = output.IndexOf(' ', startIndex);
-                    if (lastIndex > startIndex + 1)
-                    {
-                        libVersion.Version = output.Substring(startIndex, lastIndex - startIndex + 1);
-                    }
-                }
-                return libVersion;
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrEmpty(output))
             {
-                _logger.LogWarning(ex, $"Try get ffmpeg version failed. {ex.Message}");
                 return libVersion;
             }
+            if (output.StartsWith("ffmpeg version ", StringComparison.Ordinal))
+            {
+                int startIndex = "ffmpeg version ".Length;
+                var lastIndex = output.IndexOf(' ', startIndex);
+                if (lastIndex > startIndex + 1)
+                {
+                    libVersion.Version = output.Substring(startIndex, lastIndex - startIndex + 1);
+                }
+            }
+            return libVersion;
         }
     }
 }

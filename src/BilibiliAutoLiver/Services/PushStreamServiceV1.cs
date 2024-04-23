@@ -104,33 +104,12 @@ namespace BilibiliAutoLiver.Services
         {
             try
             {
-                var psi = new ProcessStartInfo
+                var version = await _ffmpeg.GetVersion();
+                if (string.IsNullOrEmpty(version.Version))
                 {
-                    FileName = @"ffmpeg",
-                    Arguments = "-version",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
-                };
-                using (var proc = Process.Start(psi))
-                {
-                    if (proc != null && proc.Id > 0)
-                    {
-                        string result = await proc.StandardOutput.ReadToEndAsync();
-                        if (!string.IsNullOrEmpty(result))
-                        {
-                            string[] allLines = result.Split('\n');
-                            string[] versionLine = allLines.Where(p => p.Contains("ffmpeg version", StringComparison.OrdinalIgnoreCase)).ToArray();
-                            if (versionLine.Length > 0)
-                            {
-                                _logger.LogInformation(versionLine[0]);
-                            }
-                        }
-                        proc.Kill();
-                        return;
-                    }
+                    throw new Exception("获取ffmpeg版本失败。");
                 }
-                throw new Exception("进程启用失败。");
+                _logger.LogInformation($"当前ffmpeg版本：{version.Version}");
             }
             catch (Exception ex)
             {
