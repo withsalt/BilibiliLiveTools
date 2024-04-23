@@ -19,6 +19,7 @@ namespace BilibiliAutoLiver.DependencyInjection
             services.AddQuartz(q =>
             {
                 q.SchedulerId = $"BilibiliAutoLiver";
+                q.InterruptJobsOnShutdown = true;
                 q.UseInMemoryStore();
                 q.UseDefaultThreadPool(tp =>
                 {

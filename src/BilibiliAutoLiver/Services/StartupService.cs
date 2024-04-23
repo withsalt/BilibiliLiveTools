@@ -87,6 +87,8 @@ namespace BilibiliAutoLiver.Services
         {
             try
             {
+                throw new NotSupportedException("目前暂不支持V2版本。");
+
                 await _pushServiceV2.CheckLiveSetting();
                 await _pushServiceV2.CheckLiveRoom();
                 await _pushServiceV2.CheckFFmpegBinary();

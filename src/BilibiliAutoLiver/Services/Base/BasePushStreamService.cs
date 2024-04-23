@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
-using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -93,7 +87,7 @@ namespace BilibiliAutoLiver.Services.Base
             }
             else if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v2)
             {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.Type目前仅支持v1！");
+                
             }
 
             return Task.CompletedTask;

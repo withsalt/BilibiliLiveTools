@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace BilibiliAutoLiver.Services.Interface
+﻿namespace BilibiliAutoLiver.Services.Interface
 {
     public interface IPushStreamServiceV1 : IPushStreamService
     {
