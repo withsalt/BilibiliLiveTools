@@ -7,5 +7,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         public QrCodeLoginStatus LoginStatus { get; set; }
 
         public UserInfo UserInfo { get; set; }
+
+        public LiveRoomInfo LiveRoomInfo { get; set; }
     }
 }

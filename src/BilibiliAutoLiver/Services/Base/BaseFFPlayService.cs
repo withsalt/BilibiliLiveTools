@@ -1,6 +1,6 @@
 ﻿using FFMpegCore;
 
-namespace BilibiliAutoLiver.Services.Interface
+namespace BilibiliAutoLiver.Services.Base
 {
     public abstract class BaseFFPlayService
     {

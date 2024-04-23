@@ -18,16 +18,19 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookieService;
+        private readonly IBilibiliLiveApiService _liveApiService;
 
         public HomeController(ILogger<HomeController> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
-            , IBilibiliCookieService cookieService)
+            , IBilibiliCookieService cookieService
+            , IBilibiliLiveApiService liveApiService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+            _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
         }
 
         public async Task<IActionResult> Index()
@@ -54,14 +57,14 @@ namespace BilibiliAutoLiver.Controllers
                     {
                         cacheEntry.AbsoluteExpiration = DateTime.UtcNow.AddMinutes(30);
 
-                        var cachePageSatus = new IndexPageStatusDto();
-                        cachePageSatus.LoginStatus = new QrCodeLoginStatus()
+                        var cachePageStatus = new IndexPageStatusDto();
+                        cachePageStatus.LoginStatus = new QrCodeLoginStatus()
                         {
                             IsLogged = true
                         };
-                        cachePageSatus.UserInfo = await _accountService.GetUserInfo();
-
-                        return cachePageSatus;
+                        cachePageStatus.UserInfo = await _accountService.GetUserInfo();
+                        cachePageStatus.LiveRoomInfo = await _liveApiService.GetLiveRoomInfo();
+                        return cachePageStatus;
                     });
                 }
                 else

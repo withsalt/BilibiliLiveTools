@@ -37,6 +37,7 @@ namespace BilibiliAutoLiver
             builder.Services.AddFFmpegService();
 
             builder.Services.AddSingleton<IPushStreamServiceV1, PushStreamServiceV1>();
+            builder.Services.AddSingleton<IPushStreamServiceV2, PushStreamServiceV2>();
             builder.Services.AddTransient<IStartupService, StartupService>();
 
             builder.Services.AddCors(options =>

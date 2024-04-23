@@ -2,7 +2,7 @@
 
 namespace BilibiliAutoLiver.Services.Interface
 {
-    public interface IPushStreamServiceV1 : IPushStreamService
+    public interface IPushStreamServiceV2 : IPushStreamService
     {
 
     }

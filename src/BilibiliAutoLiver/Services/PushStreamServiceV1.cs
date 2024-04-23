@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
-using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 using Microsoft.Extensions.Logging;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace BilibiliAutoLiver.Services
 {
-    public class PushStreamServiceV1 : IPushStreamServiceV1
+    public class PushStreamServiceV1 : BasePushStreamService, IPushStreamServiceV1
     {
         private readonly ILogger<PushStreamServiceV1> _logger;
         private readonly IBilibiliAccountApiService _account;
@@ -30,7 +30,7 @@ namespace BilibiliAutoLiver.Services
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IOptions<LiveSettings> liveSettingOptions
-            , IFFMpegService ffmpeg)
+            , IFFMpegService ffmpeg) : base(logger, account, api, liveSettingOptions, ffmpeg)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
@@ -45,11 +45,11 @@ namespace BilibiliAutoLiver.Services
         /// <param name="setting"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        public async Task StartPush()
+        public override async Task Start()
         {
             if (_mainTask != null)
             {
-                await StopPush();
+                await Stop();
             }
             if (_tokenSource != null)
             {
@@ -68,7 +68,7 @@ namespace BilibiliAutoLiver.Services
         /// 停止推流
         /// </summary>
         /// <returns></returns>
-        public async Task StopPush()
+        public override async Task Stop()
         {
             if (_mainTask == null)
             {
@@ -94,113 +94,6 @@ namespace BilibiliAutoLiver.Services
             _mainTask = null;
             _tokenSource = null;
             _logger.LogWarning("推流中已停止。");
-        }
-
-        /// <summary>
-        /// 测试FFmpeg
-        /// </summary>
-        /// <returns></returns>
-        public async Task CheckFFmpegBinary()
-        {
-            try
-            {
-                var version = await _ffmpeg.GetVersion();
-                if (string.IsNullOrEmpty(version.Version))
-                {
-                    throw new Exception("获取ffmpeg版本失败。");
-                }
-                _logger.LogInformation($"当前ffmpeg版本：{version.Version}");
-            }
-            catch (Exception ex)
-            {
-                _logger.ThrowLogError($"FFmpeg测试失败，{ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 检查配置文件
-        /// </summary>
-        public Task CheckLiveSetting()
-        {
-            if (_liveSetting.LiveAreaId <= 0)
-            {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveAreaId填写错误！");
-            }
-            if (string.IsNullOrWhiteSpace(_liveSetting.LiveRoomName))
-            {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveRoomName不能为空！");
-            }
-            if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v1)
-            {
-                string cmd = _liveSetting.V1?.FFmpegCommands?.GetTargetOSPlatformCommand();
-                if (string.IsNullOrWhiteSpace(cmd))
-                {
-                    _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不能为空！");
-                }
-                int markIndex = cmd.IndexOf("[[URL]]");
-                if (markIndex < 5)
-                {
-                    throw new Exception("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确，命令中未找到 '[[URL]]'标记。");
-                }
-                if (cmd[markIndex - 1] == '\"')
-                {
-                    throw new Exception("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确， '[[URL]]'标记前后无需“\"”。");
-                }
-            }
-            else if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v2)
-            {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.Type目前仅支持v1！");
-            }
-
-            return Task.CompletedTask;
-        }
-
-
-        /// <summary>
-        /// 检查直播间信息
-        /// </summary>
-        public async Task CheckLiveRoom()
-        {
-            //登录
-            var userInfo = await _account.LoginByCookie();
-            if (userInfo == null || !userInfo.IsLogin)
-            {
-                _logger.ThrowLogError("登录失败，Cookie无效或已过期，请重新配置Cookie！");
-            }
-            _logger.LogInformation($"用户{userInfo.Uname}，登录成功！");
-            //获取直播间信息
-            var liveRoomInfo = await _api.GetLiveRoomInfo();
-            if (liveRoomInfo == null)
-            {
-                _logger.ThrowLogError("获取直播间信息失败！");
-            }
-            if (liveRoomInfo.room_id == 0 || liveRoomInfo.have_live == 0)
-            {
-                _logger.ThrowLogError("当前用户未开通直播间！");
-            }
-            _logger.LogInformation($"获取直播间信息成功，当前直播间地址：http://live.bilibili.com/{liveRoomInfo.room_id}，名称：{liveRoomInfo.title}，分区：{liveRoomInfo.parent_name}·{liveRoomInfo.area_v2_name}，直播状态：{(liveRoomInfo.live_status == 1 ? "直播中" : "未开启")}");
-            //检查名称
-            if (liveRoomInfo.title != _liveSetting.LiveRoomName)
-            {
-                bool result = await _api.UpdateLiveRoomName(liveRoomInfo.room_id, _liveSetting.LiveRoomName);
-                if (!result)
-                {
-                    _logger.ThrowLogError($"修改直播间名称为【{_liveSetting.LiveRoomName}】失败！");
-                }
-                _logger.LogInformation($"修改直播间名称为：{_liveSetting.LiveRoomName}，成功！");
-                await Task.Delay(1000);
-            }
-            //检查分区
-            if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
-            {
-                bool result = await _api.UpdateLiveRoomArea(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
-                if (!result)
-                {
-                    _logger.ThrowLogError($"修改直播间分区为【{_liveSetting.LiveAreaId}】失败！");
-                }
-                _logger.LogInformation($"修改直播间分区为：{_liveSetting.LiveAreaId}，成功！");
-                await Task.Delay(1000);
-            }
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.Interface;
 using CliWrap;
 using CliWrap.Buffered;
