@@ -1,4 +1,4 @@
-namespace BilibiliAutoLiver.Models
+namespace BilibiliAutoLiver.Models.ViewModels
 {
     public class ErrorViewModel
     {

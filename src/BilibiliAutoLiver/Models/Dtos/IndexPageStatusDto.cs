@@ -1,8 +1,8 @@
 ﻿using Bilibili.AspNetCore.Apis.Models;
 
-namespace BilibiliAutoLiver.Models
+namespace BilibiliAutoLiver.Models.Dtos
 {
-    public class IndexPageStatus
+    public class IndexPageStatusDto
     {
         public QrCodeLoginStatus LoginStatus { get; set; }
 

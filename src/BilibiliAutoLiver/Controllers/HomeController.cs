@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -31,15 +32,15 @@ namespace BilibiliAutoLiver.Controllers
 
         public async Task<IActionResult> Index()
         {
-            IndexPageStatus pageSatus = await Status();
-            ViewData[nameof(IndexPageStatus)] = pageSatus;
+            IndexPageStatusDto pageSatus = await Status();
+            ViewData[nameof(IndexPageStatusDto)] = pageSatus;
             return View();
         }
 
         [HttpPost]
-        public async Task<IndexPageStatus> Status()
+        public async Task<IndexPageStatusDto> Status()
         {
-            IndexPageStatus pageSatus = new IndexPageStatus();
+            IndexPageStatusDto pageSatus = new IndexPageStatusDto();
             if (_accountService.TryGetQrCodeLoginStatus(out var loginStatus))
             {
                 pageSatus.LoginStatus = loginStatus;
@@ -49,11 +50,11 @@ namespace BilibiliAutoLiver.Controllers
             {
                 if (_cookieService.HasCookie())
                 {
-                    pageSatus = await _cache.GetOrCreateAsync<IndexPageStatus>(CacheKeyConstant.INDEX_PAGE_CACHE_KEY, async (cacheEntry) =>
+                    pageSatus = await _cache.GetOrCreateAsync<IndexPageStatusDto>(CacheKeyConstant.INDEX_PAGE_CACHE_KEY, async (cacheEntry) =>
                     {
                         cacheEntry.AbsoluteExpiration = DateTime.UtcNow.AddMinutes(30);
 
-                        var cachePageSatus = new IndexPageStatus();
+                        var cachePageSatus = new IndexPageStatusDto();
                         cachePageSatus.LoginStatus = new QrCodeLoginStatus()
                         {
                             IsLogged = true
