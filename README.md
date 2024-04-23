@@ -141,7 +141,7 @@ Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733
 
 2. 通过Cookie登录失败  
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/6.png)
-长期未登录（至少半年），账号失效了？
+长期未登录（至少半年），修改过密码（修改密码后全平台下线），账号失效了？
 
 3. FFmpeg测试失败，An error occurred trying to start process...
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/not_install_ffmpeg.jpg)
