@@ -28,7 +28,7 @@ namespace BilibiliAutoLiver.Services
             {
                 throw new FileNotFoundException(nameof(filePath));
             }
-            bool snapshotResult = await FFMpeg.SnapshotAsync(filePath, outPath, new Size(width, height), TimeSpan.FromSeconds(cutTime));
+            bool snapshotResult = await FFMpegCore.FFMpeg.SnapshotAsync(filePath, outPath, new Size(width, height), TimeSpan.FromSeconds(cutTime));
             if (!snapshotResult)
             {
                 throw new Exception($"Snapshot in {cutTime} from video '{filePath}' failed.");

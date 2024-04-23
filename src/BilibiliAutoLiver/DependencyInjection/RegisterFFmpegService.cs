@@ -37,7 +37,7 @@ namespace BilibiliAutoLiver.DependencyInjection
 
         private static string GetBinaryFolder()
         {
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "runtimes", GetProcessArchitecturePath());
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "runtimes", GetProcessArchitecturePath(), "bin");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return path;

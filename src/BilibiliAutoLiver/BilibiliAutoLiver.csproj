@@ -13,6 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.8" />
 		<PackageReference Include="Quartz" Version="3.8.1" />
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.1" />
@@ -27,19 +28,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Content\demo_music.m4a">
+		<None Update="runtimes\content\demo_music.m4a">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="runtimes\linux-arm64\ffmpeg">
+		<None Update="runtimes\linux-arm64\bin\ffmpeg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="runtimes\linux-arm64\ffprobe">
+		<None Update="runtimes\linux-arm64\bin\ffprobe">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="runtimes\win-x64\ffmpeg.exe">
+		<None Update="runtimes\win-x64\bin\ffmpeg.exe">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="runtimes\win-x64\ffprobe.exe">
+		<None Update="runtimes\win-x64\bin\ffprobe.exe">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
