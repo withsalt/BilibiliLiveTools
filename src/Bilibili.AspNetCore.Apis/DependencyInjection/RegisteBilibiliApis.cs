@@ -13,7 +13,7 @@ namespace Bilibili.AspNetCore.Apis.DependencyInjection
             //Http请求相关
             services.AddTransient<IHttpClientService, HttpClientService>();
             //账号
-            services.AddTransient<IBilibiliAccountService, BilibiliAccountService>();
+            services.AddTransient<IBilibiliAccountApiService, BilibiliAccountApiService>();
             //直播的API
             services.AddTransient<IBilibiliLiveApiService, BilibiliLiveApiService>();
 

@@ -11,12 +11,12 @@ namespace BilibiliAutoLiver.Services
     class StartupService : IStartupService
     {
         private readonly ILogger<StartupService> _logger;
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
         private readonly IRefreshCookieJobSchedulerService _jobScheduler;
         private readonly IPushStreamServiceV1 _pushServiceV1;
 
         public StartupService(ILogger<StartupService> logger
-            , IBilibiliAccountService accountService
+            , IBilibiliAccountApiService accountService
             , IRefreshCookieJobSchedulerService jobScheduler
             , IPushStreamServiceV1 pushServiceV1)
         {

@@ -9,11 +9,11 @@ namespace BilibiliAutoLiver.Controllers
     public class AccountController : Controller
     {
         private readonly ILogger<AccountController> _logger;
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookieService;
 
         public AccountController(ILogger<AccountController> logger
-            , IBilibiliAccountService accountService
+            , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

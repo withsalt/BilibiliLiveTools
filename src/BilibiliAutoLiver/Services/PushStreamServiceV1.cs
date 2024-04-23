@@ -18,7 +18,7 @@ namespace BilibiliAutoLiver.Services
     public class PushStreamServiceV1 : IPushStreamServiceV1
     {
         private readonly ILogger<PushStreamServiceV1> _logger;
-        private readonly IBilibiliAccountService _account;
+        private readonly IBilibiliAccountApiService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
         private readonly LiveSettings _liveSetting;
@@ -27,7 +27,7 @@ namespace BilibiliAutoLiver.Services
         private Task _mainTask;
 
         public PushStreamServiceV1(ILogger<PushStreamServiceV1> logger
-            , IBilibiliAccountService account
+            , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IOptions<LiveSettings> liveSettingOptions
             , IFFMpegService ffmpeg)

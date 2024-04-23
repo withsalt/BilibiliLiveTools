@@ -12,7 +12,7 @@ namespace BilibiliLiverTests.Services
     public class BilibiliCookieServiceTests : BilibiliLiverTestsBase
     {
         private readonly IBilibiliCookieService _cookieService;
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
 
         public BilibiliCookieServiceTests()
         {
@@ -21,7 +21,7 @@ namespace BilibiliLiverTests.Services
             {
                 Assert.Fail();
             }
-            _accountService = (IBilibiliAccountService)ServiceProvider.GetService(typeof(IBilibiliAccountService));
+            _accountService = (IBilibiliAccountApiService)ServiceProvider.GetService(typeof(IBilibiliAccountApiService));
             if (_accountService == null)
             {
                 Assert.Fail();

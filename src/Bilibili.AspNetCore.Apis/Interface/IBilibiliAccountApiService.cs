@@ -4,7 +4,7 @@ using Bilibili.AspNetCore.Apis.Models.Base;
 
 namespace Bilibili.AspNetCore.Apis.Interface
 {
-    public interface IBilibiliAccountService
+    public interface IBilibiliAccountApiService
     {
         /// <summary>
         /// 获取用户信息

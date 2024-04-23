@@ -16,12 +16,12 @@ namespace BilibiliAutoLiver.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IMemoryCache _cache;
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookieService;
 
         public HomeController(ILogger<HomeController> logger
             , IMemoryCache cache
-            , IBilibiliAccountService accountService
+            , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

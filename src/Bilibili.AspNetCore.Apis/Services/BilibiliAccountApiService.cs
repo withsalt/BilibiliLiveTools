@@ -22,7 +22,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bilibili.AspNetCore.Apis.Services
 {
-    public class BilibiliAccountService : IBilibiliAccountService
+    public class BilibiliAccountApiService : IBilibiliAccountApiService
     {
         private string _navApi = "https://api.bilibili.com/x/web-interface/nav";
 
@@ -57,11 +57,11 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         private readonly IHttpClientService _httpClient;
         private readonly IBilibiliCookieService _cookieService;
-        private readonly ILogger<BilibiliAccountService> _logger;
+        private readonly ILogger<BilibiliAccountApiService> _logger;
         private readonly IServer _server;
         private readonly IMemoryCache _cache;
 
-        public BilibiliAccountService(ILogger<BilibiliAccountService> logger
+        public BilibiliAccountApiService(ILogger<BilibiliAccountApiService> logger
             , IHttpClientService httpClient
             , IBilibiliCookieService cookieService
             , IServer server

@@ -10,11 +10,11 @@ namespace BilibiliLiverTests.Services
     [TestClass()]
     public class AccountServiceTests : BilibiliLiverTestsBase
     {
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
 
         public AccountServiceTests()
         {
-            _accountService = (IBilibiliAccountService)ServiceProvider.GetService(typeof(IBilibiliAccountService));
+            _accountService = (IBilibiliAccountApiService)ServiceProvider.GetService(typeof(IBilibiliAccountApiService));
             if (_accountService == null)
             {
                 Assert.Fail();
