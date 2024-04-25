@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>disable</Nullable>
-		<Version>4.0.1</Version>
+		<Version>4.0.2</Version>
 		<Description>Bilibili API封装。</Description>
 	</PropertyGroup>
 
