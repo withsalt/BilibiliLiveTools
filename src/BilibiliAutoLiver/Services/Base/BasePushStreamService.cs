@@ -42,6 +42,7 @@ namespace BilibiliAutoLiver.Services.Base
         {
             try
             {
+                _logger.LogInformation($"当前ffmpeg路径：{_ffmpeg.GetBinaryPath()}");
                 var version = await _ffmpeg.GetVersion();
                 if (string.IsNullOrEmpty(version.Version))
                 {
@@ -87,7 +88,7 @@ namespace BilibiliAutoLiver.Services.Base
             }
             else if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v2)
             {
-                
+
             }
 
             return Task.CompletedTask;

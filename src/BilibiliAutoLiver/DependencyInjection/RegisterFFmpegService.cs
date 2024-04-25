@@ -37,21 +37,67 @@ namespace BilibiliAutoLiver.DependencyInjection
 
         private static string GetBinaryFolder()
         {
-            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "runtimes", GetProcessArchitecturePath(), "bin");
+            string defaultBinPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "runtimes", GetProcessArchitecturePath(), "bin");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return path;
+                string path = Path.Combine(defaultBinPath, "ffmpeg.exe");
+                if (File.Exists(path))
+                {
+                    return defaultBinPath;
+                }
+                string allPathEnvs = Environment.GetEnvironmentVariable("Path");
+                if (!string.IsNullOrWhiteSpace(allPathEnvs))
+                {
+                    string[] allPath = allPathEnvs.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                    if (allPath != null && allPath.Length > 0)
+                    {
+                        foreach (var pathItem in allPath)
+                        {
+                            string ffmpegPath = Path.Combine(pathItem, "ffmpeg.exe");
+                            if (File.Exists(ffmpegPath))
+                            {
+                                return pathItem;
+                            }
+                        }
+                    }
+                }
+                throw new FileNotFoundException($"FFMpeg not found, please download ffmpeg to the path {defaultBinPath}.", defaultBinPath);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                string binPath = Path.Combine(path, "ffmpeg");
-                if (File.Exists(binPath))
+                string path = Path.Combine(defaultBinPath, "ffmpeg");
+                if (File.Exists(path))
                 {
-                    return path;
+                    SetUnixFileExecutable(path);
+                    return defaultBinPath;
                 }
-                return "/usr/bin";
+                if (File.Exists("/usr/bin/ffmpeg"))
+                {
+                    return "/usr/bin";
+                }
+                throw new FileNotFoundException("FFMpeg not found, please install ffmpeg at first. In a Debian OS, you can use 'apt install ffmpeg' to install it.");
             }
-            return null;
+            else
+            {
+                throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
+            }
+        }
+
+        private static void SetUnixFileExecutable(string path)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (!File.Exists(path))
+                {
+                    return;
+                }
+                UnixFileMode fileMode = File.GetUnixFileMode(path);
+                if ((UnixFileMode.UserExecute & fileMode) == UnixFileMode.UserExecute)
+                {
+                    return;
+                }
+                File.SetUnixFileMode(path, fileMode | UnixFileMode.UserExecute);
+            }
         }
 
         private static string GetProcessArchitecturePath()

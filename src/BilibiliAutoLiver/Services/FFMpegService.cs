@@ -8,7 +8,6 @@ using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.Interface;
 using CliWrap;
 using CliWrap.Buffered;
-using FFMpegCore;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services
@@ -44,22 +43,16 @@ namespace BilibiliAutoLiver.Services
         {
             string binName;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
                 binName = "ffmpeg.exe";
-            }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
                 binName = "ffmpeg";
-            }
             else
-            {
                 throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
-            }
 
             string path = Path.Combine(GetBinaryFolder(), binName);
             if (!File.Exists(path))
             {
-                throw new FileNotFoundException("ffmpeg not found, please download ffmpeg in target os path.", path);
+                throw new FileNotFoundException("FFMpeg not found, please download or install ffmpeg at firist.", path);
             }
             return path;
         }

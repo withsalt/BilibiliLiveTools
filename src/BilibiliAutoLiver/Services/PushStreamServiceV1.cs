@@ -135,10 +135,18 @@ namespace BilibiliAutoLiver.Services
                 throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
             }
             string cmdName = newCmd.Substring(0, firstNullChar);
+            if (string.IsNullOrEmpty(cmdName))
+            {
+                throw new Exception("命令名称不能为空！");
+            }
             string cmdArgs = newCmd.Substring(firstNullChar);
             if (string.IsNullOrEmpty(cmdArgs))
             {
                 throw new Exception("命令参数不能为空！");
+            }
+            if (cmdName.EndsWith("ffmpeg", StringComparison.OrdinalIgnoreCase) || cmdName.EndsWith("ffmpeg.exe", StringComparison.OrdinalIgnoreCase))
+            {
+                cmdName = _ffmpeg.GetBinaryPath();
             }
             var psi = new ProcessStartInfo
             {

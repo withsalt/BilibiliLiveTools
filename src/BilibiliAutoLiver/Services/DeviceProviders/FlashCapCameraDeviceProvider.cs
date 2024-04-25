@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using FlashCap;
+using SkiaSharp;
 
 namespace BilibiliAutoLiver.Services.DeviceProviders
 {
     public class FlashCapCameraDeviceProvider : ICameraDeviceProvider
     {
-        private Action<byte[]> _onBuffer;
+        private Action<BufferFrame> _onBuffer;
 
         private CaptureDevice _captureDevice;
 
-        public FlashCapCameraDeviceProvider(InputVideoSourceItem sourceItem, PixelBufferArrivedDelegate onBuffer)
+        private int _countFrames;
+
+        public FlashCapCameraDeviceProvider(InputVideoSourceItem sourceItem, Action<BufferFrame> onBuffer)
         {
             if (onBuffer == null) throw new ArgumentException("On buffer action can not null");
             _onBuffer = onBuffer;
@@ -42,7 +46,7 @@ namespace BilibiliAutoLiver.Services.DeviceProviders
                 throw new Exception($"视频输入设备{device.Name}不支持分辨率{sourceItem.Resolution}");
             }
             VideoCharacteristics characteristics = targetCharacteristics.First();
-            _captureDevice = device.OpenAsync(characteristics, _onBuffer).GetAwaiter().GetResult();
+            _captureDevice = device.OpenAsync(characteristics, PixelBufferArrived).GetAwaiter().GetResult();
             if (_captureDevice == null)
             {
                 throw new Exception($"无法打开视频输入设备设备：{device.Name}");
@@ -61,18 +65,50 @@ namespace BilibiliAutoLiver.Services.DeviceProviders
 
         private void PixelBufferArrived(PixelBufferScope bufferScope)
         {
+            try
+            {
+                ArraySegment<byte> image = bufferScope.Buffer.ReferImage();
+                if (image.Count <= 0 || image.Array == null)
+                {
+                    return;
+                }
+                int countFrames = Interlocked.Increment(ref _countFrames);
+                long frameIndex = bufferScope.Buffer.FrameIndex;
+                TimeSpan timestamp = bufferScope.Buffer.Timestamp;
+                SKBitmap bitmap = SKBitmap.Decode(image);
 
+                BufferFrame frame = new BufferFrame()
+                {
+                    Bitmap = bitmap,
+                    FrameCount = countFrames,
+                    FrameIndex = frameIndex,
+                    Timestamp = timestamp,
+                };
+                _onBuffer(frame);
+            }
+            finally
+            {
+                bufferScope.ReleaseNow();
+            }
         }
     }
 
-    public class BufferFrame
+    public sealed class BufferFrame : IDisposable
     {
-        public byte[] Bytes { get; set; }
+        public SKBitmap Bitmap { get; set; }
 
         public int FrameCount { get; set; }
 
-        public int FrameIndex { get; set; }
+        public long FrameIndex { get; set; }
 
-        public int Timestamp { get; set; }
+        public TimeSpan Timestamp { get; set; }
+
+        public void Dispose()
+        {
+            if (this.Bitmap != null)
+            {
+                this.Bitmap.Dispose();
+            }
+        }
     }
 }
