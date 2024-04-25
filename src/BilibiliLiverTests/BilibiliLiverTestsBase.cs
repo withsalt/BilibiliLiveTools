@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
+using BilibiliAutoLiver.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using System;
-using BilibiliAutoLiver.DependencyInjection;
 
 namespace BilibiliLiverTests
 {
@@ -24,7 +25,7 @@ namespace BilibiliLiverTests
             //缓存
             builder.Services.AddMemoryCache();
             //添加Bilibili相关的服务
-            builder.Services.AddBilibiliServices();
+            builder.Services.AddBilibiliApis();
             //定时任务
             builder.Services.AddQuartz();
             //FFMpeg

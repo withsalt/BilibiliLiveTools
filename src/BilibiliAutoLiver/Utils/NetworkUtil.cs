@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BilibiliAutoLiver.Utils
 {
-    public class NetworkUtil
+    class NetworkUtil
     {
         private static readonly List<string> _hosts = new List<string>()
         {

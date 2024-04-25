@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Quartz;
-using System;
-using BilibiliLive.Tool.Monitor.Jobs;
+﻿using System;
 using BilibiliLive.Tool.Monitor.DependencyInjection;
-using BilibiliLive.Tool.Monitor.Services.Interface;
+using BilibiliLive.Tool.Monitor.Jobs;
 using BilibiliLive.Tool.Monitor.Services;
+using BilibiliLive.Tool.Monitor.Services.Interface;
+using Microsoft.Extensions.DependencyInjection;
+using Quartz;
 
 namespace BilibiliLive.Tool.Monitor.DependencyInjection
 {

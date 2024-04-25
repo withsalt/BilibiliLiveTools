@@ -1,9 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Models;
-using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -14,58 +16,60 @@ namespace BilibiliAutoLiver.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IMemoryCache _cache;
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookieService;
+        private readonly IBilibiliLiveApiService _liveApiService;
 
         public HomeController(ILogger<HomeController> logger
             , IMemoryCache cache
-            , IBilibiliAccountService accountService
-            , IBilibiliCookieService cookieService)
+            , IBilibiliAccountApiService accountService
+            , IBilibiliCookieService cookieService
+            , IBilibiliLiveApiService liveApiService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+            _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
         }
 
         public async Task<IActionResult> Index()
         {
-            IndexPageStatus pageSatus = await Status();
-            ViewData[nameof(IndexPageStatus)] = pageSatus;
+            IndexPageStatusDto pageSatus = await Status();
+            ViewData[nameof(IndexPageStatusDto)] = pageSatus;
             return View();
         }
 
         [HttpPost]
-        public async Task<IndexPageStatus> Status()
+        public async Task<IndexPageStatusDto> Status()
         {
-            IndexPageStatus pageSatus = new IndexPageStatus();
-            LoginStatusCacheInfo loginInfo = _cache.Get<LoginStatusCacheInfo>(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY);
-            if (loginInfo != null)
+            IndexPageStatusDto pageSatus = new IndexPageStatusDto();
+            if (_accountService.TryGetQrCodeLoginStatus(out var loginStatus))
             {
-                pageSatus.LoginStatus = loginInfo;
+                pageSatus.LoginStatus = loginStatus;
                 pageSatus.LoginStatus.IsLogged = false;
             }
             else
             {
                 if (_cookieService.HasCookie())
                 {
-                    pageSatus = await _cache.GetOrCreateAsync<IndexPageStatus>(CacheKeyConstant.INDEX_PAGE_CACHE_KEY, async (cacheEntry) =>
+                    pageSatus = await _cache.GetOrCreateAsync<IndexPageStatusDto>(CacheKeyConstant.INDEX_PAGE_CACHE_KEY, async (cacheEntry) =>
                     {
                         cacheEntry.AbsoluteExpiration = DateTime.UtcNow.AddMinutes(30);
 
-                        var cachePageSatus = new IndexPageStatus();
-                        cachePageSatus.LoginStatus = new LoginStatusCacheInfo()
+                        var cachePageStatus = new IndexPageStatusDto();
+                        cachePageStatus.LoginStatus = new QrCodeLoginStatus()
                         {
                             IsLogged = true
                         };
-                        cachePageSatus.UserInfo = await _accountService.GetUserInfo();
-
-                        return cachePageSatus;
+                        cachePageStatus.UserInfo = await _accountService.GetUserInfo();
+                        cachePageStatus.LiveRoomInfo = await _liveApiService.GetLiveRoomInfo();
+                        return cachePageStatus;
                     });
                 }
                 else
                 {
-                    pageSatus.LoginStatus = new LoginStatusCacheInfo();
+                    pageSatus.LoginStatus = new QrCodeLoginStatus();
                     pageSatus.LoginStatus.IsLogged = false;
                 }
             }

@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliLive.Tool.UpdateAre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliLive.Tool.Monitor", "BilibiliLive.Tool.Monitor\BilibiliLive.Tool.Monitor.csproj", "{2FDC01E0-1941-4973-9AE4-3B135B9711AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bilibili.AspNetCore.Apis", "Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj", "{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{2FDC01E0-1941-4973-9AE4-3B135B9711AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FDC01E0-1941-4973-9AE4-3B135B9711AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FDC01E0-1941-4973-9AE4-3B135B9711AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

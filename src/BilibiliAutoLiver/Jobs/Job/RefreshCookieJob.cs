@@ -1,12 +1,11 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using System;
+using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
+using BilibiliAutoLiver.Config;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Quartz;
-using System;
-using System.Threading.Tasks;
-using System.Linq;
-using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Models;
 
 namespace BilibiliAutoLiver.Jobs.Job
 {
@@ -15,12 +14,12 @@ namespace BilibiliAutoLiver.Jobs.Job
     {
         private readonly ILogger<RefreshCookieJob> _logger;
         private readonly IMemoryCache _cache;
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookieService;
 
         public RefreshCookieJob(ILogger<RefreshCookieJob> logger
             , IMemoryCache cache
-            , IBilibiliAccountService accountService
+            , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -74,26 +73,33 @@ namespace BilibiliAutoLiver.Jobs.Job
                     _logger.LogInformation("定时刷新Cookie失败，未登录。");
                     return;
                 }
-                UserInfo userInfo = await _accountService.GetUserInfo();
-                if (userInfo == null)
+                if (await _accountService.CookieNeedToRefresh())
                 {
-                    _logger.LogInformation("定时刷新Cookie失败，无效Cookie。");
-                    return;
+                    _logger.LogInformation("检测到Cookie需要刷新，刷新Cookie。");
                 }
-                var cookieWillExpired = _cookieService.WillExpired();
-                if (!cookieWillExpired.Item1)
+                else
                 {
-                    _logger.LogInformation($"定时刷新Cookie完成，Cookie过期时间：{cookieWillExpired.Item2.ToString("yyyy-MM-dd HH:mm:ss")}，无需刷新。");
-                    return;
+                    UserInfo userInfo0 = await _accountService.GetUserInfo();
+                    if (userInfo0 == null)
+                    {
+                        _logger.LogInformation("定时刷新Cookie失败，获取用户信息失败，无效Cookie。");
+                        return;
+                    }
+                    var cookieWillExpired = _cookieService.WillExpired();
+                    if (!cookieWillExpired.Item1)
+                    {
+                        _logger.LogInformation($"定时刷新Cookie完成，Cookie过期时间：{cookieWillExpired.Item2.ToString("yyyy-MM-dd HH:mm:ss")}，无需刷新。");
+                        return;
+                    }
                 }
                 await _accountService.RefreshCookie();
-                userInfo = await _accountService.GetUserInfo();
-                if (userInfo == null)
+                var userInfo1 = await _accountService.GetUserInfo();
+                if (userInfo1 == null)
                 {
                     _logger.LogInformation("定时刷新Cookie失败，新Cookie获取员工失败。");
                     return;
                 }
-                _logger.LogInformation($"用户{userInfo.Uname}定时刷新Cookie完成。");
+                _logger.LogInformation($"用户{userInfo1.Uname}定时刷新Cookie完成。当前用户登录状态：{userInfo1.IsLogin}");
             }
             catch (Exception ex)
             {

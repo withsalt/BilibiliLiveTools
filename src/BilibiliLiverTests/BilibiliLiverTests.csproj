@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj" />
     <ProjectReference Include="..\BilibiliAutoLiver\BilibiliAutoLiver.csproj" />
   </ItemGroup>
 

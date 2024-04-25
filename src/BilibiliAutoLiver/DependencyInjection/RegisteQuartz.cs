@@ -1,8 +1,8 @@
-﻿using BilibiliAutoLiver.Jobs.Job;
+﻿using System;
+using BilibiliAutoLiver.Jobs.Job;
 using BilibiliAutoLiver.Jobs.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
-using System;
 
 namespace BilibiliAutoLiver.DependencyInjection
 {
@@ -19,6 +19,7 @@ namespace BilibiliAutoLiver.DependencyInjection
             services.AddQuartz(q =>
             {
                 q.SchedulerId = $"BilibiliAutoLiver";
+                q.InterruptJobsOnShutdown = true;
                 q.UseInMemoryStore();
                 q.UseDefaultThreadPool(tp =>
                 {

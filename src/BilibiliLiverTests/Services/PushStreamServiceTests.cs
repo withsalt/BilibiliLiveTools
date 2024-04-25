@@ -1,8 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
-using BilibiliLiverTests;
+﻿using System.Threading.Tasks;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BilibiliLiverTests.Services
 {
@@ -25,13 +23,6 @@ namespace BilibiliLiverTests.Services
         {
             await _pushStream.CheckFFmpegBinary();
             Assert.Fail();
-        }
-
-        [TestMethod()]
-        public async Task NetworkCheckTest()
-        {
-            bool result = await NetworkUtil.Ping();
-            Assert.IsTrue(result);
         }
     }
 }

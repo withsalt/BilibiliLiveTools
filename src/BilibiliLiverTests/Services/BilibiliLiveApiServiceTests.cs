@@ -1,7 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
-using BilibiliLiverTests;
-using BilibiliAutoLiver.Services.Interface;
+﻿using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Interface;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BilibiliLiverTests.Services
 {

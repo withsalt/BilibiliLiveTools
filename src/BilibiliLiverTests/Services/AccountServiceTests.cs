@@ -1,23 +1,20 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
-using BilibiliLiverTests;
-using System.IO;
-using System.Diagnostics;
+using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Utils;
-using BilibiliAutoLiver.Models;
 
 namespace BilibiliLiverTests.Services
 {
     [TestClass()]
     public class AccountServiceTests : BilibiliLiverTestsBase
     {
-        private readonly IBilibiliAccountService _accountService;
+        private readonly IBilibiliAccountApiService _accountService;
 
         public AccountServiceTests()
         {
-            _accountService = (IBilibiliAccountService)ServiceProvider.GetService(typeof(IBilibiliAccountService));
+            _accountService = (IBilibiliAccountApiService)ServiceProvider.GetService(typeof(IBilibiliAccountApiService));
             if (_accountService == null)
             {
                 Assert.Fail();
@@ -69,13 +66,7 @@ namespace BilibiliLiverTests.Services
         {
             QrCodeUrl qrCode = await _accountService.GenerateQrCode();
 
-            byte[] qrCodeBytes = QrCode.Generate(qrCode.url);
-            {
-                using (FileStream fileStream = new FileStream("qrcode.png", FileMode.Create))
-                {
-                    await fileStream.WriteAsync(qrCodeBytes, 0, qrCodeBytes.Length);
-                }
-            }
+            byte[] qrCodeBytes = qrCode.GetBytes();
             Stopwatch sw = Stopwatch.StartNew();
             while (true)
             {

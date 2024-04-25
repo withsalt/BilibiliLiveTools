@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using Bilibili.AspNetCore.Apis.DependencyInjection;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Services;
@@ -29,12 +30,14 @@ namespace BilibiliAutoLiver
             //缓存
             builder.Services.AddMemoryCache();
             //添加Bilibili相关的服务
-            builder.Services.AddBilibiliServices();
+            builder.Services.AddBilibiliApis();
             //定时任务
             builder.Services.AddQuartz();
             //FFMpeg
             builder.Services.AddFFmpegService();
 
+            builder.Services.AddSingleton<IPushStreamServiceV1, PushStreamServiceV1>();
+            builder.Services.AddSingleton<IPushStreamServiceV2, PushStreamServiceV2>();
             builder.Services.AddTransient<IStartupService, StartupService>();
 
             builder.Services.AddCors(options =>
