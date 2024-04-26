@@ -32,11 +32,15 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
 
 ### 教程
 
-#### 在Linux上面推流（这里以树莓派为例，64位操作系统）
-1. 获取程序  
+#### 开始推流
+1. 获取程序
+树莓派 64位操作系统：    
 ```shell
 wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Linux_ARM64.zip --no-check-certificate
 ```
+
+Windows：  
+点击链接下载：[https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip](https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip "https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip")
 
 2. 解压并授权  
 ```shell
@@ -52,22 +56,35 @@ nano appsettings.json
 配置文件如下所示，按照提示修改为自己的分区和直播间名称。  
 ```json
 {
-  "LiveSetting": {
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "LiveSettings": {
     //直播间分类
     "LiveAreaId": 369,
     //直播间名称
     "LiveRoomName": "【24H】小金鱼啦~",
-    //FFmpeg推流命令，请自行填写对应操作系统和设备的推流命令
-    //填写到此处时，请注意将命令中‘"’用‘\’进行转义，将推流的rtmp连接替换为[[URL]]，[[URL]]不需要双引号。
-    //下面推流指令默认适配设备树莓派，使用USB摄像头，设备为/dev/video0
-    "FFmpegCmd": "ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Content/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv [[URL]]",
-    //ffmpeg异常退出后，是否自动重新启动
-    "AutoRestart": true
+    "Type": "v1", //目前仅支持V1
+    "V1": {
+      "FFmpegCommands": {
+        //FFmpeg推流命令，请自行填写对应操作系统和设备的推流命令
+        //填写到此处时，请注意将命令中‘"’用‘\’进行转义，将推流的rtmp连接替换为[[URL]]，[[URL]]不需要双引号。
+        //在Windows环境下调用ffmpeg的命令，使用USB摄像头，设备为HD Pro Webcam C920。列出所有可用设备命令：ffmpeg -list_devices true -f dshow -i dummy
+        "Win": "ffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv [[URL]]",
+        //在Linux环境下调用ffmpeg的命令，使用USB摄像头，设备为/dev/video0，默认适配树莓派
+        "Linux": "ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Content/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv [[URL]]"
+      }
+    }
   }
 }
+
 ```
-由于推流方式不同以及FFMpeg配置比较复杂，不同的平台、不同的硬件的参数都不相同（主要是懒，懒得去写FFMpeg的适配了，直接调用多巴适）。  
-这里采用直接填写推流命令的方式。**建议填写之前先测试推流命令能否正确执行。**  
+Windows系统填写推流命令到FFmpegCommands->Win中，Linux系统填写推流命令到FFmpegCommands->Linux中。
+由于推流方式不同以及FFMpeg配置比较复杂，不同的平台、不同的硬件的参数都不相同（主要是懒，懒得去写FFMpeg的适配了，直接调用多巴适）。这里采用直接填写推流命令的方式。**建议填写之前先测试推流命令能否正确执行。**  
 比如默认的推流命令设配树莓派官方系统，并且使用USB摄像头，设备Id为`/dev/video0`。其它系统可能不适用，需要自己修改。  
 推流命令（FFmpegCmd）中的“[[URL]]”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “[[URL]]”（URL大写） ，否则程序将抛出错误。推流命令中注意半角双引号需要用符号‘\’来进行转义。  
 这里提供常见的两条推流命令：  
@@ -99,7 +116,6 @@ ffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec lib
   前往：https://www.gyan.dev/ffmpeg/builds/ 下载你喜欢版本的ffmpeg。下载之后，解压到你喜欢的路径。然后配置为ffmpeg程序所在路径配置环境变量。  
   （预计下个版本会内置windows版本的ffmpeg）。  
 
-
 6. 跑起来  
 ```shell
 ./BilibiliAutoLiver --urls="http://*:18686"
@@ -111,14 +127,6 @@ ffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec lib
 
 8. 配置开机自启等  
 Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733  
-
-#### 在Windows系统上面推流
-
-1. 获取程序  
-点击链接：[https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip](https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip "https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip")
-下载最新的适用于Windows系统的发布包。  
-其余步骤和上一节“在Linux上面推流”中步骤一致。  
-
 
 ### 如何登录
 目前已经支持扫码登录和自动维护Cookie。第一次运行程序时，会要求使用Bilibili移动端扫码登录。  
