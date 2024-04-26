@@ -33,7 +33,7 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
 ### 教程
 
 #### 开始推流
-1. 获取程序
+1. 获取程序  
 树莓派 64位操作系统：    
 ```shell
 wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Linux_ARM64.zip --no-check-certificate
