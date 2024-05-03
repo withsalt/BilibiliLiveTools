@@ -41,15 +41,21 @@ namespace BilibiliAutoLiver.Services
             //登录成功之后，启动定时任务
             await _jobScheduler.Start();
             //开始推流
-            switch (_liveSetting.Type)
+            if (_liveSetting.V2?.IsEnabled== true)
             {
-                case PushStreamMethodType.v1:
-                    await StartPushV1();
-                    break;
-                case PushStreamMethodType.v2:
-                    await StartPushV2();
-                    break;
+                if(_liveSetting.V1?.IsEnabled != true)
+                {
+                    throw new NotSupportedException("暂不支持使用V2的推流方式。");
+                }
+                //await StartPushV2();
+                //return;
             }
+            if (_liveSetting.V1?.IsEnabled == true)
+            {
+                await StartPushV1();
+                return;
+            }
+            throw new NotSupportedException("V1和V2两种推流方式，至少启用一种！");
         }
 
         public async Task<UserInfo> Login()

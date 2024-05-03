@@ -69,7 +69,12 @@ namespace BilibiliAutoLiver.Services.Base
             {
                 _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveRoomName不能为空！");
             }
-            if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v1)
+            if (_liveSetting.V1?.IsEnabled != true && _liveSetting.V2?.IsEnabled != true)
+            {
+                _logger.ThrowLogError("V1和V2两种推流方式，至少启用一种！");
+            }
+
+            if (_liveSetting.V1?.IsEnabled == true)
             {
                 string cmd = _liveSetting.V1?.FFmpegCommands?.GetTargetOSPlatformCommand();
                 if (string.IsNullOrWhiteSpace(cmd))
@@ -86,9 +91,12 @@ namespace BilibiliAutoLiver.Services.Base
                     throw new Exception("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确， '[[URL]]'标记前后无需“\"”。");
                 }
             }
-            else if (_liveSetting.Type == Models.Enums.PushStreamMethodType.v2)
+            if (_liveSetting.V2?.IsEnabled == true)
             {
-
+                if (_liveSetting.V1?.IsEnabled != true)
+                {
+                    throw new NotSupportedException("暂不支持使用V2的推流方式。");
+                }
             }
 
             return Task.CompletedTask;

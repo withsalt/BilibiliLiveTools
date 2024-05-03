@@ -11,11 +11,5 @@ namespace BilibiliAutoLiver.DependencyInjection
             services.Configure<LiveSettings>(builder.Configuration.GetSection(LiveSettings.Position));
             return services;
         }
-
-        public static IServiceCollection ConfigureSettings(this IServiceCollection services, HostBuilderContext builder)
-        {
-            services.Configure<LiveSettings>(builder.Configuration.GetSection(LiveSettings.Position));
-            return services;
-        }
     }
 }

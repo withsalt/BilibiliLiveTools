@@ -5,7 +5,7 @@
 <div class="text-center">
     <div style="margin-top:60px"></div>
     <img src="img/logon.jpg" alt="登录二维码" width="300" height="300" id="loginImg" style="@(status.LoginStatus.IsLogged ? $"" : "display: none;")">
-    <p style="font-size:20px" id="info">@Html.Raw(status.LoginStatus.IsLogged ? $"<span style=\"color:green;\">已登录</span><br />登录用户：{status.UserInfo.Uname}（{status.UserInfo.Mid}）" : "<span style=\"color:red;\">未登录</span>")</p>
+    <p style="font-size:20px" id="info">@Html.Raw(status.LoginStatus.IsLogged ? $"<span style=\"color:green;\">已登录</span><br />登录用户：{status.UserInfo.Uname}（{status.UserInfo.Mid}）" : "<span style=\"color:red;\">未登录</span>")<br />登录二维码加载中，请稍后...</p>
 </div>
 
 @section Scripts {

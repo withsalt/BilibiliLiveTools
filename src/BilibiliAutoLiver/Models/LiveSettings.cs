@@ -10,8 +10,6 @@ namespace BilibiliAutoLiver.Models
 
         public string LiveRoomName { get; set; }
 
-        public PushStreamMethodType Type { get; set; }
-
         public PushStreamV1Config V1 { get; set; }
 
         public PushStreamV2Config V2 { get; set; }
@@ -19,12 +17,17 @@ namespace BilibiliAutoLiver.Models
         public static string Position { get { return "LiveSettings"; } }
     }
 
-    public class PushStreamV1Config
+    public abstract class BasePushStreamConfig
+    {
+        public bool IsEnabled { get; set; }
+    }
+
+    public class PushStreamV1Config : BasePushStreamConfig
     {
         public FFmpegCommands FFmpegCommands { get; set; }
     }
 
-    public class PushStreamV2Config
+    public class PushStreamV2Config : BasePushStreamConfig
     {
 
     }
