@@ -5,6 +5,7 @@ using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Plugin.Base;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +36,8 @@ namespace BilibiliAutoLiver
             builder.Services.AddQuartz();
             //FFMpeg
             builder.Services.AddFFmpegService();
+            //²å¼þ
+            builder.Services.AddPipePlugins();
 
             builder.Services.AddSingleton<IPushStreamServiceV1, PushStreamServiceV1>();
             builder.Services.AddSingleton<IPushStreamServiceV2, PushStreamServiceV2>();

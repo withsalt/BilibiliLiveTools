@@ -7,11 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiverTests", "Bilib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliAutoLiver", "BilibiliAutoLiver\BilibiliAutoLiver.csproj", "{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliLive.Tool.UpdateArea", "BilibiliLive.Tool.UpdateArea\BilibiliLive.Tool.UpdateArea.csproj", "{B0C4C98B-21EE-4156-9339-45B49474C34C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLive.Tool.UpdateArea", "BilibiliLive.Tool.UpdateArea\BilibiliLive.Tool.UpdateArea.csproj", "{B0C4C98B-21EE-4156-9339-45B49474C34C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliLive.Tool.Monitor", "BilibiliLive.Tool.Monitor\BilibiliLive.Tool.Monitor.csproj", "{2FDC01E0-1941-4973-9AE4-3B135B9711AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLive.Tool.Monitor", "BilibiliLive.Tool.Monitor\BilibiliLive.Tool.Monitor.csproj", "{2FDC01E0-1941-4973-9AE4-3B135B9711AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bilibili.AspNetCore.Apis", "Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj", "{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bilibili.AspNetCore.Apis", "Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj", "{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliAutoLiver.Plugin.Base", "BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj", "{97566CD2-E90B-499A-A74F-003E85E1D769}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5237B7F3-7522-4631-99FF-02DD77528377}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliAutoLiver.Plugin.YoloAI", "BilibiliAutoLiver.Plugin.YoloAI\BilibiliAutoLiver.Plugin.YoloAI.csproj", "{A2BA2D26-87DA-4089-A559-420EBACAD9D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +45,21 @@ Global
 		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97566CD2-E90B-499A-A74F-003E85E1D769}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97566CD2-E90B-499A-A74F-003E85E1D769}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97566CD2-E90B-499A-A74F-003E85E1D769}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97566CD2-E90B-499A-A74F-003E85E1D769}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2BA2D26-87DA-4089-A559-420EBACAD9D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2BA2D26-87DA-4089-A559-420EBACAD9D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2BA2D26-87DA-4089-A559-420EBACAD9D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2BA2D26-87DA-4089-A559-420EBACAD9D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{97566CD2-E90B-499A-A74F-003E85E1D769} = {5237B7F3-7522-4631-99FF-02DD77528377}
+		{A2BA2D26-87DA-4089-A559-420EBACAD9D1} = {5237B7F3-7522-4631-99FF-02DD77528377}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {67B37021-17F7-4C68-AB36-C2BB02852BCE}
