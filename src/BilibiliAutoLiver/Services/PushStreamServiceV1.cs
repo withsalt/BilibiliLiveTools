@@ -24,7 +24,6 @@ namespace BilibiliAutoLiver.Services
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
         private readonly LiveSettings _liveSetting;
-        private readonly IEnumerable<IPipeProcess> _pipeProcesses;
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
@@ -33,19 +32,13 @@ namespace BilibiliAutoLiver.Services
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IOptions<LiveSettings> liveSettingOptions
-            , IFFMpegService ffmpeg
-            , IEnumerable<IPipeProcess> pipeProcesses) : base(logger, account, api, liveSettingOptions, ffmpeg)
+            , IFFMpegService ffmpeg) : base(logger, account, api, liveSettingOptions, ffmpeg)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
             _liveSetting = liveSettingOptions.Value ?? throw new ArgumentNullException(nameof(liveSettingOptions));
-
-            if (pipeProcesses?.Any() == true)
-            {
-                _pipeProcesses = pipeProcesses.OrderBy(p => p.Index).ToList();
-            }
         }
 
         /// <summary>
