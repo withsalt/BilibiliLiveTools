@@ -37,7 +37,7 @@ namespace BilibiliAutoLiver.DependencyInjection
 
         private static string GetBinaryFolder()
         {
-            string defaultBinPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "runtimes", GetProcessArchitecturePath(), "bin");
+            string defaultBinPath = Path.Combine(AppContext.BaseDirectory, "runtimes", GetProcessArchitecturePath(), "bin");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 string path = Path.Combine(defaultBinPath, "ffmpeg.exe");
