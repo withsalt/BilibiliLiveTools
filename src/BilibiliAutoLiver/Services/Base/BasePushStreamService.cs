@@ -116,7 +116,7 @@ namespace BilibiliAutoLiver.Services.Base
             }
             _logger.LogInformation($"用户{userInfo.Uname}，登录成功！");
             //获取直播间信息
-            var liveRoomInfo = await _api.GetLiveRoomInfo();
+            var liveRoomInfo = await _api.GetMyLiveRoomInfo();
             if (liveRoomInfo == null)
             {
                 _logger.ThrowLogError("获取直播间信息失败！");

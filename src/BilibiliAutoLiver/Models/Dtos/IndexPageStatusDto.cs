@@ -8,6 +8,6 @@ namespace BilibiliAutoLiver.Models.Dtos
 
         public UserInfo UserInfo { get; set; }
 
-        public LiveRoomInfo LiveRoomInfo { get; set; }
+        public MyLiveRoomInfo LiveRoomInfo { get; set; }
     }
 }

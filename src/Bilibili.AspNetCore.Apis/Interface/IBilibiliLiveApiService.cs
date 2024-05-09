@@ -7,10 +7,17 @@ namespace Bilibili.AspNetCore.Apis.Interface
     public interface IBilibiliLiveApiService
     {
         /// <summary>
-        /// 获取直播间信息
+        /// 获取我的直播间信息
         /// </summary>
         /// <returns></returns>
-        Task<LiveRoomInfo> GetLiveRoomInfo();
+        Task<MyLiveRoomInfo> GetMyLiveRoomInfo();
+
+        /// <summary>
+        /// 获取直播间信息
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        Task<LiveRoomInfo> GetLiveRoomInfo(long roomId);
 
         /// <summary>
         /// 更新直播间房间号

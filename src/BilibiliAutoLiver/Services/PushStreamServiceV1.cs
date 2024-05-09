@@ -111,7 +111,7 @@ namespace BilibiliAutoLiver.Services
                 throw new Exception("登录失败，Cookie已失效");
             }
             //获取直播间信息
-            var liveRoomInfo = await _api.GetLiveRoomInfo();
+            var liveRoomInfo = await _api.GetMyLiveRoomInfo();
             if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
             {
                 await _api.UpdateLiveRoomArea(liveRoomInfo.room_id, _liveSetting.LiveAreaId);

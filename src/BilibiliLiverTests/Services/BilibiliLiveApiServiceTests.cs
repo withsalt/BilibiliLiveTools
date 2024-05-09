@@ -21,14 +21,14 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task GetLiveRoomInfoTest()
         {
-            var info = await _apiService.GetLiveRoomInfo();
+            var info = await _apiService.GetMyLiveRoomInfo();
             Assert.IsNotNull(info);
         }
 
         [TestMethod()]
         public async Task UpdateLiveRoomNameTest()
         {
-            var info = await _apiService.GetLiveRoomInfo();
+            var info = await _apiService.GetMyLiveRoomInfo();
             bool reslt = await _apiService.UpdateLiveRoomName(info.room_id, info.title);
             Assert.IsTrue(reslt);
         }
@@ -43,7 +43,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task StartLiveTest()
         {
-            var info = await _apiService.GetLiveRoomInfo();
+            var info = await _apiService.GetMyLiveRoomInfo();
             var reslt = await _apiService.StartLive(info.room_id, 369);
             Assert.IsNotNull(reslt);
         }
@@ -51,10 +51,10 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task StopLiveTest()
         {
-            var info = await _apiService.GetLiveRoomInfo();
+            var info = await _apiService.GetMyLiveRoomInfo();
             var reslt = await _apiService.StopLive(info.room_id);
 
-            var liveRoomInfo = await _apiService.GetLiveRoomInfo();
+            var liveRoomInfo = await _apiService.GetMyLiveRoomInfo();
             if (liveRoomInfo.live_status != 0)
             {
                 Assert.Fail();
@@ -66,7 +66,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task UpdateLiveRoomAreaTest()
         {
-            var info = await _apiService.GetLiveRoomInfo();
+            var info = await _apiService.GetMyLiveRoomInfo();
             var reslt = await _apiService.UpdateLiveRoomArea(info.room_id, 369);
             Assert.IsTrue(reslt);
         }
@@ -81,7 +81,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task Test1()
         {
-            var info = await _apiService.GetLiveRoomInfo();
+            var info = await _apiService.GetMyLiveRoomInfo();
             var r1 = await _apiService.UpdateLiveRoomArea(info.room_id, 33);
             await Task.Delay(5000);
             var r2 = await _apiService.UpdateLiveRoomName(info.room_id, "白噪音");

@@ -63,7 +63,7 @@ namespace BilibiliAutoLiver.Controllers
                             IsLogged = true
                         };
                         cachePageStatus.UserInfo = await _accountService.GetUserInfo();
-                        cachePageStatus.LiveRoomInfo = await _liveApiService.GetLiveRoomInfo();
+                        cachePageStatus.LiveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
                         return cachePageStatus;
                     });
                 }

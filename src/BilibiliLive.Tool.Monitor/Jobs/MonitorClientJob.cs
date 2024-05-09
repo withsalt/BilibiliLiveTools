@@ -45,13 +45,13 @@ namespace BilibiliLive.Tool.Monitor.Jobs
                 {
                     throw new Exception("获取需要查询的直播房间号失败，请检查配置文件是否正确配置房间号。");
                 }
-                RoomPlayInfo playInfo = await _liveApiService.GetRoomPlayInfo(_liveSettings.RoomId);
+                LiveRoomInfo playInfo = await _liveApiService.GetLiveRoomInfo(_liveSettings.RoomId);
                 if (playInfo == null || playInfo.room_id != _liveSettings.RoomId)
                 {
                     throw new Exception("获取直播间信息失败。");
                 }
                 _logger.LogInformation($"获取直播间{_liveSettings.RoomId}状态成功，当前状态：{(playInfo.is_living ? "直播中" : "停止直播")}");
-                RoomPlayInfo lastPlayInfo = _cache.Get<RoomPlayInfo>(CacheKeyConstant.LIVE_STATUS_KEY);
+                LiveRoomInfo lastPlayInfo = _cache.Get<LiveRoomInfo>(CacheKeyConstant.LIVE_STATUS_KEY);
                 if (lastPlayInfo == null)
                 {
                     //第一次存缓存强制设置直播状态为1，免得第一次开启时就发送通知
@@ -76,21 +76,14 @@ namespace BilibiliLive.Tool.Monitor.Jobs
         /// </summary>
         /// <param name="reason"></param>
         /// <returns></returns>
-        private async Task SendEmailNotice(RoomPlayInfo info)
+        private async Task SendEmailNotice(LiveRoomInfo info)
         {
             try
             {
-                _logger.LogInformation($"直播间{info.room_id}直播状态发生改变，发送通知邮件");
-                string reason = "";
+                _logger.LogInformation($"直播间{info.title}({info.room_id})直播状态发生改变，发送通知邮件");
+                string reason = info.is_living ? $"开播提醒：\r\n您订阅的直播间{info.title}(https://live.bilibili.com/{info.room_id})开始直播啦。" 
+                    : $"关闭提醒：\r\n您订阅的直播间{info.title}(https://live.bilibili.com/{info.room_id})已经停止直播。";
                 string cacheKey = string.Format(CacheKeyConstant.MAIL_SEND_CACHE_KEY, info.live_status);
-                if (info.is_living)
-                {
-                    reason = $"开播提醒：\r\n您订阅的直播间(https://live.bilibili.com/{info.room_id})开始直播啦。";
-                }
-                else
-                {
-                    reason = $"关闭提醒：\r\n您订阅的直播间(https://live.bilibili.com/{info.room_id})已经停止直播。";
-                }
                 long lastSendTime = _cache.Get<long>(cacheKey);
                 if (TimeUtil.Timestamp() - lastSendTime < 600)
                 {

@@ -17,7 +17,12 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// <summary>
         /// 获取直播间信息
         /// </summary>
-        private const string _getLiveRoomInfoApi = "https://api.live.bilibili.com/xlive/app-blink/v1/room/GetInfo?platform=pc";
+        private const string _getMyLiveRoomInfoApi = "https://api.live.bilibili.com/xlive/app-blink/v1/room/GetInfo?platform=pc";
+
+        /// <summary>
+        /// 根据id获取直播间信息
+        /// </summary>
+        private const string _getLiveRoomInfoByIdApi = "https://api.live.bilibili.com/room/v1/Room/get_info?room_id={0}";
 
         /// <summary>
         /// 更新直播间名称
@@ -58,16 +63,30 @@ namespace Bilibili.AspNetCore.Apis.Services
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
         }
 
-        public async Task<LiveRoomInfo> GetLiveRoomInfo()
+        public async Task<MyLiveRoomInfo> GetMyLiveRoomInfo()
         {
-            var result = await _httpClient.Execute<LiveRoomInfo>(_getLiveRoomInfoApi, HttpMethod.Get);
+            var result = await _httpClient.Execute<MyLiveRoomInfo>(_getMyLiveRoomInfoApi, HttpMethod.Get);
             if (result == null)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, HttpMethod.Get, "返回内容为空");
+                throw new ApiRequestException(_getMyLiveRoomInfoApi, HttpMethod.Get, "返回内容为空");
             }
             if (result.Code != 0)
             {
-                throw new ApiRequestException(_getLiveRoomInfoApi, HttpMethod.Get, result.Message);
+                throw new ApiRequestException(_getMyLiveRoomInfoApi, HttpMethod.Get, result.Message);
+            }
+            return result.Data;
+        }
+
+        public async Task<LiveRoomInfo> GetLiveRoomInfo(long roomId)
+        {
+            var result = await _httpClient.Execute<LiveRoomInfo>(string.Format(_getLiveRoomInfoByIdApi, roomId), HttpMethod.Get, withCookie: false);
+            if (result == null)
+            {
+                throw new ApiRequestException(_getLiveRoomInfoByIdApi, HttpMethod.Get, "返回内容为空");
+            }
+            if (result.Code != 0)
+            {
+                throw new ApiRequestException(_getLiveRoomInfoByIdApi, HttpMethod.Get, result.Message);
             }
             return result.Data;
         }

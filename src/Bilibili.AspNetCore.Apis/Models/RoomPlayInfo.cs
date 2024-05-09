@@ -81,7 +81,7 @@ namespace Bilibili.AspNetCore.Apis.Models
         {
             get
             {
-                return live_status == 1;
+                return live_status == 1 || live_status == 2;
             }
         }
     }
