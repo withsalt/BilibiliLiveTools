@@ -151,7 +151,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             finally
             {
-                await SlowDownOperation(nameof(UpdateLiveRoomName));
+                await Delay(nameof(UpdateLiveRoomName));
             }
         }
 
@@ -180,7 +180,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             finally
             {
-                await SlowDownOperation(nameof(UpdateLiveRoomArea));
+                await Delay(nameof(UpdateLiveRoomArea));
             }
         }
 
@@ -214,7 +214,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             finally
             {
-                await SlowDownOperation(nameof(StartLive));
+                await Delay(nameof(StartLive));
             }
         }
 
@@ -242,7 +242,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             finally
             {
-                await SlowDownOperation(nameof(StopLive));
+                await Delay(nameof(StopLive));
             }
         }
 
@@ -300,10 +300,10 @@ namespace Bilibili.AspNetCore.Apis.Services
             return areaItem;
         }
 
-        private async Task SlowDownOperation(string operationName)
+        private async Task Delay(string operationName)
         {
-            int sleepMsec = new Random().Next(1000, 3000);
-            _logger.LogDebug($"执行{operationName}操作完成，休眠{sleepMsec / 1000}秒，避免被B站频繁操作。");
+            int sleepMsec = new Random().Next(500, 1500);
+            _logger.LogDebug($"执行{operationName}操作完成，休眠{sleepMsec}ms，避免被B站频繁操作。");
             await Task.Delay(sleepMsec);
         }
 

@@ -42,12 +42,14 @@ namespace BilibiliAutoLiver.Services
             //开始推流
             if (_liveSetting.V2?.IsEnabled== true)
             {
-                if(_liveSetting.V1?.IsEnabled != true)
+#if !DEBUG
+                if (_liveSetting.V1?.IsEnabled != true)
                 {
                     throw new NotSupportedException("暂不支持使用V2的推流方式。");
                 }
-                //await StartPushV2();
-                //return;
+#endif
+                await StartPushV2();
+                return;
             }
             if (_liveSetting.V1?.IsEnabled == true)
             {
@@ -92,8 +94,6 @@ namespace BilibiliAutoLiver.Services
         {
             try
             {
-                throw new NotSupportedException("目前暂不支持V2版本。");
-
                 await _pushServiceV2.CheckLiveSetting();
                 await _pushServiceV2.CheckLiveRoom();
                 await _pushServiceV2.CheckFFmpegBinary();

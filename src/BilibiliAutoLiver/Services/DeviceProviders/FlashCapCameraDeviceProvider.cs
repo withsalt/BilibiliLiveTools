@@ -17,7 +17,7 @@ namespace BilibiliAutoLiver.Services.DeviceProviders
 
         private int _countFrames;
 
-        public FlashCapCameraDeviceProvider(InputVideoSourceItem sourceItem, Action<BufferFrame> onBuffer)
+        public FlashCapCameraDeviceProvider(InputVideoSource sourceItem, Action<BufferFrame> onBuffer)
         {
             if (onBuffer == null) throw new ArgumentException("On buffer action can not null");
             _onBuffer = onBuffer;

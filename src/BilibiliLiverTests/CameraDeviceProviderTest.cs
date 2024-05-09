@@ -17,9 +17,9 @@ namespace BilibiliLiverTests
         [TestMethod()]
         public async Task FlashCapCameraDeviceProviderTest()
         {
-            InputVideoSourceItem sourceItem = new InputVideoSourceItem()
+            InputVideoSource sourceItem = new InputVideoSource()
             {
-                Type = InputVideoSourceType.Device,
+                Type = InputSourceType.Device,
                 Path = "HD Pro Webcam C920",
                 Resolution = "1280*720",
                 Index = 0,

@@ -9,7 +9,7 @@ using FFMpegCore.Pipes;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.PipeSource
 {
-    public class VideoFramePipeSource : IPipeSource
+    public class CameraFramePipeSource : IPipeSource
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -27,7 +27,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.PipeSource
         private byte[] _lastData = null;
         private readonly Stopwatch _frameCounter = new Stopwatch();
 
-        public VideoFramePipeSource(Queue<byte[]> frameQueue, int width, int height, double frameRate)
+        public CameraFramePipeSource(Queue<byte[]> frameQueue, int width, int height, double frameRate)
         {
             Width = width;
             Height = height;

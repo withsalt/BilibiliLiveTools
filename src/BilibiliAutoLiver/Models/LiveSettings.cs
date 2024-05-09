@@ -29,7 +29,9 @@ namespace BilibiliAutoLiver.Models
 
     public class PushStreamV2Config : BasePushStreamConfig
     {
+        public Output Output {  get; set; }
 
+        public Input Input {  get; set; }
     }
 
     public class FFmpegCommands
@@ -55,5 +57,19 @@ namespace BilibiliAutoLiver.Models
             }
             throw new PlatformNotSupportedException("Not support your OS platform.");
         }
+    }
+
+    public class Output
+    {
+        public OutputQualityEnum Quality {  get; set; }
+
+        public string Resolution { get; set; }
+    }
+
+    public class Input
+    {
+        public InputVideoSource VideoSource { get; set; }
+
+        public InputAudioSource AudioSource { get; set; }
     }
 }

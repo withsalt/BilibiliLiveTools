@@ -1,6 +1,6 @@
 ﻿namespace BilibiliAutoLiver.Models.Enums
 {
-    public enum InputVideoSourceType
+    public enum InputSourceType
     {
         Device = 1,
 

@@ -73,8 +73,14 @@ namespace BilibiliAutoLiver.Services.Base
             {
                 _logger.ThrowLogError("V1和V2两种推流方式，至少启用一种！");
             }
-
-            if (_liveSetting.V1?.IsEnabled == true)
+            if (_liveSetting.V2?.IsEnabled == true)
+            {
+                if (_liveSetting.V2.Input == null)
+                {
+                    _logger.ThrowLogError("配置文件appsettings.json中，需要配置LiveSetting.V2.Input输入源！");
+                }
+            }
+            if (_liveSetting.V2?.IsEnabled != true && _liveSetting.V1?.IsEnabled == true)
             {
                 string cmd = _liveSetting.V1?.FFmpegCommands?.GetTargetOSPlatformCommand();
                 if (string.IsNullOrWhiteSpace(cmd))
@@ -84,21 +90,13 @@ namespace BilibiliAutoLiver.Services.Base
                 int markIndex = cmd.IndexOf("[[URL]]");
                 if (markIndex < 5)
                 {
-                    throw new Exception("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确，命令中未找到 '[[URL]]'标记。");
+                    _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确，命令中未找到 '[[URL]]'标记。");
                 }
                 if (cmd[markIndex - 1] == '\"')
                 {
-                    throw new Exception("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确， '[[URL]]'标记前后无需“\"”。");
+                    _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确， '[[URL]]'标记前后无需“\"”。");
                 }
             }
-            if (_liveSetting.V2?.IsEnabled == true)
-            {
-                if (_liveSetting.V1?.IsEnabled != true)
-                {
-                    throw new NotSupportedException("暂不支持使用V2的推流方式。");
-                }
-            }
-
             return Task.CompletedTask;
         }
 

@@ -3,15 +3,17 @@ using BilibiliAutoLiver.Models.Enums;
 
 namespace BilibiliAutoLiver.Models
 {
-    public class InputVideoSourceItem
+    public class InputVideoSource
     {
-        public InputVideoSourceType Type { get; set; }
+        public InputSourceType Type { get; set; }
 
         public int Index { get; set; } = -1;
 
         public string Path { get; set; }
 
         public string Resolution { get; set; }
+
+        public bool IsMute { get; set; }
 
         public int Width
         {
@@ -31,7 +33,7 @@ namespace BilibiliAutoLiver.Models
 
         private (int width, int height) GetResolution()
         {
-            if (this.Type != InputVideoSourceType.Device)
+            if (this.Type != InputSourceType.Device)
             {
                 return (0, 0);
             }
