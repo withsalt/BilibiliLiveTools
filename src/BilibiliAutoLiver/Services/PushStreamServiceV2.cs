@@ -8,9 +8,11 @@ using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
+using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
 using BilibiliAutoLiver.Services.FFMpeg.SourceReaders;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
+using FFMpegCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -108,7 +110,7 @@ namespace BilibiliAutoLiver.Services
         {
             while (!_tokenSource.IsCancellationRequested)
             {
-                
+                ISourceReader sourceReader = null;
                 try
                 {
                     //check network
@@ -119,11 +121,8 @@ namespace BilibiliAutoLiver.Services
                     }
                     //start live
                     string rtmpAddr = await GetRtmpAddress();
-
-                    //CameraFramePipeSource cameraImagePipe = new CameraFramePipeSource(que, characteristic.Width, characteristic.Height, _frameRate);
-                    var processor = GetSourceReader(rtmpAddr)
-                        .WithInputArg()
-                        .WithOutputArg()
+                    sourceReader = GetSourceReader(rtmpAddr);
+                    FFMpegArgumentProcessor processor = sourceReader.WithInputArg().WithOutputArg()
                         .CancellableThrough(out _cancel);
 
                     _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
@@ -152,6 +151,10 @@ namespace BilibiliAutoLiver.Services
                         await Task.Delay(60000, _tokenSource.Token);
                     }
                 }
+                finally
+                {
+                    if (sourceReader != null) sourceReader.Dispose();
+                }
             }
         }
 
@@ -163,6 +166,8 @@ namespace BilibiliAutoLiver.Services
                     return new VideoSourceReader(_liveSetting, rtmpAddr, _logger);
                 case InputSourceType.Desktop:
                     return new DesktopSourceReader(_liveSetting, rtmpAddr, _logger);
+                case InputSourceType.Device:
+                    return new DeviceSourceReader(_liveSetting, rtmpAddr, _logger, _pipeContainer);
                 default:
                     throw new NotImplementedException($"不支持的输入类型：{_liveSetting.V2.Input.VideoSource.Type}");
             }

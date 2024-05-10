@@ -10,27 +10,23 @@ namespace BilibiliAutoLiver.Plugin.Base
     {
         private static readonly object _locker = new object();
 
-        private List<IPipeProcess> Processes = new List<IPipeProcess>();
+        private SortedList<int, IPipeProcess> Processes = new SortedList<int, IPipeProcess>();
 
         public void Add(IPipeProcess process)
         {
             lock (_locker)
             {
-                if (Processes.Contains(process))
+                if (Processes.ContainsValue(process))
                 {
                     return;
                 }
-                Processes.Add(process);
-                if (Processes.Count > 1)
-                {
-                    Processes = Processes.OrderBy(p => p.Index).ToList();
-                }
+                Processes.Add(process.Index, process);
             }
         }
 
         public IEnumerable<IPipeProcess> Get()
         {
-            return this.Processes;
+            return this.Processes.Values;
         }
     }
 }

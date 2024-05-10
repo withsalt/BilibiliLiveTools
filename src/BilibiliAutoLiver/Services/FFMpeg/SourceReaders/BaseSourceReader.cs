@@ -66,5 +66,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             return true;
         }
+
+        public virtual void Dispose()
+        {
+            
+        }
     }
 }

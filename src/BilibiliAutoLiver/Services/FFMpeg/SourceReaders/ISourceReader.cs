@@ -1,8 +1,9 @@
-﻿using FFMpegCore;
+﻿using System;
+using FFMpegCore;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
-    public interface ISourceReader
+    public interface ISourceReader : IDisposable
     {
         ISourceReader WithInputArg();
 

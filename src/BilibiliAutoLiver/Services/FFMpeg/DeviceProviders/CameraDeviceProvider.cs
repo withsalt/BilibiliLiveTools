@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Settings;
 using FlashCap;
 using SkiaSharp;
@@ -12,10 +14,13 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
     public class CameraDeviceProvider : ICameraDeviceProvider
     {
         private Action<BufferFrame> _onBuffer;
-
         private CaptureDevice _captureDevice;
-
+        private CaptureDeviceDescriptor _captureDeviceDescriptor;
+        private VideoCharacteristics _characteristics;
+        private CancellationTokenSource _tokenSource;
         private int _countFrames;
+        private static readonly object stopLocker = new object();
+        private static bool _isStopped = false;
 
         public CameraDeviceProvider(InputVideoSource sourceItem, Action<BufferFrame> onBuffer)
         {
@@ -27,40 +32,75 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
             {
                 throw new Exception($"找不到视频输入设备！");
             }
-            CaptureDeviceDescriptor device = null;
             if (!string.IsNullOrEmpty(sourceItem.Path))
             {
-                device = devices.Where(p => p.Name == sourceItem.Path).FirstOrDefault();
+                _captureDeviceDescriptor = devices.Where(p => p.Name == sourceItem.Path).FirstOrDefault();
             }
-            if (device == null && sourceItem.Index >= 0 && sourceItem.Index < devices.Count)
+            if (_captureDeviceDescriptor == null && sourceItem.Index >= 0 && sourceItem.Index < devices.Count)
             {
-                device = devices[sourceItem.Index];
+                _captureDeviceDescriptor = devices[sourceItem.Index];
             }
-            if (device == null && !string.IsNullOrEmpty(sourceItem.Path))
+            if (_captureDeviceDescriptor == null && !string.IsNullOrEmpty(sourceItem.Path))
             {
                 throw new Exception($"找不到名称为{sourceItem.Path}的视频输入设备！");
             }
-            IEnumerable<VideoCharacteristics> targetCharacteristics = device.Characteristics?.Where(p => p.Width == sourceItem.Width && p.Height == sourceItem.Height && p.PixelFormat != PixelFormats.Unknown);
+            IEnumerable<VideoCharacteristics> targetCharacteristics = _captureDeviceDescriptor.Characteristics?.Where(p => p.Width == sourceItem.Width && p.Height == sourceItem.Height && p.PixelFormat != PixelFormats.Unknown);
             if (targetCharacteristics?.Any() != true)
             {
-                throw new Exception($"视频输入设备{device.Name}不支持分辨率{sourceItem.Resolution}");
+                throw new Exception($"视频输入设备{_captureDeviceDescriptor.Name}不支持分辨率{sourceItem.Resolution}");
             }
-            VideoCharacteristics characteristics = targetCharacteristics.First();
-            _captureDevice = device.OpenAsync(characteristics, PixelBufferArrived).GetAwaiter().GetResult();
-            if (_captureDevice == null)
-            {
-                throw new Exception($"无法打开视频输入设备设备：{device.Name}");
-            }
+            _characteristics = targetCharacteristics.First();
         }
 
         public async Task Start()
         {
-            await _captureDevice.StartAsync();
+            _tokenSource = new CancellationTokenSource();
+            _captureDevice = await _captureDeviceDescriptor.OpenAsync(_characteristics, PixelBufferArrived).ConfigureAwait(false);
+            if (_captureDevice == null)
+            {
+                throw new Exception($"无法打开视频输入设备设备：{_captureDeviceDescriptor.Name}");
+            }
+            await _captureDevice.StartAsync(_tokenSource.Token);
+            _isStopped = false;
         }
 
         public Task Stop()
         {
+            if (_isStopped)
+                return Task.CompletedTask;
+            lock (stopLocker)
+            {
+                if (_isStopped)
+                    return Task.CompletedTask;
+                if (_captureDevice.IsRunning)
+                {
+                    _tokenSource.Cancel();
+                    Stopwatch sw = new Stopwatch();
+                    while (_captureDevice.IsRunning && sw.ElapsedMilliseconds < 3000)
+                    {
+                        Thread.Sleep(0);
+                    }
+                }
+                if (_captureDevice != null)
+                {
+                    _captureDevice.StopAsync().GetAwaiter().GetResult();
+                    _captureDevice.Dispose();
+
+                    if (_tokenSource != null)
+                    {
+                        _tokenSource.Dispose();
+                        _tokenSource = null;
+                    }
+                    _captureDevice = null;
+                }
+                _isStopped = true;
+            }
             return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            Stop().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private void PixelBufferArrived(PixelBufferScope bufferScope)
@@ -76,38 +116,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
                 long frameIndex = bufferScope.Buffer.FrameIndex;
                 TimeSpan timestamp = bufferScope.Buffer.Timestamp;
                 SKBitmap bitmap = SKBitmap.Decode(image);
-
-                BufferFrame frame = new BufferFrame()
-                {
-                    Bitmap = bitmap,
-                    FrameCount = countFrames,
-                    FrameIndex = frameIndex,
-                    Timestamp = timestamp,
-                };
+                BufferFrame frame = new BufferFrame(bitmap, countFrames, frameIndex, timestamp);
                 _onBuffer(frame);
             }
             finally
             {
                 bufferScope.ReleaseNow();
-            }
-        }
-    }
-
-    public sealed class BufferFrame : IDisposable
-    {
-        public SKBitmap Bitmap { get; set; }
-
-        public int FrameCount { get; set; }
-
-        public long FrameIndex { get; set; }
-
-        public TimeSpan Timestamp { get; set; }
-
-        public void Dispose()
-        {
-            if (Bitmap != null)
-            {
-                Bitmap.Dispose();
             }
         }
     }
