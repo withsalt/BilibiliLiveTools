@@ -1,6 +1,6 @@
 ﻿using FFMpegCore;
 
-namespace BilibiliAutoLiver.Services.SourceReaders
+namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
     public interface ISourceReader
     {

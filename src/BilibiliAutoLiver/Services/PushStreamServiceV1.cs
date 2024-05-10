@@ -202,8 +202,8 @@ namespace BilibiliAutoLiver.Services
                     //如果开启了自动重试
                     if (!_tokenSource.IsCancellationRequested)
                     {
-                        _logger.LogWarning($"等待60s后重新推流...");
-                        await Task.Delay(60000, _tokenSource.Token);
+                        _logger.LogWarning($"等待{_liveSetting.RetryDelay}s后重新推流...");
+                        await Task.Delay(_liveSetting.RetryDelay * 1000, _tokenSource.Token);
                     }
                 }
                 catch (OperationCanceledException)

@@ -8,11 +8,9 @@ using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
-using BilibiliAutoLiver.Services.FFMpeg.PipeSource;
 using BilibiliAutoLiver.Services.FFMpeg.SourceReaders;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
-using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -29,6 +27,7 @@ namespace BilibiliAutoLiver.Services
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
+        private Action _cancel = null;
 
         public PushStreamServiceV2(ILogger<PushStreamServiceV1> logger
             , IBilibiliAccountApiService account
@@ -86,6 +85,7 @@ namespace BilibiliAutoLiver.Services
             }
             _logger.LogWarning("结束推流中...");
             _tokenSource.Cancel();
+            _cancel?.Invoke();
             Stopwatch sw = Stopwatch.StartNew();
             //3s等待下线
             while (sw.ElapsedMilliseconds < 3000
@@ -99,6 +99,7 @@ namespace BilibiliAutoLiver.Services
             _tokenSource.Dispose();
             _mainTask = null;
             _tokenSource = null;
+            _cancel = null;
             _logger.LogWarning("推流中已停止。");
         }
 
@@ -110,6 +111,7 @@ namespace BilibiliAutoLiver.Services
         {
             while (!_tokenSource.IsCancellationRequested)
             {
+                
                 try
                 {
                     //check network
@@ -124,17 +126,19 @@ namespace BilibiliAutoLiver.Services
                     //CameraFramePipeSource cameraImagePipe = new CameraFramePipeSource(que, characteristic.Width, characteristic.Height, _frameRate);
                     var processor = GetSourceReader(rtmpAddr)
                         .WithInputArg()
-                        .WithOutputArg();
+                        .WithOutputArg()
+                        .CancellableThrough(out _cancel);
 
                     _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
                     _logger.LogInformation("推流参数初始化完成，开始推流...");
                     //启动
                     await processor.ProcessAsynchronously();
+
                     //如果开启了自动重试
                     if (!_tokenSource.IsCancellationRequested)
                     {
-                        _logger.LogWarning($"等待60s后重新推流...");
-                        await Task.Delay(60000, _tokenSource.Token);
+                        _logger.LogWarning($"等待{_liveSetting.RetryDelay}s后重新推流...");
+                        await Task.Delay(_liveSetting.RetryDelay * 1000, _tokenSource.Token);
                     }
                 }
                 catch (OperationCanceledException)

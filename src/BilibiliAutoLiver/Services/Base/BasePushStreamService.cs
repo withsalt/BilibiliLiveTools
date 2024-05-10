@@ -147,5 +147,10 @@ namespace BilibiliAutoLiver.Services.Base
                 await Task.Delay(1000);
             }
         }
+
+        public void Dispose()
+        {
+            this.Stop();
+        }
     }
 }

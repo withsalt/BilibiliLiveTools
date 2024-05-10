@@ -5,7 +5,7 @@ using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 
-namespace BilibiliAutoLiver.Services.SourceReaders
+namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
     public abstract class BaseSourceReader : ISourceReader
     {

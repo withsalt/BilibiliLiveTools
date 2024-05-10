@@ -20,10 +20,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         public override ISourceReader WithInputArg()
         {
             GetVideoInputArg();
-            if (HasAudio())
-            {
-                GetAudioInputArg(Settings.V2.Input.AudioSource);
-            }
+            GetAudioInputArg();
             return this;
         }
 

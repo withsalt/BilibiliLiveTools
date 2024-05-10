@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace BilibiliAutoLiver.Services.Interface
 {
-    public interface IPushStreamService
+    public interface IPushStreamService : IDisposable
     {
         /// <summary>
         /// 开启推流

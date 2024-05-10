@@ -13,11 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLive.Tool.Monitor",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bilibili.AspNetCore.Apis", "Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj", "{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliAutoLiver.Plugin.Base", "BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj", "{97566CD2-E90B-499A-A74F-003E85E1D769}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliAutoLiver.Plugin.Base", "BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj", "{97566CD2-E90B-499A-A74F-003E85E1D769}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5237B7F3-7522-4631-99FF-02DD77528377}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BilibiliAutoLiver.Plugin.YoloAI", "BilibiliAutoLiver.Plugin.YoloAI\BilibiliAutoLiver.Plugin.YoloAI.csproj", "{A2BA2D26-87DA-4089-A559-420EBACAD9D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliAutoLiver.Plugin.YoloAI", "BilibiliAutoLiver.Plugin.YoloAI\BilibiliAutoLiver.Plugin.YoloAI.csproj", "{A2BA2D26-87DA-4089-A559-420EBACAD9D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,6 +10,23 @@ namespace BilibiliAutoLiver.Models
 
         public string LiveRoomName { get; set; }
 
+        private int _retryDelay { get; set; }
+        public int RetryDelay
+        {
+            get
+            {
+                return _retryDelay;
+            }
+            set
+            {
+                if (value < 10)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "重试等待时间不能小于10s");
+                }
+                _retryDelay = value;
+            }
+        }
+
         public PushStreamV1Config V1 { get; set; }
 
         public PushStreamV2Config V2 { get; set; }
@@ -29,9 +46,9 @@ namespace BilibiliAutoLiver.Models
 
     public class PushStreamV2Config : BasePushStreamConfig
     {
-        public Output Output {  get; set; }
+        public Output Output { get; set; }
 
-        public Input Input {  get; set; }
+        public Input Input { get; set; }
     }
 
     public class FFmpegCommands
@@ -61,7 +78,7 @@ namespace BilibiliAutoLiver.Models
 
     public class Output
     {
-        public OutputQualityEnum Quality {  get; set; }
+        public OutputQualityEnum Quality { get; set; }
 
         public string Resolution { get; set; }
     }
