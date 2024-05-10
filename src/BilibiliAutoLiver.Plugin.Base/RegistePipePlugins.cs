@@ -32,12 +32,13 @@ namespace BilibiliAutoLiver.Plugin.Base
                     {
                         object? instance = Activator.CreateInstance(pluginType);
                         if (instance == null) continue;
+                        Console.WriteLine($"从{fileName}加载插件{pluginType.FullName}");
                         container.Add((IPipeProcess)instance);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"加载模块{fileName}失败，{ex.Message}");
+                    Console.WriteLine($"加载插件{fileName}失败，{ex.Message}");
                     continue;
                 }
             }
