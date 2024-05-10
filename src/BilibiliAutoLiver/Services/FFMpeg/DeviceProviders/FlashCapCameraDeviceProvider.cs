@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Settings;
 using FlashCap;
 using SkiaSharp;
 
-namespace BilibiliAutoLiver.Services.DeviceProviders
+namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
 {
     public class FlashCapCameraDeviceProvider : ICameraDeviceProvider
     {
@@ -105,9 +105,9 @@ namespace BilibiliAutoLiver.Services.DeviceProviders
 
         public void Dispose()
         {
-            if (this.Bitmap != null)
+            if (Bitmap != null)
             {
-                this.Bitmap.Dispose();
+                Bitmap.Dispose();
             }
         }
     }

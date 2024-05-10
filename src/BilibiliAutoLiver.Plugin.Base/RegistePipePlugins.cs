@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using McMaster.NETCore.Plugins;
+using BilibiliAutoLiver.Plugin.Base.Loader;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BilibiliAutoLiver.Plugin.Base

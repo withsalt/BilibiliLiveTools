@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;

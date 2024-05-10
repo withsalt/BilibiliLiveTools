@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace McMaster.NETCore.Plugins.LibraryModel
+namespace BilibiliAutoLiver.Plugin.Base.Loader.LibraryModel
 {
     /// <summary>
     /// Represents an unmanaged library, such as `libsqlite3`, which may need to be loaded

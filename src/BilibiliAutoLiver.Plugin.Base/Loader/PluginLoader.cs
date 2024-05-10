@@ -6,10 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
-using McMaster.NETCore.Plugins.Internal;
-using McMaster.NETCore.Plugins.Loader;
+using BilibiliAutoLiver.Plugin.Base.Loader.Loader;
 
-namespace McMaster.NETCore.Plugins
+namespace BilibiliAutoLiver.Plugin.Base.Loader
 {
     /// <summary>
     /// This loader attempts to load binaries for execution (both managed assemblies and native libraries)

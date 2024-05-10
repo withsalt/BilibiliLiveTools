@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-namespace McMaster.NETCore.Plugins.LibraryModel
+namespace BilibiliAutoLiver.Plugin.Base.Loader.LibraryModel
 {
     /// <summary>
     /// Represents a managed, .NET assembly.

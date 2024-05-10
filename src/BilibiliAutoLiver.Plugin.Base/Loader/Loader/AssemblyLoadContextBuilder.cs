@@ -7,9 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using McMaster.NETCore.Plugins.LibraryModel;
+using BilibiliAutoLiver.Plugin.Base.Loader.LibraryModel;
 
-namespace McMaster.NETCore.Plugins.Loader
+namespace BilibiliAutoLiver.Plugin.Base.Loader.Loader
 {
     /// <summary>
     /// A builder for creating an instance of <see cref="AssemblyLoadContext" />.

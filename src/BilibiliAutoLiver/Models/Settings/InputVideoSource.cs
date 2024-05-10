@@ -1,7 +1,7 @@
 ﻿using System;
 using BilibiliAutoLiver.Models.Enums;
 
-namespace BilibiliAutoLiver.Models
+namespace BilibiliAutoLiver.Models.Settings
 {
     public class InputVideoSource
     {

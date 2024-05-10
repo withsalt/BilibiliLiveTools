@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Enums;
 
-namespace BilibiliAutoLiver.Models
+namespace BilibiliAutoLiver.Models.Settings
 {
     public class LiveSettings
     {
@@ -66,11 +66,11 @@ namespace BilibiliAutoLiver.Models
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return this.Win;
+                return Win;
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return this.Linux;
+                return Linux;
             }
             throw new PlatformNotSupportedException("Not support your OS platform.");
         }

@@ -7,7 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace McMaster.NETCore.Plugins
+namespace BilibiliAutoLiver.Plugin.Base.Loader
 {
     /// <summary>
     /// Represents the configuration for a .NET Core plugin.

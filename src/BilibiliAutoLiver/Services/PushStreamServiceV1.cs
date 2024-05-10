@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
-using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.Interface;

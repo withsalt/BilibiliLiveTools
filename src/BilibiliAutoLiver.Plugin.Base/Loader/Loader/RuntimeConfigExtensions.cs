@@ -6,8 +6,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using BilibiliAutoLiver.Plugin.Base.Loader.Internal;
 
-namespace McMaster.NETCore.Plugins.Loader
+namespace BilibiliAutoLiver.Plugin.Base.Loader.Loader
 {
     /// <summary>
     /// Extensions for creating a load context using settings from a runtimeconfig.json file

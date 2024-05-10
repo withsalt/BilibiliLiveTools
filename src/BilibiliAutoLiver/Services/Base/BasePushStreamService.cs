@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using BilibiliAutoLiver.Extensions;
-using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;

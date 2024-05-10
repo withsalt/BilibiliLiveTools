@@ -8,9 +8,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using McMaster.NETCore.Plugins.LibraryModel;
+using BilibiliAutoLiver.Plugin.Base.Loader.Internal;
+using BilibiliAutoLiver.Plugin.Base.Loader.LibraryModel;
 
-namespace McMaster.NETCore.Plugins.Loader
+namespace BilibiliAutoLiver.Plugin.Base.Loader.Loader
 {
     /// <summary>
     /// An implementation of <see cref="AssemblyLoadContext" /> which attempts to load managed and native
@@ -207,7 +208,7 @@ namespace McMaster.NETCore.Plugins.Loader
         /// </summary>
         /// <param name="unmanagedDllName"></param>
         /// <returns></returns>
-        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+        protected override nint LoadUnmanagedDll(string unmanagedDllName)
         {
 #if FEATURE_NATIVE_RESOLVER
             var resolvedPath = _dependencyResolver.ResolveUnmanagedDllToPath(unmanagedDllName);
@@ -351,7 +352,7 @@ namespace McMaster.NETCore.Plugins.Loader
             return false;
         }
 
-        private IntPtr LoadUnmanagedDllFromResolvedPath(string unmanagedDllPath, bool normalizePath = true)
+        private nint LoadUnmanagedDllFromResolvedPath(string unmanagedDllPath, bool normalizePath = true)
         {
             if (normalizePath)
             {
@@ -363,7 +364,7 @@ namespace McMaster.NETCore.Plugins.Loader
                 : LoadUnmanagedDllFromPath(unmanagedDllPath);
         }
 
-        private IntPtr LoadUnmanagedDllFromShadowCopy(string unmanagedDllPath)
+        private nint LoadUnmanagedDllFromShadowCopy(string unmanagedDllPath)
         {
             var shadowCopyDllPath = CreateShadowCopy(unmanagedDllPath);
 

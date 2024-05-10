@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using BilibiliAutoLiver.Models;
-using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;

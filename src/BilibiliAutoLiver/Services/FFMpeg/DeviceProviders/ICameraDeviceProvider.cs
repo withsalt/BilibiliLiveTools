@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BilibiliAutoLiver.Services.DeviceProviders
+namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
 {
     public interface ICameraDeviceProvider
     {

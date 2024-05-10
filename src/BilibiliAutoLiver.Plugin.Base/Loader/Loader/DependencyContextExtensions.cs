@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using McMaster.NETCore.Plugins.LibraryModel;
+using BilibiliAutoLiver.Plugin.Base.Loader.Internal;
+using BilibiliAutoLiver.Plugin.Base.Loader.LibraryModel;
 using Microsoft.Extensions.DependencyModel;
-using NativeLibrary = McMaster.NETCore.Plugins.LibraryModel.NativeLibrary;
+using NativeLibrary = BilibiliAutoLiver.Plugin.Base.Loader.LibraryModel.NativeLibrary;
 
-namespace McMaster.NETCore.Plugins.Loader
+namespace BilibiliAutoLiver.Plugin.Base.Loader.Loader
 {
     /// <summary>
     /// Extensions for configuring a load context using .deps.json files.
