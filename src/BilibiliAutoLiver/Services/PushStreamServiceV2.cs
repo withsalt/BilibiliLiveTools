@@ -129,18 +129,17 @@ namespace BilibiliAutoLiver.Services
                         {
                             opt.UsingShortest();
 
-                            sourceReader.WithDisableAudioChannelMap(opt);
-                            sourceReader.WithDisableVideoChannelMap(opt);
+                            sourceReader.WithDisableAudioChannel(opt);
+                            sourceReader.WithDisableVideoChannel(opt);
                             sourceReader.WithAudioCodec(opt);
                             sourceReader.WithVideoCodec(opt);
 
                             opt.ForceFormat("flv");
                             opt.ForcePixelFormat("yuv420p");
                             opt.WithConstantRateFactor(20);
-                            opt.WithFastStart();
                         });
 
-                    _logger.LogInformation($"FFMpeg参数：{handle.Arguments}");
+                    _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {handle.Arguments}");
                     _logger.LogInformation("推流参数初始化完成，即将开始推流...");
                     //启动
                     await handle.ProcessAsynchronously();

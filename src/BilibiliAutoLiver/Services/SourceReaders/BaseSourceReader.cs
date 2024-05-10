@@ -20,7 +20,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
 
         public abstract FFMpegArguments BuildInputArg();
 
-        public virtual void WithDisableAudioChannelMap(FFMpegArgumentOptions opt)
+        public virtual void WithDisableAudioChannel(FFMpegArgumentOptions opt)
         {
             if (!string.IsNullOrEmpty(videoMuteMapOpt))
             {
@@ -28,7 +28,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
             }
         }
 
-        public virtual void WithDisableVideoChannelMap(FFMpegArgumentOptions opt)
+        public virtual void WithDisableVideoChannel(FFMpegArgumentOptions opt)
         {
             if (!string.IsNullOrEmpty(audioMuteMapOpt))
             {
@@ -52,6 +52,10 @@ namespace BilibiliAutoLiver.Services.SourceReaders
         protected bool HasAudio()
         {
             if (this.Settings.V2.Input.AudioSource == null)
+            {
+                return false;
+            }
+            if(this.Settings.V2.Input.AudioSource.Type == Models.Enums.InputSourceType.None)
             {
                 return false;
             }
