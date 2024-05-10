@@ -60,10 +60,7 @@ namespace BilibiliAutoLiver.Services
                 _tokenSource = null;
             }
             _tokenSource = new CancellationTokenSource();
-            _mainTask = Task.Run(async () =>
-            {
-                await PushStream();
-            });
+            _mainTask = Task.Run(PushStream);
         }
 
         /// <summary>
