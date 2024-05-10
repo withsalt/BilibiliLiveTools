@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Enums;
-using BilibiliAutoLiver.Services.DeviceProviders;
+using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
 using FlashCap;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

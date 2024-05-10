@@ -8,7 +8,7 @@ using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 
-namespace BilibiliAutoLiver.Services.SourceReaders
+namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
     public class VideoSourceReader : BaseSourceReader
     {
@@ -22,15 +22,15 @@ namespace BilibiliAutoLiver.Services.SourceReaders
             GetVideoInputArg();
             if (HasAudio())
             {
-                GetAudioInputArg(this.Settings.V2.Input.AudioSource);
+                GetAudioInputArg(Settings.V2.Input.AudioSource);
             }
             return this;
         }
 
         public override FFMpegArgumentProcessor WithOutputArg()
         {
-            if (this.FFMpegArguments == null) throw new Exception("请先指定输入参数");
-            var rt = this.FFMpegArguments.OutputToUrl(this.RtmpAddr, opt =>
+            if (FFMpegArguments == null) throw new Exception("请先指定输入参数");
+            var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
                 //禁用视频中的音频
                 if (!string.IsNullOrEmpty(videoMuteMapOpt))
@@ -59,7 +59,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
 
         private void GetVideoInputArg()
         {
-            InputVideoSource videoSource = this.Settings.V2.Input.VideoSource;
+            InputVideoSource videoSource = Settings.V2.Input.VideoSource;
             if (string.IsNullOrEmpty(videoSource.Path))
             {
                 throw new ArgumentNullException("视频输入源Path不能为空");
@@ -69,7 +69,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
                 throw new FileNotFoundException($"视频输入源{videoSource.Path}文件不存在", videoSource.Path);
             }
             var fullPath = Path.GetFullPath(videoSource.Path);
-            this.FFMpegArguments = FFMpegArguments.FromFileInput(fullPath, true, opt =>
+            FFMpegArguments = FFMpegArguments.FromFileInput(fullPath, true, opt =>
             {
                 opt.WithCustomArgument("-re");
                 opt.WithCustomArgument("-stream_loop -1");
@@ -94,7 +94,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
                 return;
             }
             var fullPath = Path.GetFullPath(audioSource.Path);
-            this.FFMpegArguments.AddFileInput(fullPath, true, opt =>
+            FFMpegArguments.AddFileInput(fullPath, true, opt =>
             {
                 opt.WithCustomArgument("-stream_loop -1");
                 audioMuteMapOpt = "-map 1:a:0";

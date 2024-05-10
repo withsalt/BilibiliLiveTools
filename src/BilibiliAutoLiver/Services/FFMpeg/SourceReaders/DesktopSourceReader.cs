@@ -10,7 +10,7 @@ using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 
-namespace BilibiliAutoLiver.Services.SourceReaders
+namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
     public class DesktopSourceReader : BaseSourceReader
     {
@@ -28,8 +28,8 @@ namespace BilibiliAutoLiver.Services.SourceReaders
 
         public override FFMpegArgumentProcessor WithOutputArg()
         {
-            if (this.FFMpegArguments == null) throw new Exception("请先指定输入参数");
-            var rt = this.FFMpegArguments.OutputToUrl(this.RtmpAddr, opt =>
+            if (FFMpegArguments == null) throw new Exception("请先指定输入参数");
+            var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
                 //禁用视频中的音频
                 if (!string.IsNullOrEmpty(videoMuteMapOpt))
@@ -58,11 +58,11 @@ namespace BilibiliAutoLiver.Services.SourceReaders
 
         private void GetVideoInputArg()
         {
-            InputVideoSource videoSource = this.Settings.V2.Input.VideoSource;
+            InputVideoSource videoSource = Settings.V2.Input.VideoSource;
             Rectangle? rectangle = AnalyzeRectangle();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.FFMpegArguments = FFMpegArguments.FromFileInput("desktop", false, opt =>
+                FFMpegArguments = FFMpegArguments.FromFileInput("desktop", false, opt =>
                 {
                     opt.ForceFormat("gdigrab");
                     opt.WithFramerate(30);
@@ -78,7 +78,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 string path = rectangle != null ? $":0.0+{rectangle.Value.X},{rectangle.Value.Y}" : ":0.0";
-                this.FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
+                FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
                 {
                     opt.ForceFormat("x11grab");
                     opt.WithFramerate(30);
@@ -92,7 +92,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 string path = rectangle != null ? $"1:{rectangle.Value.X},{rectangle.Value.Y}" : "1";
-                this.FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
+                FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
                 {
                     opt.ForceFormat("avfoundation");
                     opt.WithFramerate(30);
@@ -126,11 +126,11 @@ namespace BilibiliAutoLiver.Services.SourceReaders
 
         private Rectangle? AnalyzeRectangle()
         {
-            if (string.IsNullOrWhiteSpace(this.Settings.V2.Input.VideoSource.Path))
+            if (string.IsNullOrWhiteSpace(Settings.V2.Input.VideoSource.Path))
             {
                 return null;
             }
-            string[] param = this.Settings.V2.Input.VideoSource.Path.Split(',');
+            string[] param = Settings.V2.Input.VideoSource.Path.Split(',');
             if (param == null || param.Length != 4)
             {
                 _logger.LogInformation("Path参数不正确，示例：0,0,800,800（x, y, width, height）");
