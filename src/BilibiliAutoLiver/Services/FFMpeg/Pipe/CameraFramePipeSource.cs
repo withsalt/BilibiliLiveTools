@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FFMpegCore.Pipes;
 
-namespace BilibiliAutoLiver.Services.FFMpeg.PipeSource
+namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
 {
     public class CameraFramePipeSource : IPipeSource
     {

@@ -25,7 +25,7 @@ namespace BilibiliLiverTests
                 Index = 0,
             };
 
-            FlashCapCameraDeviceProvider deviceProvider = new FlashCapCameraDeviceProvider(sourceItem, (p) =>
+            CameraDeviceProvider deviceProvider = new CameraDeviceProvider(sourceItem, (p) =>
             {
 
             });

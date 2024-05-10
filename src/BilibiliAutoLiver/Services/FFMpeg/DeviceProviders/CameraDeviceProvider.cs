@@ -9,7 +9,7 @@ using SkiaSharp;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
 {
-    public class FlashCapCameraDeviceProvider : ICameraDeviceProvider
+    public class CameraDeviceProvider : ICameraDeviceProvider
     {
         private Action<BufferFrame> _onBuffer;
 
@@ -17,7 +17,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
 
         private int _countFrames;
 
-        public FlashCapCameraDeviceProvider(InputVideoSource sourceItem, Action<BufferFrame> onBuffer)
+        public CameraDeviceProvider(InputVideoSource sourceItem, Action<BufferFrame> onBuffer)
         {
             if (onBuffer == null) throw new ArgumentException("On buffer action can not null");
             _onBuffer = onBuffer;
