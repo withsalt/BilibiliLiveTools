@@ -9,45 +9,24 @@ namespace BilibiliAutoLiver.Services.SourceReaders
     public abstract class BaseSourceReader : ISourceReader
     {
         protected LiveSettings Settings { get; set; }
+        protected FFMpegArguments FFMpegArguments { get; set; }
+
+        protected FFMpegArgumentProcessor Processor { get; set; }
+
+        protected string RtmpAddr { get; set; }
 
         protected string videoMuteMapOpt = null;
         protected string audioMuteMapOpt = null;
 
-        public BaseSourceReader(LiveSettings settings)
+        public BaseSourceReader(LiveSettings settings, string rtmpAddr)
         {
             this.Settings = settings;
+            this.RtmpAddr = !rtmpAddr.StartsWith('\"') ? $"\"{rtmpAddr}\"" : rtmpAddr;
         }
 
-        public abstract FFMpegArguments BuildInputArg();
+        public abstract ISourceReader WithInputArg();
 
-        public virtual void WithDisableAudioChannel(FFMpegArgumentOptions opt)
-        {
-            if (!string.IsNullOrEmpty(videoMuteMapOpt))
-            {
-                opt.WithCustomArgument(videoMuteMapOpt);
-            }
-        }
-
-        public virtual void WithDisableVideoChannel(FFMpegArgumentOptions opt)
-        {
-            if (!string.IsNullOrEmpty(audioMuteMapOpt))
-            {
-                opt.WithCustomArgument(audioMuteMapOpt);
-            }
-        }
-
-        public virtual void WithAudioCodec(FFMpegArgumentOptions opt)
-        {
-            if (HasAudio())
-            {
-                opt.WithAudioCodec(AudioCodec.Aac);
-            }
-        }
-
-        public virtual void WithVideoCodec(FFMpegArgumentOptions opt)
-        {
-            opt.WithVideoCodec(VideoCodec.LibX264);
-        }
+        public abstract FFMpegArgumentProcessor WithOutputArg();
 
         protected bool HasAudio()
         {
@@ -55,7 +34,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
             {
                 return false;
             }
-            if(this.Settings.V2.Input.AudioSource.Type == Models.Enums.InputSourceType.None)
+            if (this.Settings.V2.Input.AudioSource.Type == Models.Enums.InputSourceType.None)
             {
                 return false;
             }

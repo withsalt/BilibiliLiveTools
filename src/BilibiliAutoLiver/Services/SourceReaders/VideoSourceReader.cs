@@ -11,41 +11,54 @@ namespace BilibiliAutoLiver.Services.SourceReaders
 {
     public class VideoSourceReader : BaseSourceReader
     {
-        public VideoSourceReader(LiveSettings settings) : base(settings)
+        public VideoSourceReader(LiveSettings settings, string rtmpAddr) : base(settings, rtmpAddr)
         {
 
         }
 
-        public override FFMpegArguments BuildInputArg()
+        public override ISourceReader WithInputArg()
         {
-            FFMpegArguments arg = null;
-            switch (this.Settings.V2.Input.VideoSource.Type)
+            GetVideoInputArg();
+            if (HasAudio())
             {
-                case InputSourceType.File:
-                    arg = GetVideoInputArg(this.Settings.V2.Input.VideoSource);
-                    break;
-                case InputSourceType.Device:
-                    break;
-                default:
-                    throw new Exception("为知视频输入类型。");
-
+                GetAudioInputArg(this.Settings.V2.Input.AudioSource);
             }
+            return this;
+        }
 
-            if (this.Settings.V2.Input.AudioSource != null)
+        public override FFMpegArgumentProcessor WithOutputArg()
+        {
+            if (this.FFMpegArguments == null) throw new Exception("请先指定输入参数");
+            var rt = this.FFMpegArguments.OutputToUrl(this.RtmpAddr, opt =>
             {
-                arg = GetAudioInputArg(arg, this.Settings.V2.Input.AudioSource);
-            }
-            return arg;
+                //禁用视频中的音频
+                if (!string.IsNullOrEmpty(videoMuteMapOpt))
+                {
+                    opt.WithCustomArgument(videoMuteMapOpt);
+                }
+                //禁用音频中的视频
+                if (!string.IsNullOrEmpty(audioMuteMapOpt))
+                {
+                    opt.WithCustomArgument(audioMuteMapOpt);
+                }
+                //音频编码
+                if (HasAudio())
+                {
+                    opt.WithAudioCodec(AudioCodec.Aac);
+                }
+                //视频编码
+                opt.WithVideoCodec(VideoCodec.LibX264);
+                opt.ForceFormat("flv");
+                opt.ForcePixelFormat("yuv420p");
+                opt.WithConstantRateFactor(20);
+                opt.UsingShortest();
+            });
+            return rt;
         }
 
-        private FFMpegArguments GetDeviceInputArg(InputVideoSource[] deviceSources)
+        private void GetVideoInputArg()
         {
-
-            return null;
-        }
-
-        private FFMpegArguments GetVideoInputArg(InputVideoSource videoSource)
-        {
+            InputVideoSource videoSource = this.Settings.V2.Input.VideoSource;
             if (string.IsNullOrEmpty(videoSource.Path))
             {
                 throw new ArgumentNullException("视频输入源Path不能为空");
@@ -55,7 +68,7 @@ namespace BilibiliAutoLiver.Services.SourceReaders
                 throw new FileNotFoundException($"视频输入源{videoSource.Path}文件不存在", videoSource.Path);
             }
             var fullPath = Path.GetFullPath(videoSource.Path);
-            var arg = FFMpegArguments.FromFileInput(fullPath, true, opt =>
+            this.FFMpegArguments = FFMpegArguments.FromFileInput(fullPath, true, opt =>
             {
                 opt.WithCustomArgument("-re");
                 opt.WithCustomArgument("-stream_loop -1");
@@ -71,22 +84,20 @@ namespace BilibiliAutoLiver.Services.SourceReaders
                     }
                 }
             });
-            return arg;
         }
 
-        private FFMpegArguments GetAudioInputArg(FFMpegArguments arg, InputAudioSource audioSource)
+        private void GetAudioInputArg(InputAudioSource audioSource)
         {
             if (!HasAudio())
             {
-                return arg;
+                return;
             }
             var fullPath = Path.GetFullPath(audioSource.Path);
-            arg.AddFileInput(fullPath, true, opt =>
+            this.FFMpegArguments.AddFileInput(fullPath, true, opt =>
             {
                 opt.WithCustomArgument("-stream_loop -1");
                 audioMuteMapOpt = "-map 1:a:0";
             });
-            return arg;
         }
     }
 }

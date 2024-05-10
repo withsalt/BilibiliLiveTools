@@ -121,28 +121,14 @@ namespace BilibiliAutoLiver.Services
                     string rtmpAddr = await GetRtmpAddress();
 
                     //CameraFramePipeSource cameraImagePipe = new CameraFramePipeSource(que, characteristic.Width, characteristic.Height, _frameRate);
-                    ISourceReader sourceReader = new VideoSourceReader(_liveSetting);
+                    var processor = new VideoSourceReader(_liveSetting, rtmpAddr)
+                        .WithInputArg()
+                        .WithOutputArg();
 
-                    var handle = sourceReader
-                        .BuildInputArg()
-                        .OutputToUrl(rtmpAddr, opt =>
-                        {
-                            opt.UsingShortest();
-
-                            sourceReader.WithDisableAudioChannel(opt);
-                            sourceReader.WithDisableVideoChannel(opt);
-                            sourceReader.WithAudioCodec(opt);
-                            sourceReader.WithVideoCodec(opt);
-
-                            opt.ForceFormat("flv");
-                            opt.ForcePixelFormat("yuv420p");
-                            opt.WithConstantRateFactor(20);
-                        });
-
-                    _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {handle.Arguments}");
+                    _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
                     _logger.LogInformation("推流参数初始化完成，即将开始推流...");
                     //启动
-                    await handle.ProcessAsynchronously();
+                    await processor.ProcessAsynchronously();
                     //如果开启了自动重试
                     if (!_tokenSource.IsCancellationRequested)
                     {
