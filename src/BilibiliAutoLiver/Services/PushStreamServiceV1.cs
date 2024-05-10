@@ -181,7 +181,7 @@ namespace BilibiliAutoLiver.Services
                     }
                     //start live
                     ProcessStartInfo psi = await InitLiveProcessStartInfo();
-                    _logger.LogInformation("推流参数初始化完成，即将开始推流...");
+                    _logger.LogInformation("推流参数初始化完成，开始推流...");
                     //启动
                     using (var proc = Process.Start(psi))
                     {

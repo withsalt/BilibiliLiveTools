@@ -3,11 +3,14 @@ using System.IO;
 using BilibiliAutoLiver.Models;
 using FFMpegCore;
 using FFMpegCore.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.SourceReaders
 {
     public abstract class BaseSourceReader : ISourceReader
     {
+        protected readonly ILogger _logger;   
+
         protected LiveSettings Settings { get; set; }
         protected FFMpegArguments FFMpegArguments { get; set; }
 
@@ -18,15 +21,30 @@ namespace BilibiliAutoLiver.Services.SourceReaders
         protected string videoMuteMapOpt = null;
         protected string audioMuteMapOpt = null;
 
-        public BaseSourceReader(LiveSettings settings, string rtmpAddr)
+        public BaseSourceReader(LiveSettings settings, string rtmpAddr, ILogger logger)
         {
             this.Settings = settings;
             this.RtmpAddr = !rtmpAddr.StartsWith('\"') ? $"\"{rtmpAddr}\"" : rtmpAddr;
+            _logger = logger;
         }
 
         public abstract ISourceReader WithInputArg();
 
         public abstract FFMpegArgumentProcessor WithOutputArg();
+
+        protected void GetAudioInputArg()
+        {
+            if (!HasAudio())
+            {
+                return;
+            }
+            var fullPath = Path.GetFullPath(this.Settings.V2.Input.AudioSource.Path);
+            this.FFMpegArguments.AddFileInput(fullPath, true, opt =>
+            {
+                opt.WithCustomArgument("-stream_loop -1");
+                audioMuteMapOpt = "-map 1:a:0";
+            });
+        }
 
         protected bool HasAudio()
         {

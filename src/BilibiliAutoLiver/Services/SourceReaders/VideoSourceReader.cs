@@ -6,12 +6,13 @@ using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Enums;
 using FFMpegCore;
 using FFMpegCore.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.SourceReaders
 {
     public class VideoSourceReader : BaseSourceReader
     {
-        public VideoSourceReader(LiveSettings settings, string rtmpAddr) : base(settings, rtmpAddr)
+        public VideoSourceReader(LiveSettings settings, string rtmpAddr, ILogger logger) : base(settings, rtmpAddr, logger)
         {
 
         }

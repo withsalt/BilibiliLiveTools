@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.PipeSource;
@@ -121,12 +122,12 @@ namespace BilibiliAutoLiver.Services
                     string rtmpAddr = await GetRtmpAddress();
 
                     //CameraFramePipeSource cameraImagePipe = new CameraFramePipeSource(que, characteristic.Width, characteristic.Height, _frameRate);
-                    var processor = new VideoSourceReader(_liveSetting, rtmpAddr)
+                    var processor = GetSourceReader(rtmpAddr)
                         .WithInputArg()
                         .WithOutputArg();
 
                     _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
-                    _logger.LogInformation("推流参数初始化完成，即将开始推流...");
+                    _logger.LogInformation("推流参数初始化完成，开始推流...");
                     //启动
                     await processor.ProcessAsynchronously();
                     //如果开启了自动重试
@@ -150,6 +151,19 @@ namespace BilibiliAutoLiver.Services
                         await Task.Delay(60000, _tokenSource.Token);
                     }
                 }
+            }
+        }
+
+        private ISourceReader GetSourceReader(string rtmpAddr)
+        {
+            switch (_liveSetting.V2.Input.VideoSource.Type)
+            {
+                case InputSourceType.File:
+                    return new VideoSourceReader(_liveSetting, rtmpAddr, _logger);
+                case InputSourceType.Desktop:
+                    return new DesktopSourceReader(_liveSetting, rtmpAddr, _logger);
+                default:
+                    throw new NotImplementedException($"不支持的输入类型：{_liveSetting.V2.Input.VideoSource.Type}");
             }
         }
 

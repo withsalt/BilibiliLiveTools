@@ -7,5 +7,7 @@
         Device = 1,
 
         File = 2,
+
+        Desktop = 3,
     }
 }
