@@ -30,6 +30,7 @@ namespace BilibiliAutoLiver.Services
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
         private Action _cancel = null;
+        private readonly static object _locker = new object();
 
         public PushStreamServiceV2(ILogger<PushStreamServiceV1> logger
             , IBilibiliAccountApiService account
@@ -72,34 +73,37 @@ namespace BilibiliAutoLiver.Services
         /// 停止推流
         /// </summary>
         /// <returns></returns>
-        public override async Task Stop()
+        public override Task Stop()
         {
             if (_mainTask == null)
             {
-                return;
+                return Task.CompletedTask;
             }
             if (_tokenSource == null || _tokenSource.IsCancellationRequested)
             {
-                return;
+                return Task.CompletedTask;
             }
-            _logger.LogWarning("结束推流中...");
-            _tokenSource.Cancel();
-            _cancel?.Invoke();
-            Stopwatch sw = Stopwatch.StartNew();
-            //3s等待下线
-            while (sw.ElapsedMilliseconds < 3000
-                && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+            lock (_locker)
             {
-                await Task.Delay(10);
+                _logger.LogWarning("结束推流中...");
+                _tokenSource.Cancel();
+                _cancel?.Invoke();
+                Stopwatch sw = Stopwatch.StartNew();
+                //3s等待下线
+                while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+                {
+                    Thread.Sleep(0);
+                }
+                sw.Stop();
+                //Dispose
+                _mainTask.Dispose();
+                _tokenSource.Dispose();
+                _mainTask = null;
+                _tokenSource = null;
+                _cancel = null;
+                _logger.LogWarning("推流已停止。");
             }
-            sw.Stop();
-            //Dispose
-            _mainTask.Dispose();
-            _tokenSource.Dispose();
-            _mainTask = null;
-            _tokenSource = null;
-            _cancel = null;
-            _logger.LogWarning("推流中已停止。");
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -122,7 +126,9 @@ namespace BilibiliAutoLiver.Services
                     //start live
                     string rtmpAddr = await GetRtmpAddress();
                     sourceReader = GetSourceReader(rtmpAddr);
-                    FFMpegArgumentProcessor processor = sourceReader.WithInputArg().WithOutputArg()
+                    FFMpegArgumentProcessor processor = sourceReader
+                        .WithInputArg()
+                        .WithOutputArg()
                         .CancellableThrough(out _cancel);
 
                     _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
@@ -153,7 +159,8 @@ namespace BilibiliAutoLiver.Services
                 }
                 finally
                 {
-                    if (sourceReader != null) sourceReader.Dispose();
+                    if (sourceReader != null)
+                        sourceReader.Dispose();
                 }
             }
         }

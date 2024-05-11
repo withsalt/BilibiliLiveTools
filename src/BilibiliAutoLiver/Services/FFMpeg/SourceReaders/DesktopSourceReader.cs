@@ -69,7 +69,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithCustomArgument($"-offset_y {rectangle.Value.Y}");
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument(videoSource, opt);
+                    WithMuteArgument( opt);
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -83,7 +83,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     {
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument(videoSource, opt);
+                    WithMuteArgument( opt);
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -97,27 +97,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     {
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument(videoSource, opt);
+                    WithMuteArgument( opt);
                 });
             }
             else
             {
                 throw new NotSupportedException("不支持的系统类型");
-            }
-        }
-
-        private void WithMuteArgument(InputVideoSource videoSource, FFMpegArgumentOptions opt)
-        {
-            if (videoSource.IsMute)
-            {
-                if (HasAudio())
-                {
-                    videoMuteMapOpt = "-map 0:v:0";
-                }
-                else
-                {
-                    opt.DisableChannel(Channel.Audio);
-                }
             }
         }
 

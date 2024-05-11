@@ -8,6 +8,8 @@ namespace BilibiliAutoLiver.Plugin.YoloAI
     {
         public int Index { get; }
 
+        public string Name { get; } = "YoloV8检测";
+
         public YoloPipeProcess()
         {
             this.Index = 99;

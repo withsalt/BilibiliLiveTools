@@ -9,6 +9,8 @@ namespace BilibiliAutoLiver.Plugin.Base
         /// </summary>
         int Index { get; }
 
+        string Name { get; }
+
         SKBitmap Process(SKBitmap bitmap);
     }
 }

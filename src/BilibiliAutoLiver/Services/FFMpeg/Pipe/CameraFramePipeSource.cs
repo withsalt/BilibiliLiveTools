@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Models;
 using FFMpegCore.Pipes;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
@@ -22,12 +23,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
         /// <summary>
         /// 帧队列
         /// </summary>
-        public Queue<byte[]> FrameQueue { get; set; }
+        public Queue<BufferFrame> FrameQueue { get; set; }
 
         private byte[] _lastData = null;
         private readonly Stopwatch _frameCounter = new Stopwatch();
 
-        public CameraFramePipeSource(Queue<byte[]> frameQueue, int width, int height, double frameRate)
+        public CameraFramePipeSource(Queue<BufferFrame> frameQueue, int width, int height, double frameRate)
         {
             Width = width;
             Height = height;
@@ -45,7 +46,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
 
         public string GetStreamArguments()
         {
-            return $"-f image2pipe -r {FrameRate.ToString(CultureInfo.InvariantCulture)} -s {Width}x{Height}";
+            return string.Empty;
         }
 
         public async Task WriteAsync(Stream outputStream, CancellationToken cancellationToken)
@@ -54,13 +55,13 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
             {
                 try
                 {
-                    if (FrameQueue.TryDequeue(out var data) && data != null && data.Length > 0)
+                    if (FrameQueue.TryDequeue(out var data) && data != null && data.Bitmap?.Bytes.Length > 0)
                     {
-                        await outputStream.WriteAsync(data, 0, data.Length, cancellationToken).ConfigureAwait(false);
+                        await outputStream.WriteAsync(data.Bitmap.Bytes, 0, data.Bitmap.Bytes.Length, cancellationToken).ConfigureAwait(false);
 
                         _frameCounter.Restart();
-                        _lastData = new byte[data.Length];
-                        Array.ConstrainedCopy(data, 0, _lastData, 0, data.Length);
+                        _lastData = new byte[data.Bitmap.Bytes.Length];
+                        Array.ConstrainedCopy(data.Bitmap.Bytes, 0, _lastData, 0, data.Bitmap.Bytes.Length);
                     }
                     else
                     {

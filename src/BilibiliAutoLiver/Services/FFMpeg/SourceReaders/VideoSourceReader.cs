@@ -70,31 +70,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 opt.WithCustomArgument("-re");
                 opt.WithCustomArgument("-stream_loop -1");
-                if (videoSource.IsMute)
-                {
-                    if (HasAudio())
-                    {
-                        videoMuteMapOpt = "-map 0:v:0";
-                    }
-                    else
-                    {
-                        opt.DisableChannel(Channel.Audio);
-                    }
-                }
-            });
-        }
 
-        private void GetAudioInputArg(InputAudioSource audioSource)
-        {
-            if (!HasAudio())
-            {
-                return;
-            }
-            var fullPath = Path.GetFullPath(audioSource.Path);
-            FFMpegArguments.AddFileInput(fullPath, true, opt =>
-            {
-                opt.WithCustomArgument("-stream_loop -1");
-                audioMuteMapOpt = "-map 1:a:0";
+                WithMuteArgument(opt);
             });
         }
     }

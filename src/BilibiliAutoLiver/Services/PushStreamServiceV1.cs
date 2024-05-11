@@ -27,6 +27,7 @@ namespace BilibiliAutoLiver.Services
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
+        private readonly static object _locker = new object();
 
         public PushStreamServiceV1(ILogger<PushStreamServiceV1> logger
             , IBilibiliAccountApiService account
@@ -67,32 +68,35 @@ namespace BilibiliAutoLiver.Services
         /// 停止推流
         /// </summary>
         /// <returns></returns>
-        public override async Task Stop()
+        public override Task Stop()
         {
             if (_mainTask == null)
             {
-                return;
+                return Task.CompletedTask;
             }
             if (_tokenSource == null || _tokenSource.IsCancellationRequested)
             {
-                return;
+                return Task.CompletedTask;
             }
-            _logger.LogWarning("结束推流中...");
-            _tokenSource.Cancel();
-            Stopwatch sw = Stopwatch.StartNew();
-            //3s等待下线
-            while (sw.ElapsedMilliseconds < 3000
-                && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+            lock (_locker)
             {
-                await Task.Delay(10);
+                _logger.LogWarning("结束推流中...");
+                _tokenSource.Cancel();
+                Stopwatch sw = Stopwatch.StartNew();
+                //3s等待下线
+                while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+                {
+                    Thread.Sleep(0);
+                }
+                sw.Stop();
+                //Dispose
+                _mainTask.Dispose();
+                _tokenSource.Dispose();
+                _mainTask = null;
+                _tokenSource = null;
+                _logger.LogWarning("推流已停止。");
             }
-            sw.Stop();
-            //Dispose
-            _mainTask.Dispose();
-            _tokenSource.Dispose();
-            _mainTask = null;
-            _tokenSource = null;
-            _logger.LogWarning("推流中已停止。");
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -178,6 +182,7 @@ namespace BilibiliAutoLiver.Services
                     }
                     //start live
                     ProcessStartInfo psi = await InitLiveProcessStartInfo();
+                    _logger.LogInformation($"ffmpeg推流命令：{psi.FileName} {psi.Arguments}");
                     _logger.LogInformation("推流参数初始化完成，开始推流...");
                     //启动
                     using (var proc = Process.Start(psi))

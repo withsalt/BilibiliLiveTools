@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using BilibiliAutoLiver.Plugin.Base.Loader;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Plugin.Base
 {
@@ -13,13 +14,21 @@ namespace BilibiliAutoLiver.Plugin.Base
         {
             var loaders = new List<PluginLoader>();
             var container = new PipeContainer();
+            services.AddSingleton<IPipeContainer>(container);
+
+            using ServiceProvider provider = services.BuildServiceProvider();
+            ILogger<IPipeProcess> logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<IPipeProcess>();
 
             string[]? dllNames = Directory.GetFiles(AppContext.BaseDirectory, "BilibiliAutoLiver.Plugin.*.dll", SearchOption.AllDirectories)
                 ?.Where(p => !Path.GetFileName(p).Equals("BilibiliAutoLiver.Plugin.Base.dll", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
             if (dllNames == null || dllNames.Length == 0)
+            {
+                logger.LogInformation("没有插件需要加载。");
                 return services;
+            }
 
+            HashSet<string> exists = new HashSet<string>();
             foreach (var fileName in dllNames)
             {
                 try
@@ -31,19 +40,27 @@ namespace BilibiliAutoLiver.Plugin.Base
                     foreach (var pluginType in types)
                     {
                         object? instance = Activator.CreateInstance(pluginType);
-                        if (instance == null) continue;
-                        Console.WriteLine($"从{fileName}加载插件{pluginType.FullName}");
-                        container.Add((IPipeProcess)instance);
+                        if (instance == null || string.IsNullOrEmpty(pluginType.FullName)) continue;
+                        if (exists.Contains(pluginType.FullName))
+                        {
+                            continue;
+                        }
+                        IPipeProcess pipeProcess = (IPipeProcess)instance;
+                        if (string.IsNullOrWhiteSpace(pipeProcess.Name) || pipeProcess.Index <= 0)
+                        {
+                            continue;
+                        }
+                        logger.LogInformation($"从{fileName}加载插件{pluginType.FullName}");
+                        container.Add(pipeProcess);
+                        exists.Add(pluginType.FullName);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"加载插件{fileName}失败，{ex.Message}");
+                    logger.LogWarning(ex, $"加载插件{fileName}失败，{ex.Message}");
                     continue;
                 }
             }
-
-            services.AddSingleton<IPipeContainer>(container);
             return services;
         }
     }

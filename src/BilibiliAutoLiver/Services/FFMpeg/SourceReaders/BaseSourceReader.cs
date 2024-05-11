@@ -67,6 +67,21 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             return true;
         }
 
+        protected void WithMuteArgument(FFMpegArgumentOptions opt)
+        {
+            if (this.Settings.V2.Input.VideoSource.IsMute)
+            {
+                if (HasAudio())
+                {
+                    videoMuteMapOpt = "-map 0:v:0";
+                }
+                else
+                {
+                    opt.DisableChannel(Channel.Audio);
+                }
+            }
+        }
+
         public virtual void Dispose()
         {
             
