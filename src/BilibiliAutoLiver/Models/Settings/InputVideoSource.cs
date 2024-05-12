@@ -1,5 +1,6 @@
 ﻿using System;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver.Models.Settings
 {
@@ -7,11 +8,11 @@ namespace BilibiliAutoLiver.Models.Settings
     {
         public InputSourceType Type { get; set; }
 
-        public int Index { get; set; } = -1;
-
         public string Path { get; set; }
 
         public string Resolution { get; set; }
+
+        public int Framerate { get; set; }
 
         public bool IsMute { get; set; }
 
@@ -19,7 +20,11 @@ namespace BilibiliAutoLiver.Models.Settings
         {
             get
             {
-                return GetResolution().width;
+                if (this.Type != InputSourceType.Camera)
+                {
+                    return 0;
+                }
+                return ResolutionHelper.Analyze(this.Resolution).width;
             }
         }
 
@@ -27,31 +32,12 @@ namespace BilibiliAutoLiver.Models.Settings
         {
             get
             {
-                return GetResolution().height;
+                if (this.Type != InputSourceType.Camera)
+                {
+                    return 0;
+                }
+                return ResolutionHelper.Analyze(this.Resolution).height;
             }
-        }
-
-        private (int width, int height) GetResolution()
-        {
-            if (this.Type != InputSourceType.Device)
-            {
-                return (0, 0);
-            }
-            if (string.IsNullOrEmpty(this.Resolution))
-            {
-                throw new ArgumentException("The resolution is null.");
-            }
-            char spChar = this.Resolution.Contains('x') ? 'x' : (this.Resolution.Contains('*') ? '*' : throw new Exception($"Can't find a separator with {this.Resolution}"));
-            string[] parts = this.Resolution.Split(spChar, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length != 2)
-            {
-                throw new ArgumentException($"{this.Resolution} not a standard resolution format.");
-            }
-            if (!int.TryParse(parts[0], out int width) || !int.TryParse(parts[1], out int height))
-            {
-                throw new ArgumentException($"{this.Resolution} not a standard resolution format.");
-            }
-            return (width, height);
         }
     }
 }

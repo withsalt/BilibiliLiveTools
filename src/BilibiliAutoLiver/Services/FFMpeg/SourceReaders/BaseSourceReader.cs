@@ -9,7 +9,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
     public abstract class BaseSourceReader : ISourceReader
     {
-        protected readonly ILogger _logger;   
+        protected readonly ILogger _logger;
 
         protected LiveSettings Settings { get; set; }
         protected FFMpegArguments FFMpegArguments { get; set; }
@@ -31,6 +31,45 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         public abstract ISourceReader WithInputArg();
 
         public abstract FFMpegArgumentProcessor WithOutputArg();
+
+        protected void WithCommonOutputArg(FFMpegArgumentOptions opt)
+        {
+            //禁用视频中的音频
+            if (!string.IsNullOrEmpty(videoMuteMapOpt))
+            {
+                opt.WithCustomArgument(videoMuteMapOpt);
+            }
+            //禁用音频中的视频
+            if (!string.IsNullOrEmpty(audioMuteMapOpt))
+            {
+                opt.WithCustomArgument(audioMuteMapOpt);
+            }
+            //音频编码
+            if (HasAudio())
+            {
+                opt.WithAudioCodec(AudioCodec.Aac);
+                opt.WithAudioSamplingRate(44100);
+                opt.WithAudioBitrate(AudioQuality.Normal);
+            }
+            //视频编码
+            //opt.WithCustomArgument("-bufsize 10M");
+            opt.WithVideoCodec(VideoCodec.LibX264);
+            opt.ForceFormat("flv");
+            opt.ForcePixelFormat("yuv420p");
+            opt.WithConstantRateFactor(23);
+            opt.WithVideoBitrate(6000);
+            //用于设置 x264 编码器的编码速度和质量之间的权衡。
+            opt.WithSpeedPreset(Speed.SuperFast);
+            //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
+            opt.WithCustomArgument("-tune zerolatency");
+            opt.WithCustomArgument("-g 30");
+
+            //推流分辨率
+            if (Settings.V2.Output.Height > 0 && Settings.V2.Output.Width > 0)
+            {
+                opt.Resize(Settings.V2.Output.Width, Settings.V2.Output.Height);
+            }
+        }
 
         protected void GetAudioInputArg()
         {
@@ -84,7 +123,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         public virtual void Dispose()
         {
-            
+
         }
     }
 }

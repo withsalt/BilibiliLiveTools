@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver.Models.Settings
 {
@@ -81,6 +82,36 @@ namespace BilibiliAutoLiver.Models.Settings
         public OutputQualityEnum Quality { get; set; }
 
         public string Resolution { get; set; }
+
+        public int Width
+        {
+            get
+            {
+                try
+                {
+                    return ResolutionHelper.Analyze(this.Resolution).width;
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                try
+                {
+                    return ResolutionHelper.Analyze(this.Resolution).height;
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+        }
     }
 
     public class Input

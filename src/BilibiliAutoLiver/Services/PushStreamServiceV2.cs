@@ -139,8 +139,7 @@ namespace BilibiliAutoLiver.Services
                     //如果开启了自动重试
                     if (!_tokenSource.IsCancellationRequested)
                     {
-                        _logger.LogWarning($"等待{_liveSetting.RetryDelay}s后重新推流...");
-                        await Task.Delay(_liveSetting.RetryDelay * 1000, _tokenSource.Token);
+                        await Delay(_tokenSource);
                     }
                 }
                 catch (OperationCanceledException)
@@ -150,11 +149,18 @@ namespace BilibiliAutoLiver.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
+                    try
+                    {
+                        if (sourceReader != null) sourceReader.Dispose();
+                    }
+                    catch (Exception ex1)
+                    {
+                        _logger.LogError(ex1, "终止DeviceSourceReader失败");
+                    }
                     //如果开启了自动重试
                     if (!_tokenSource.IsCancellationRequested)
                     {
-                        _logger.LogWarning($"等待60s后重新推流...");
-                        await Task.Delay(60000, _tokenSource.Token);
+                        await Delay(_tokenSource);
                     }
                 }
                 finally
@@ -173,8 +179,10 @@ namespace BilibiliAutoLiver.Services
                     return new VideoSourceReader(_liveSetting, rtmpAddr, _logger);
                 case InputSourceType.Desktop:
                     return new DesktopSourceReader(_liveSetting, rtmpAddr, _logger);
-                case InputSourceType.Device:
-                    return new DeviceSourceReader(_liveSetting, rtmpAddr, _logger, _pipeContainer);
+                case InputSourceType.Camera:
+                    return new CameraSourceReader(_liveSetting, rtmpAddr, _logger);
+                case InputSourceType.CameraPlus:
+                    return new CameraPlusSourceReader(_liveSetting, rtmpAddr, _logger, _pipeContainer);
                 default:
                     throw new NotImplementedException($"不支持的输入类型：{_liveSetting.V2.Input.VideoSource.Type}");
             }

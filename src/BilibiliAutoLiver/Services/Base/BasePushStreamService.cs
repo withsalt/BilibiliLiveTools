@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using BilibiliAutoLiver.Extensions;
@@ -146,6 +147,12 @@ namespace BilibiliAutoLiver.Services.Base
                 _logger.LogInformation($"修改直播间分区为：{_liveSetting.LiveAreaId}，成功！");
                 await Task.Delay(1000);
             }
+        }
+
+        protected async Task Delay(CancellationTokenSource tokenSource)
+        {
+            _logger.LogWarning($"等待{_liveSetting.RetryDelay}s后重新推流...");
+            await Task.Delay(_liveSetting.RetryDelay * 1000, tokenSource.Token);
         }
 
         public void Dispose()

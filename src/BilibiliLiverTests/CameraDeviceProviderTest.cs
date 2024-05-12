@@ -19,7 +19,7 @@ namespace BilibiliLiverTests
         {
             InputVideoSource sourceItem = new InputVideoSource()
             {
-                Type = InputSourceType.Device,
+                Type = InputSourceType.Camera,
                 Path = "HD Pro Webcam C920",
                 Resolution = "1280*720",
                 Index = 0,

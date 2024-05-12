@@ -14,7 +14,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
 {
     public class CameraDeviceProvider : ICameraDeviceProvider
     {
-        public Size Size {  get; }
+        public Size Size { get; }
 
         private Action<BufferFrame> _onBuffer;
         private CaptureDevice _captureDevice;
@@ -23,7 +23,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
         private CancellationTokenSource _tokenSource;
         private int _countFrames;
         private static readonly object stopLocker = new object();
-        private static bool _isStopped = false;
+        private bool _isStopped = false;
 
         public CameraDeviceProvider(InputVideoSource sourceItem, Action<BufferFrame> onBuffer)
         {
@@ -39,13 +39,20 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
             {
                 _captureDeviceDescriptor = devices.Where(p => p.Name == sourceItem.Path).FirstOrDefault();
             }
-            if (_captureDeviceDescriptor == null && sourceItem.Index >= 0 && sourceItem.Index < devices.Count)
+            if (int.TryParse(sourceItem.Path, out int index)
+                && index >= 0
+                && _captureDeviceDescriptor == null
+                && index < devices.Count)
             {
-                _captureDeviceDescriptor = devices[sourceItem.Index];
+                _captureDeviceDescriptor = devices[index];
             }
             if (_captureDeviceDescriptor == null && !string.IsNullOrEmpty(sourceItem.Path))
             {
                 throw new Exception($"找不到名称为{sourceItem.Path}的视频输入设备！");
+            }
+            if (string.IsNullOrEmpty(sourceItem.Resolution) || sourceItem.Width == 0 || sourceItem.Height == 0)
+            {
+                throw new Exception($"当视频输入类型为设备时，分辨率不能为空！");
             }
             IEnumerable<VideoCharacteristics> targetCharacteristics = _captureDeviceDescriptor.Characteristics?.Where(p => p.Width == sourceItem.Width && p.Height == sourceItem.Height && p.PixelFormat != PixelFormats.Unknown);
             if (targetCharacteristics?.Any() != true)
@@ -76,27 +83,37 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
             {
                 if (_isStopped)
                     return Task.CompletedTask;
+                if (_captureDevice == null)
+                {
+                    if (_tokenSource != null)
+                    {
+                        _tokenSource.Cancel();
+                        _tokenSource.Dispose();
+                        _tokenSource = null;
+                    }
+                    return Task.CompletedTask;
+                }
+
+                _tokenSource.Cancel();
+                _captureDevice.StopAsync().GetAwaiter().GetResult();
                 if (_captureDevice.IsRunning)
                 {
-                    _tokenSource.Cancel();
-                    Stopwatch sw = new Stopwatch();
+                    Stopwatch sw = Stopwatch.StartNew();
                     while (_captureDevice.IsRunning && sw.ElapsedMilliseconds < 3000)
                     {
                         Thread.Sleep(0);
                     }
+                    sw.Stop();
                 }
-                if (_captureDevice != null)
-                {
-                    _captureDevice.StopAsync().GetAwaiter().GetResult();
-                    _captureDevice.Dispose();
+                _captureDevice.Dispose();
 
-                    if (_tokenSource != null)
-                    {
-                        _tokenSource.Dispose();
-                        _tokenSource = null;
-                    }
-                    _captureDevice = null;
+                if (_tokenSource != null)
+                {
+                    _tokenSource.Dispose();
+                    _tokenSource = null;
                 }
+                _captureDevice = null;
+
                 _isStopped = true;
             }
             return Task.CompletedTask;
@@ -126,6 +143,26 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
             finally
             {
                 bufferScope.ReleaseNow();
+            }
+        }
+
+        private string GetStreamFormat(SKColorType fmt)
+        {
+            // TODO: Add support for additional formats
+            switch (fmt)
+            {
+                case SKColorType.Gray8:
+                    return "gray8";
+                case SKColorType.Bgra8888:
+                    return "bgra";
+                case SKColorType.Rgb888x:
+                    return "rgb";
+                case SKColorType.Rgba8888:
+                    return "rgba";
+                case SKColorType.Rgb565:
+                    return "rgb565";
+                default:
+                    throw new NotSupportedException($"Not supported pixel format {fmt}");
             }
         }
     }

@@ -15,21 +15,21 @@ using SkiaSharp;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
-    public class DeviceSourceReader : BaseSourceReader
+    public class CameraPlusSourceReader : BaseSourceReader
     {
         private ICameraDeviceProvider DeviceProvider { get; }
         private IPipeContainer PipeContainer { get; }
         private CameraFramePipeSource PipeSource { get; }
-        private Queue<BufferFrame> frameQueue = new Queue<BufferFrame>();
 
+        private Queue<BufferFrame> frameQueue = new Queue<BufferFrame>();
         private readonly int _frameRate = 30;
 
-        public DeviceSourceReader(LiveSettings settings, string rtmpAddr, ILogger logger, IPipeContainer pipeContainer) : base(settings, rtmpAddr, logger)
+        public CameraPlusSourceReader(LiveSettings settings, string rtmpAddr, ILogger logger, IPipeContainer pipeContainer) : base(settings, rtmpAddr, logger)
         {
             this.PipeContainer = pipeContainer;
             this.DeviceProvider = new CameraDeviceProvider(settings.V2.Input.VideoSource, OnFrameArrived);
             this.DeviceProvider.Start();
-            this.PipeSource = new CameraFramePipeSource(frameQueue, this.DeviceProvider.Size.Width, this.DeviceProvider.Size.Height, _frameRate);
+            this.PipeSource = new CameraFramePipeSource(frameQueue);
         }
 
         private void OnFrameArrived(BufferFrame frame)
@@ -39,7 +39,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 if (frameQueue.Count > _frameRate * 2)
                 {
                     _logger.LogWarning("帧队列堆积，丢弃...");
-                    frameQueue.Clear();
+                    while (frameQueue.TryDequeue(out var p))
+                    {
+                        p?.Dispose();
+                    }
                 }
                 if (frame.Bitmap == null)
                 {
@@ -90,30 +93,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         public override FFMpegArgumentProcessor WithOutputArg()
         {
-            if (FFMpegArguments == null) throw new Exception("请先指定输入参数");
+            if (FFMpegArguments == null)
+                throw new Exception("请先指定输入参数");
             var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
-                //禁用视频中的音频
-                if (!string.IsNullOrEmpty(videoMuteMapOpt))
-                {
-                    opt.WithCustomArgument(videoMuteMapOpt);
-                }
-                //禁用音频中的视频
-                if (!string.IsNullOrEmpty(audioMuteMapOpt))
-                {
-                    opt.WithCustomArgument(audioMuteMapOpt);
-                }
-                //音频编码
-                if (HasAudio())
-                {
-                    opt.WithAudioCodec(AudioCodec.Aac);
-                }
-                //视频编码
-                opt.WithVideoCodec(VideoCodec.LibX264);
-                opt.ForceFormat("flv");
-                opt.ForcePixelFormat("yuv420p");
-                opt.WithConstantRateFactor(20);
-                opt.UsingShortest();
+                WithCommonOutputArg(opt);
             });
             return rt;
         }
@@ -122,7 +106,9 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         {
             this.FFMpegArguments = FFMpegArguments.FromPipeInput(this.PipeSource, opt =>
             {
-                opt.ForceFormat("image2pipe");
+                //opt.WithCustomArgument("-thread_queue_size 1024");
+                opt.ForceFormat("rawvideo");
+                opt.ForcePixelFormat("bgra");
                 opt.WithFramerate(_frameRate);
                 opt.Resize(this.DeviceProvider.Size.Width, this.DeviceProvider.Size.Height);
 
@@ -133,7 +119,16 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         public override void Dispose()
         {
             if (this.DeviceProvider != null)
+            {
                 this.DeviceProvider.Dispose();
+            }
+            if (frameQueue != null && frameQueue.Count > 0)
+            {
+                while (frameQueue.TryDequeue(out var p))
+                {
+                    p?.Dispose();
+                }
+            }
         }
     }
 }

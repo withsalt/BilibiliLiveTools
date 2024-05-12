@@ -4,10 +4,12 @@
     {
         None = 0,
 
-        Device = 1,
+        Camera = 1,
 
-        File = 2,
+        CameraPlus = 2,
 
-        Desktop = 3,
+        File = 3,
+
+        Desktop = 4,
     }
 }

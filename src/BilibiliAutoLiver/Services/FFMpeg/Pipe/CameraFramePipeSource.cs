@@ -7,14 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using FFMpegCore.Pipes;
+using SkiaSharp;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
 {
     public class CameraFramePipeSource : IPipeSource
     {
-        public int Width { get; private set; }
-        public int Height { get; private set; }
-
         /// <summary>
         /// 输入帧数
         /// </summary>
@@ -25,18 +23,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
         /// </summary>
         public Queue<BufferFrame> FrameQueue { get; set; }
 
-        private byte[] _lastData = null;
+        private ReadOnlyMemory<byte> _lastData = new ReadOnlyMemory<byte>();
         private readonly Stopwatch _frameCounter = new Stopwatch();
 
-        public CameraFramePipeSource(Queue<BufferFrame> frameQueue, int width, int height, double frameRate)
+        public CameraFramePipeSource(Queue<BufferFrame> frameQueue)
         {
-            Width = width;
-            Height = height;
-            FrameRate = frameRate;
-            if (FrameRate <= 0)
-            {
-                throw new ArgumentException("Frame rate can not less than 0.");
-            }
             FrameQueue = frameQueue;
             if (FrameQueue == null)
             {
@@ -46,29 +37,28 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
 
         public string GetStreamArguments()
         {
-            return string.Empty;
+            return "";
         }
 
         public async Task WriteAsync(Stream outputStream, CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
+                BufferFrame frame = null;
                 try
                 {
-                    if (FrameQueue.TryDequeue(out var data) && data != null && data.Bitmap?.Bytes.Length > 0)
+                    if (FrameQueue.TryDequeue(out frame) && frame != null && frame.Bitmap?.Bytes.Length > 0)
                     {
-                        await outputStream.WriteAsync(data.Bitmap.Bytes, 0, data.Bitmap.Bytes.Length, cancellationToken).ConfigureAwait(false);
-
+                        _lastData = frame.Bitmap.Bytes.AsMemory(0, frame.Bitmap.Bytes.Length);
+                        await outputStream.WriteAsync(_lastData, cancellationToken).ConfigureAwait(false);
                         _frameCounter.Restart();
-                        _lastData = new byte[data.Bitmap.Bytes.Length];
-                        Array.ConstrainedCopy(data.Bitmap.Bytes, 0, _lastData, 0, data.Bitmap.Bytes.Length);
                     }
                     else
                     {
-                        if (_frameCounter.ElapsedMilliseconds > 100 && _lastData != null && _lastData.Length > 0)
+                        if (_frameCounter.ElapsedMilliseconds > 100 && !_lastData.IsEmpty)
                         {
                             //如果超过100ms还没有视频帧，则补上一帧
-                            await outputStream.WriteAsync(_lastData, 0, _lastData.Length, cancellationToken).ConfigureAwait(false);
+                            await outputStream.WriteAsync(_lastData, cancellationToken).ConfigureAwait(false);
                         }
                         else
                         {
@@ -87,6 +77,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Pipe
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Write byte data to outputStream failed. {ex.Message}");
+                }
+                finally
+                {
+                    if (frame != null) frame.Dispose();
                 }
             }
         }
