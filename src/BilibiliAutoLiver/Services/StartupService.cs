@@ -42,12 +42,6 @@ namespace BilibiliAutoLiver.Services
             //开始推流
             if (_liveSetting.V2?.IsEnabled== true)
             {
-#if !DEBUG
-                if (_liveSetting.V1?.IsEnabled != true)
-                {
-                    throw new NotSupportedException("暂不支持使用V2的推流方式。");
-                }
-#endif
                 await StartPushV2();
                 return;
             }

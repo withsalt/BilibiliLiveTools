@@ -22,7 +22,6 @@ namespace BilibiliLiverTests
                 Type = InputSourceType.Camera,
                 Path = "HD Pro Webcam C920",
                 Resolution = "1280*720",
-                Index = 0,
             };
 
             CameraDeviceProvider deviceProvider = new CameraDeviceProvider(sourceItem, (p) =>
