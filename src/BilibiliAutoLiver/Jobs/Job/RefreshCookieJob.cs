@@ -64,7 +64,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                 _cache.Set(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME, DateTime.UtcNow);
                 return;
             }
-
+            bool rt = false;
             try
             {
                 //刷新cookie
@@ -92,7 +92,12 @@ namespace BilibiliAutoLiver.Jobs.Job
                         return;
                     }
                 }
-                await _accountService.RefreshCookie();
+                rt = await _accountService.RefreshCookie();
+                if (!rt)
+                {
+                    _logger.LogWarning("定时刷新Cookie失败，具体信息请查看日志。");
+                    return;
+                }
                 var userInfo1 = await _accountService.GetUserInfo();
                 if (userInfo1 == null)
                 {
@@ -107,7 +112,10 @@ namespace BilibiliAutoLiver.Jobs.Job
             }
             finally
             {
-                _cache.Set(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME, DateTime.UtcNow);
+                if (rt)
+                {
+                    _cache.Set(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME, DateTime.UtcNow);
+                }
             }
         }
     }

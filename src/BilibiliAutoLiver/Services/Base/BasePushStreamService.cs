@@ -108,12 +108,12 @@ namespace BilibiliAutoLiver.Services.Base
         public async Task CheckLiveRoom()
         {
             //登录
-            var userInfo = await _account.LoginByCookie();
+            var userInfo = await _account.GetUserInfo();
             if (userInfo == null || !userInfo.IsLogin)
             {
                 _logger.ThrowLogError("登录失败，Cookie无效或已过期，请重新配置Cookie！");
             }
-            _logger.LogInformation($"用户{userInfo.Uname}，登录成功！");
+            _logger.LogInformation($"当前直播用户：{userInfo.Uname}（{userInfo.Mid}）");
             //获取直播间信息
             var liveRoomInfo = await _api.GetMyLiveRoomInfo();
             if (liveRoomInfo == null)

@@ -36,21 +36,29 @@ namespace BilibiliAutoLiver.Services
 
         public async Task Start()
         {
-            var userInfo = await Login();
-            //登录成功之后，启动定时任务
-            await _jobScheduler.Start();
-            //开始推流
-            if (_liveSetting.V2?.IsEnabled== true)
+            try
             {
-                await StartPushV2();
-                return;
+                var userInfo = await Login();
+                //登录成功之后，启动定时任务
+                await _jobScheduler.Start();
+                //开始推流
+                if (_liveSetting.V2?.IsEnabled == true)
+                {
+                    await StartPushV2();
+                    return;
+                }
+                if (_liveSetting.V1?.IsEnabled == true)
+                {
+                    await StartPushV1();
+                    return;
+                }
+                throw new NotSupportedException("V1和V2两种推流方式，至少启用一种！");
             }
-            if (_liveSetting.V1?.IsEnabled == true)
+            catch (Exception ex)
             {
-                await StartPushV1();
-                return;
+                _logger.LogError(ex, "初始化失败！");
+                Environment.Exit(-1);
             }
-            throw new NotSupportedException("V1和V2两种推流方式，至少启用一种！");
         }
 
         public async Task<UserInfo> Login()

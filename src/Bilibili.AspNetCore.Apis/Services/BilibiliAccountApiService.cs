@@ -225,61 +225,69 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task<bool> RefreshCookie()
         {
-            if (!_cookieService.HasCookie())
+            try
             {
-                throw new Exception("未登录，请先登录！");
-            }
-            string key = GetCorrespondPath();
-            var refreshCsrfRt = await _httpClient.Execute<string>(string.Format(_getRefreshCsrf, key), HttpMethod.Get, getRowData: true);
-            if (string.IsNullOrWhiteSpace(refreshCsrfRt.Data))
-            {
-                throw new Exception($"获取refresh csrf失败！");
-            }
+                if (!_cookieService.HasCookie())
+                {
+                    throw new Exception("未登录，请先登录！");
+                }
+                string key = GetCorrespondPath();
+                var refreshCsrfRt = await _httpClient.Execute<string>(string.Format(_getRefreshCsrf, key), HttpMethod.Get, getRowData: true);
+                if (string.IsNullOrWhiteSpace(refreshCsrfRt.Data))
+                {
+                    throw new Exception($"获取refresh csrf失败！");
+                }
 
-            string pattern = @"<div id=""1-name"">(?<content>.*?)</div>";
-            Match match = Regex.Match(refreshCsrfRt.Data, pattern);
-            if (!match.Success)
-            {
-                throw new Exception($"获取refresh csrf失败，返回内容：{refreshCsrfRt.Data}");
+                string pattern = @"<div id=""1-name"">(?<content>.*?)</div>";
+                Match match = Regex.Match(refreshCsrfRt.Data, pattern);
+                if (!match.Success)
+                {
+                    throw new Exception($"获取refresh csrf失败，返回内容：{refreshCsrfRt.Data}");
+                }
+                string refreshCsrf = match.Groups["content"]?.Value;
+                if (string.IsNullOrWhiteSpace(refreshCsrf))
+                {
+                    throw new Exception($"获取refresh csrf失败");
+                }
+                //刷新cookie
+                RefreshCookieModel refreshCookieModel = new RefreshCookieModel()
+                {
+                    csrf = _cookieService.GetCsrf(),
+                    refresh_csrf = refreshCsrf,
+                    refresh_token = _cookieService.GetRefreshToken()
+                };
+                ResultModel<RefreshCookieResult> refreshCookieResult = await _httpClient.Execute<RefreshCookieResult>(_refreshCookie, HttpMethod.Post, refreshCookieModel, BodyFormat.Form_UrlEncoded);
+                if (refreshCookieResult == null)
+                {
+                    throw new Exception($"刷新cookie失败。{refreshCookieResult?.Message}");
+                }
+                if (refreshCookieResult.Code != 0)
+                {
+                    throw new Exception($"刷新cookie失败。{refreshCookieResult?.Message}");
+                }
+                if (string.IsNullOrWhiteSpace(refreshCookieResult?.Data.refresh_token) || refreshCookieResult.Cookies?.Any() != true)
+                {
+                    throw new Exception($"刷新cookie失败。返回数据为空");
+                }
+                await _cookieService.SaveCookie(refreshCookieResult.Cookies, refreshCookieResult.Data.refresh_token);
+                //确认刷新cookie
+                ConfirmRefreshModel confirmRefreshModel = new ConfirmRefreshModel()
+                {
+                    csrf = _cookieService.GetCsrf(),
+                    refresh_token = refreshCookieModel.refresh_token,
+                };
+                ResultModel<object> confirmRefreshResult = await _httpClient.Execute<object>(_confirmRefresh, HttpMethod.Post, confirmRefreshModel, BodyFormat.Form_UrlEncoded);
+                if (confirmRefreshResult == null || confirmRefreshResult.Code != 0)
+                {
+                    throw new Exception($"刷新cookie失，确认更新失败。{confirmRefreshResult?.Message}");
+                }
+                return true;
             }
-            string refreshCsrf = match.Groups["content"]?.Value;
-            if (string.IsNullOrWhiteSpace(refreshCsrf))
+            catch(Exception ex)
             {
-                throw new Exception($"获取refresh csrf失败");
+                _logger.LogError(ex, "刷新Cookie失败，404可能是接口请求频次限制");
+                return false;
             }
-            //刷新cookie
-            RefreshCookieModel refreshCookieModel = new RefreshCookieModel()
-            {
-                csrf = _cookieService.GetCsrf(),
-                refresh_csrf = refreshCsrf,
-                refresh_token = _cookieService.GetRefreshToken()
-            };
-            ResultModel<RefreshCookieResult> refreshCookieResult = await _httpClient.Execute<RefreshCookieResult>(_refreshCookie, HttpMethod.Post, refreshCookieModel, BodyFormat.Form_UrlEncoded);
-            if (refreshCookieResult == null)
-            {
-                throw new Exception($"刷新cookie失败。{refreshCookieResult?.Message}");
-            }
-            if (refreshCookieResult.Code != 0)
-            {
-                throw new Exception($"刷新cookie失败。{refreshCookieResult?.Message}");
-            }
-            if (string.IsNullOrWhiteSpace(refreshCookieResult?.Data.refresh_token) || refreshCookieResult.Cookies?.Any() != true)
-            {
-                throw new Exception($"刷新cookie失败。返回数据为空");
-            }
-            await _cookieService.SaveCookie(refreshCookieResult.Cookies, refreshCookieResult.Data.refresh_token);
-            //确认刷新cookie
-            ConfirmRefreshModel confirmRefreshModel = new ConfirmRefreshModel()
-            {
-                csrf = _cookieService.GetCsrf(),
-                refresh_token = refreshCookieModel.refresh_token,
-            };
-            ResultModel<object> confirmRefreshResult = await _httpClient.Execute<object>(_confirmRefresh, HttpMethod.Post, confirmRefreshModel, BodyFormat.Form_UrlEncoded);
-            if (confirmRefreshResult == null || confirmRefreshResult.Code != 0)
-            {
-                throw new Exception($"刷新cookie失，确认更新失败。{confirmRefreshResult?.Message}");
-            }
-            return true;
         }
 
         public async Task<bool> CookieNeedToRefresh()

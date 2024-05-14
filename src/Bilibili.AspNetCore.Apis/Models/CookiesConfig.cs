@@ -53,7 +53,7 @@ namespace Bilibili.AspNetCore.Apis.Models
         public string GetCookieString()
         {
             if (Cookies?.Any() != true) return null;
-            var cookies = Cookies.SelectMany(p => p.Cookies.Select(q => $"{q.Name}={q.Value}")).ToList();
+            var cookies = Cookies.SelectMany(p => p.Cookies.Select(q => $"{q.Name}={Uri.EscapeDataString(q.Value)}")).ToList();
             if (cookies?.Any() != true) return null;
             return string.Join("; ", cookies);
         }

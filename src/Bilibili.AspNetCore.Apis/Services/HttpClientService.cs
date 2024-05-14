@@ -139,7 +139,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                     string resultStr = await TryGetStringResponse(response);
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        throw new Exception($"Http request failed, url: {url}, method: {method}, status code: {response.StatusCode}, result: {(string.IsNullOrEmpty(resultStr) ? "null" : resultStr)}");
+                        throw new Exception($"Http request failed, url: {url}, method: {method}, status code: {response.StatusCode}, result: {(string.IsNullOrEmpty(resultStr) || method == HttpMethod.Get ? "null" : resultStr)}");
                     }
                     response.Dispose();
                     string data = resultStr.Replace("\"data\":[]", "\"data\":null");
