@@ -145,25 +145,5 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
                 bufferScope.ReleaseNow();
             }
         }
-
-        private string GetStreamFormat(SKColorType fmt)
-        {
-            // TODO: Add support for additional formats
-            switch (fmt)
-            {
-                case SKColorType.Gray8:
-                    return "gray8";
-                case SKColorType.Bgra8888:
-                    return "bgra";
-                case SKColorType.Rgb888x:
-                    return "rgb";
-                case SKColorType.Rgba8888:
-                    return "rgba";
-                case SKColorType.Rgb565:
-                    return "rgb565";
-                default:
-                    throw new NotSupportedException($"Not supported pixel format {fmt}");
-            }
-        }
     }
 }

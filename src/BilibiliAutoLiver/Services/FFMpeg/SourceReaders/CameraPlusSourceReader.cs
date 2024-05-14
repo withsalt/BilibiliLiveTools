@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
@@ -32,10 +33,18 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             this.PipeSource = new CameraFramePipeSource(frameQueue);
         }
 
+        private bool hasFrameArrived = false;
+        private string streamFormat = string.Empty;
+
         private void OnFrameArrived(BufferFrame frame)
         {
             try
             {
+                if (!hasFrameArrived)
+                {
+                    streamFormat = GetStreamFormat(frame.Bitmap.ColorType);
+                    hasFrameArrived = true;
+                }
                 if (frameQueue.Count > _frameRate * 2)
                 {
                     _logger.LogWarning("帧队列堆积，丢弃...");
@@ -84,6 +93,26 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
         }
 
+        private string GetStreamFormat(SKColorType fmt)
+        {
+            // TODO: Add support for additional formats
+            switch (fmt)
+            {
+                case SKColorType.Gray8:
+                    return "gray8";
+                case SKColorType.Bgra8888:
+                    return "bgra";
+                case SKColorType.Rgb888x:
+                    return "rgb";
+                case SKColorType.Rgba8888:
+                    return "rgba";
+                case SKColorType.Rgb565:
+                    return "rgb565";
+                default:
+                    throw new NotSupportedException($"Not supported pixel format {fmt}");
+            }
+        }
+
         public override ISourceReader WithInputArg()
         {
             GetVideoInputArg();
@@ -104,11 +133,16 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         private void GetVideoInputArg()
         {
+            hasFrameArrived = false;
+            while (!hasFrameArrived)
+            {
+                Thread.Sleep(0);
+            }
             this.FFMpegArguments = FFMpegArguments.FromPipeInput(this.PipeSource, opt =>
             {
                 //opt.WithCustomArgument("-thread_queue_size 1024");
                 opt.ForceFormat("rawvideo");
-                opt.ForcePixelFormat("bgra");
+                opt.ForcePixelFormat(streamFormat);
                 opt.WithFramerate(_frameRate);
                 opt.Resize(this.DeviceProvider.Size.Width, this.DeviceProvider.Size.Height);
 

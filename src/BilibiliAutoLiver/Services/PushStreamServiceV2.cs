@@ -149,14 +149,7 @@ namespace BilibiliAutoLiver.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
-                    try
-                    {
-                        if (sourceReader != null) sourceReader.Dispose();
-                    }
-                    catch (Exception ex1)
-                    {
-                        _logger.LogError(ex1, "终止DeviceSourceReader失败");
-                    }
+                    SourceReaderDispose(sourceReader);
                     //如果开启了自动重试
                     if (!_tokenSource.IsCancellationRequested)
                     {
@@ -165,9 +158,21 @@ namespace BilibiliAutoLiver.Services
                 }
                 finally
                 {
-                    if (sourceReader != null)
-                        sourceReader.Dispose();
+                    SourceReaderDispose(sourceReader);
                 }
+            }
+        }
+
+        private void SourceReaderDispose(ISourceReader sourceReader)
+        {
+            try
+            {
+                if (sourceReader != null)
+                    sourceReader.Dispose();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, $"终止{sourceReader.GetType().Name}失败。");
             }
         }
 
