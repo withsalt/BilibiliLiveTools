@@ -61,6 +61,8 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly IServer _server;
         private readonly IMemoryCache _cache;
 
+        private readonly static object _locker = new object();
+
         public BilibiliAccountApiService(ILogger<BilibiliAccountApiService> logger
             , IHttpClientService httpClient
             , IBilibiliCookieService cookieService
@@ -74,11 +76,24 @@ namespace Bilibili.AspNetCore.Apis.Services
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        public async Task<UserInfo> GetUserInfo()
+        public Task<UserInfo> GetUserInfo()
         {
             try
             {
-                var result = await _httpClient.Execute<UserInfo>(_navApi, HttpMethod.Get);
+                ResultModel<UserInfo> result = _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY);
+                if (result == null)
+                {
+                    lock (_locker)
+                    {
+                        result = _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY);
+                        if (result != null)
+                        {
+                            return Task.FromResult(result.Data);
+                        }
+                        result = _httpClient.Execute<UserInfo>(_navApi, HttpMethod.Get).GetAwaiter().GetResult();
+                        _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(10));
+                    }
+                }
                 if (result == null || result.Data == null)
                 {
                     throw new Exception("通过Cookie登录失败，返回结果为空！");
@@ -87,7 +102,8 @@ namespace Bilibili.AspNetCore.Apis.Services
                 {
                     throw new Exception("通过Cookie登录失败，可能Cookie已经失效，请重新获取Cookie");
                 }
-                return result.Data;
+                return Task.FromResult(result.Data);
+
             }
             catch (Exception ex)
             {
@@ -283,7 +299,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                 }
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "刷新Cookie失败，404可能是接口请求频次限制");
                 return false;
