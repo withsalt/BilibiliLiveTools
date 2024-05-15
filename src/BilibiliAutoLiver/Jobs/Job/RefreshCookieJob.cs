@@ -45,11 +45,6 @@ namespace BilibiliAutoLiver.Jobs.Job
                     return;
                 }
             }
-            else
-            {
-                _cache.Set(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME, DateTime.UtcNow);
-                return;
-            }
             bool rt = false;
             try
             {
@@ -115,7 +110,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                 _jobMetadata = new JobMetadata()
                 {
                     Id = 1,
-                    Name = nameof(RefreshCookieJob) + "Service",
+                    Name = $"{this.GetType().Name}Service",
                     IntervalTime = 600,  //10分钟
                     StartTime = DateTime.Now.AddSeconds(300)
                 };

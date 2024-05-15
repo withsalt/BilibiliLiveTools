@@ -63,8 +63,8 @@ namespace BilibiliAutoLiver.Jobs.Job
                 }
                 _jobMetadata = new JobMetadata()
                 {
-                    Id = 1,
-                    Name = nameof(SendHeartBeatJob) + "Service",
+                    Id = 2,
+                    Name = $"{this.GetType().Name}Service",
                     IntervalTime = 60,
                     StartTime = DateTime.Now.AddSeconds(60)
                 };
