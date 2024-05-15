@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
@@ -14,14 +15,14 @@ namespace BilibiliAutoLiver.Services
     {
         private readonly ILogger<StartupService> _logger;
         private readonly IBilibiliAccountApiService _accountService;
-        private readonly IRefreshCookieJobSchedulerService _jobScheduler;
+        private readonly IJobSchedulerService _jobScheduler;
         private readonly LiveSettings _liveSetting;
         private readonly IPushStreamServiceV1 _pushServiceV1;
         private readonly IPushStreamServiceV2 _pushServiceV2;
 
         public StartupService(ILogger<StartupService> logger
             , IBilibiliAccountApiService accountService
-            , IRefreshCookieJobSchedulerService jobScheduler
+            , IJobSchedulerService jobScheduler
             , IOptions<LiveSettings> liveSettingOptions
             , IPushStreamServiceV1 pushServiceV1
             , IPushStreamServiceV2 pushServiceV2)
@@ -34,13 +35,13 @@ namespace BilibiliAutoLiver.Services
             _pushServiceV2 = pushServiceV2 ?? throw new ArgumentNullException(nameof(pushServiceV2));
         }
 
-        public async Task Start()
+        public async Task Start(CancellationToken token)
         {
             try
             {
                 var userInfo = await Login();
                 //登录成功之后，启动定时任务
-                await _jobScheduler.Start();
+                await _jobScheduler.StartAsync(token);
                 //开始推流
                 if (_liveSetting.V2?.IsEnabled == true)
                 {

@@ -16,8 +16,7 @@
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.8" />
-		<PackageReference Include="Quartz" Version="3.8.1" />
-		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.1" />
+		<PackageReference Include="Quartz.AspNetCore" Version="3.9.0" />
 		<PackageReference Include="Quartz.Plugins" Version="3.8.1" />
 		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.8.1" />
 		<PackageReference Include="CliWrap" Version="3.6.6" />

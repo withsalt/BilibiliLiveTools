@@ -1,8 +1,11 @@
 ﻿using System;
+using BilibiliAutoLiver.Jobs;
 using BilibiliAutoLiver.Jobs.Job;
 using BilibiliAutoLiver.Jobs.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
+using Quartz.AspNetCore;
+using Quartz.Impl;
 
 namespace BilibiliAutoLiver.DependencyInjection
 {
@@ -18,7 +21,7 @@ namespace BilibiliAutoLiver.DependencyInjection
 
             services.AddQuartz(q =>
             {
-                q.SchedulerId = $"BilibiliAutoLiver";
+                q.SchedulerId = $"BilibiliAutoLiverScheduler";
                 q.InterruptJobsOnShutdown = true;
                 q.UseInMemoryStore();
                 q.UseDefaultThreadPool(tp =>
@@ -35,15 +38,19 @@ namespace BilibiliAutoLiver.DependencyInjection
                 q.UseTimeZoneConverter();
             });
             //注册JobScheduler
-            services.AddSingleton<IRefreshCookieJobSchedulerService, RefreshCookieJobSchedulerService>();
+            services.AddSingleton<IJobSchedulerService, JobSchedulerService>();
             //add base job
             services.AddTransient<RefreshCookieJob>();
+            services.AddTransient<SendHeartBeatJob>();
             // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-            services.AddQuartzHostedService(options =>
+            services.AddQuartzServer(options =>
             {
                 // when shutting down we want jobs to complete gracefully
                 options.WaitForJobsToComplete = true;
             });
+
+            services.AddHostedService<QuartzJobHostedService>();
+
             return services;
         }
 

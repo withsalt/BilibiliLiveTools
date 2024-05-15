@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
+using System.Threading;
+using BilibiliAutoLiver.Jobs;
 
 namespace BilibiliAutoLiver
 {
@@ -78,12 +80,9 @@ namespace BilibiliAutoLiver
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            IStartupService startService = app.Services.GetRequiredService<IStartupService>();
-            app.Lifetime.ApplicationStarted.Register(() =>
-            {
-                startService.Start();
-            });
-            //定时任务
+            app.Lifetime.ApplicationStarted.Register((obj, token)
+                => app.Services.GetRequiredService<IStartupService>().Start(token), null);
+
             app.Run();
         }
     }

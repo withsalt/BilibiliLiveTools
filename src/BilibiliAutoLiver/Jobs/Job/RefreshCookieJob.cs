@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
+using BilibiliAutoLiver.Jobs.Interface;
+using BilibiliAutoLiver.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -10,7 +12,7 @@ using Quartz;
 namespace BilibiliAutoLiver.Jobs.Job
 {
     [DisallowConcurrentExecution]
-    public class RefreshCookieJob : IJob
+    public class RefreshCookieJob : BaseJobDescribe, IJob
     {
         private readonly ILogger<RefreshCookieJob> _logger;
         private readonly IMemoryCache _cache;
@@ -31,22 +33,6 @@ namespace BilibiliAutoLiver.Jobs.Job
         public async Task Execute(IJobExecutionContext context)
         {
             await RefreshCookie();
-
-            await SendHeartBeat();
-        }
-
-        public async Task SendHeartBeat()
-        {
-            try
-            {
-                _logger.LogInformation("发送心跳请求");
-                //心跳
-                await _accountService.HeartBeat();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"心跳定时任务执行失败，{ex.Message}");
-            }
         }
 
         private async Task RefreshCookie()
@@ -67,6 +53,7 @@ namespace BilibiliAutoLiver.Jobs.Job
             bool rt = false;
             try
             {
+                _logger.LogInformation("定时刷新Cookie开始。");
                 //刷新cookie
                 if (!_cookieService.HasCookie())
                 {
@@ -79,12 +66,6 @@ namespace BilibiliAutoLiver.Jobs.Job
                 }
                 else
                 {
-                    UserInfo userInfo0 = await _accountService.GetUserInfo();
-                    if (userInfo0 == null)
-                    {
-                        _logger.LogInformation("定时刷新Cookie失败，获取用户信息失败，无效Cookie。");
-                        return;
-                    }
                     var cookieWillExpired = _cookieService.WillExpired();
                     if (!cookieWillExpired.Item1)
                     {
@@ -118,5 +99,31 @@ namespace BilibiliAutoLiver.Jobs.Job
                 }
             }
         }
+
+        #region Job info
+
+        private JobMetadata _jobMetadata = null;
+
+        protected override JobMetadata JobMetadata
+        {
+            get
+            {
+                if (_jobMetadata != null)
+                {
+                    return _jobMetadata;
+                }
+                _jobMetadata = new JobMetadata()
+                {
+                    Id = 1,
+                    Name = nameof(RefreshCookieJob) + "Service",
+                    IntervalTime = 600,  //10分钟
+                    StartTime = DateTime.Now.AddSeconds(300)
+                };
+                return _jobMetadata;
+            }
+        }
+
+        #endregion
+
     }
 }

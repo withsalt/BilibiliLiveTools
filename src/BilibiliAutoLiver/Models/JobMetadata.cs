@@ -2,7 +2,7 @@
 
 namespace BilibiliAutoLiver.Models
 {
-    class JobDescribe
+    public class JobMetadata
     {
         public int Id { get; set; }
 
