@@ -3,9 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
+using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Jobs.Scheduler;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Services.Interface;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -14,6 +16,7 @@ namespace BilibiliAutoLiver.Services
     class StartupService : IStartupService
     {
         private readonly ILogger<StartupService> _logger;
+        private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
         private readonly IJobSchedulerService _jobScheduler;
         private readonly LiveSettings _liveSetting;
@@ -21,6 +24,7 @@ namespace BilibiliAutoLiver.Services
         private readonly IPushStreamServiceV2 _pushServiceV2;
 
         public StartupService(ILogger<StartupService> logger
+            , IMemoryCache cache
             , IBilibiliAccountApiService accountService
             , IJobSchedulerService jobScheduler
             , IOptions<LiveSettings> liveSettingOptions
@@ -28,6 +32,7 @@ namespace BilibiliAutoLiver.Services
             , IPushStreamServiceV2 pushServiceV2)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _jobScheduler = jobScheduler ?? throw new ArgumentNullException(nameof(jobScheduler));
             _liveSetting = liveSettingOptions.Value ?? throw new ArgumentNullException(nameof(liveSettingOptions));
@@ -73,6 +78,7 @@ namespace BilibiliAutoLiver.Services
                     Environment.Exit(-1);
                 }
             }
+            _cache.Set<bool>(CacheKeyConstant.LOGIN_STATUS, true);
             _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
             return userInfo;
         }

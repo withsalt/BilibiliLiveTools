@@ -76,40 +76,42 @@ namespace Bilibili.AspNetCore.Apis.Services
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        public Task<UserInfo> GetUserInfo()
+        public Task<UserInfo> GetUserInfo(bool withCache = true)
         {
             try
             {
-                ResultModel<UserInfo> result = _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY);
+                ResultModel<UserInfo> result = withCache ? _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY) : null;
                 if (result == null)
                 {
                     lock (_locker)
                     {
-                        result = _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY);
+                        result = withCache ? _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY) : null;
                         if (result != null)
                         {
                             return Task.FromResult(result.Data);
                         }
                         result = _httpClient.Execute<UserInfo>(_navApi, HttpMethod.Get).GetAwaiter().GetResult();
-                        _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(10));
+                        if (result.Code == 0 && result.Data?.IsLogin == true)
+                        {
+                            _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(10));
+                        }
                     }
                 }
                 if (result == null || result.Data == null)
                 {
                     throw new Exception("通过Cookie登录失败，返回结果为空！");
                 }
-                if (!result.Data.IsLogin)
+                if (result.Data?.IsLogin != true)
                 {
                     throw new Exception("通过Cookie登录失败，可能Cookie已经失效，请重新获取Cookie");
                 }
                 return Task.FromResult(result.Data);
-
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return null;
             }
+            return Task.FromResult<UserInfo>(null);
         }
 
         public async Task<UserInfo> LoginByCookie()
@@ -123,12 +125,18 @@ namespace Bilibili.AspNetCore.Apis.Services
                 _logger.LogInformation($"Cookie即将过期，过期时间：{_cookieService.WillExpired().Item2}，刷新Cookie。");
                 await RefreshCookie();
             }
+            UserInfo userInfo = await GetUserInfo();
+            if (userInfo == null)
+            {
+                _logger.LogInformation("通过Cookie获取用户信息失败。");
+                return null;
+            }
             if (await CookieNeedToRefresh())
             {
                 _logger.LogInformation("检测到Cookie需要刷新，刷新Cookie。");
                 await RefreshCookie();
             }
-            return await GetUserInfo();
+            return userInfo;
         }
 
         public async Task<UserInfo> LoginByQrCode()
@@ -308,12 +316,20 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task<bool> CookieNeedToRefresh()
         {
-            var result = await _httpClient.Execute<CookieInfo>(_cookieInfo, HttpMethod.Get);
-            if (result == null || result.Code != 0 || result.Data == null)
+            try
             {
-                throw new Exception($"获取Cookie信息失败！{result?.Message}");
+                var result = await _httpClient.Execute<CookieInfo>(_cookieInfo, HttpMethod.Get);
+                if (result == null || result.Code != 0 || result.Data == null)
+                {
+                    throw new Exception($"获取Cookie信息失败！{result?.Message}");
+                }
+                return result.Data.refresh;
             }
-            return result.Data.refresh;
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"校验Cookie是否有效失败，{ex.Message}");
+                return false;
+            }
         }
 
         public async Task<QrCodeUrl> GenerateQrCode()

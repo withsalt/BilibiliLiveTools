@@ -44,12 +44,7 @@ namespace BilibiliAutoLiver.Controllers
         public async Task<IndexPageStatusDto> Status()
         {
             IndexPageStatusDto pageSatus = new IndexPageStatusDto();
-            if (_accountService.TryGetQrCodeLoginStatus(out var loginStatus))
-            {
-                pageSatus.LoginStatus = loginStatus;
-                pageSatus.LoginStatus.IsLogged = false;
-            }
-            else
+            if (_cache.TryGetValue<bool>(CacheKeyConstant.LOGIN_STATUS, out bool status) && status)
             {
                 if (_cookieService.HasCookie())
                 {
@@ -69,6 +64,20 @@ namespace BilibiliAutoLiver.Controllers
                 }
                 else
                 {
+                    pageSatus.LoginStatus = new QrCodeLoginStatus();
+                    pageSatus.LoginStatus.IsLogged = false;
+                }
+            }
+            else
+            {
+                if (_accountService.TryGetQrCodeLoginStatus(out var loginStatus))
+                {
+                    pageSatus.LoginStatus = loginStatus;
+                    pageSatus.LoginStatus.IsLogged = false;
+                }
+                else
+                {
+                    //Î´µÇÂ¼
                     pageSatus.LoginStatus = new QrCodeLoginStatus();
                     pageSatus.LoginStatus.IsLogged = false;
                 }

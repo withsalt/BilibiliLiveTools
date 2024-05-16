@@ -10,7 +10,7 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// 获取用户信息
         /// </summary>
         /// <returns></returns>
-        Task<UserInfo> GetUserInfo();
+        Task<UserInfo> GetUserInfo(bool withCache = true);
 
         /// <summary>
         /// 登录

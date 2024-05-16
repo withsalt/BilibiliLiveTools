@@ -45,7 +45,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                     return;
                 }
             }
-            bool rt = false;
+            bool updateStatus = false;
             try
             {
                 _logger.LogInformation("定时刷新Cookie开始。");
@@ -64,17 +64,18 @@ namespace BilibiliAutoLiver.Jobs.Job
                     var cookieWillExpired = _cookieService.WillExpired();
                     if (!cookieWillExpired.Item1)
                     {
+                        updateStatus = true;
                         _logger.LogInformation($"定时刷新Cookie完成，Cookie过期时间：{cookieWillExpired.Item2.ToString("yyyy-MM-dd HH:mm:ss")}，无需刷新。");
                         return;
                     }
                 }
-                rt = await _accountService.RefreshCookie();
-                if (!rt)
+                updateStatus = await _accountService.RefreshCookie();
+                if (!updateStatus)
                 {
                     _logger.LogWarning("定时刷新Cookie失败，具体信息请查看日志。");
                     return;
                 }
-                var userInfo1 = await _accountService.GetUserInfo();
+                var userInfo1 = await _accountService.GetUserInfo(false);
                 if (userInfo1 == null)
                 {
                     _logger.LogInformation("定时刷新Cookie失败，新Cookie获取员工失败。");
@@ -88,10 +89,8 @@ namespace BilibiliAutoLiver.Jobs.Job
             }
             finally
             {
-                if (rt)
-                {
+                if (updateStatus)
                     _cache.Set(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME, DateTime.UtcNow);
-                }
             }
         }
 
@@ -111,8 +110,8 @@ namespace BilibiliAutoLiver.Jobs.Job
                 {
                     Id = 1,
                     Name = $"{this.GetType().Name}Service",
-                    IntervalTime = 600,  //10分钟
-                    StartTime = DateTime.Now.AddSeconds(300)
+                    IntervalTime = 30,  //10分钟
+                    StartTime = DateTime.Now.AddSeconds(10)
                 };
                 return _jobMetadata;
             }
