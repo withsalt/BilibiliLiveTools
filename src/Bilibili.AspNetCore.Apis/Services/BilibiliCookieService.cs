@@ -23,7 +23,7 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         private static readonly object _locker = new object();
 
-        private string _cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.config");
+        private string _cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.json");
 
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
             , IMemoryCache cache)
@@ -43,7 +43,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                 RefreshToken = refreshToken
             };
             if (cookiesConfig.IsExpired) throw new ArgumentException("Cookie has expired");
-            string json = JsonUtil.SerializeObject(new CookiesJson(cookiesConfig));
+            string json = JsonUtil.SerializeObject(new CookiesJson(cookiesConfig), true);
             await File.WriteAllTextAsync(_cookiePath, json);
             _ = GetCookies(true);
         }

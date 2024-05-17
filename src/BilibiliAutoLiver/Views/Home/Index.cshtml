@@ -1,49 +1,10 @@
-﻿@{
-    IndexPageStatusDto status = ViewData[nameof(IndexPageStatusDto)] as IndexPageStatusDto;
-}
-
-<div class="text-center">
+﻿<div class="text-center">
     <div style="margin-top:60px"></div>
-    <img src="img/logon.jpg" alt="登录二维码" width="300" height="300" id="loginImg" style="@(status.LoginStatus.IsLogged ? $"" : "display: none;")">
-    <p style="font-size:20px" id="info">@Html.Raw(status.LoginStatus.IsLogged ? $"<span style=\"color:green;\">已登录</span><br />登录用户：{status.UserInfo.Uname}（{status.UserInfo.Mid}）" : "<span style=\"color:red;\">未登录</span><br />登录二维码加载中，请稍后...")</p>
+    <p>已登录</p>
 </div>
 
 @section Scripts {
     <script>
-        function update() {
-            $.ajax({
-                type: "post",
-                url: "Home/Status",
-                cache: false,
-                dataType: 'json', // 返回对象
-                success: function (data) {
-                    if (!data) {
-                        console.log("返回参数为空！");
-                    }
-                    if (data.loginStatus.isLogged) {
-                        $("#loginImg").show();
-                        $("#loginImg").attr("src", "img/logon.jpg");
-                        $("#info").html("<span style=\"color:green;\">已登录</span><br />登录用户：" + data.userInfo.uname + "（" + data.userInfo.mid + "）<br />直播间名称：" + data.liveRoomInfo.title + "<br/>直播间地址：<a href=\"https://live.bilibili.com/" + data.liveRoomInfo.room_id + "\" target=\"_blank\">https://live.bilibili.com/" + data.liveRoomInfo.room_id + "</a>");
-                    }
-                    else {
-                        if (data.loginStatus.qrCode) {
-                            $("#loginImg").attr("src", data.loginStatus.qrCode);
-                            $("#loginImg").show();
-                        }
-                        if (data.loginStatus.isScaned) {
-                            $("#info").html("【<span style=\"color:green;\">已扫码</span>】二维码剩余有效期" + data.loginStatus.qrCodeEffectiveTime + "秒");
-                        }
-                        else {
-                            $("#info").html("【<span style=\"color:red;\">未扫码</span>】二维码剩余有效期" + data.loginStatus.qrCodeEffectiveTime + "秒");
-                        }
-                    }
-                },
-                error: function (data) {
-                    console.log(data);
-                }
-            });
-        }
-
-        setInterval(update, 1000);
+        
     </script>
 }

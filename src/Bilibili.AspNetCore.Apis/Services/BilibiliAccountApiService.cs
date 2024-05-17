@@ -93,7 +93,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                         result = _httpClient.Execute<UserInfo>(_navApi, HttpMethod.Get).GetAwaiter().GetResult();
                         if (result.Code == 0 && result.Data?.IsLogin == true)
                         {
-                            _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(10));
+                            _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(30));
                         }
                     }
                 }
@@ -225,6 +225,10 @@ namespace Bilibili.AspNetCore.Apis.Services
                     throw new Exception("登录超时。");
                 }
                 stopwatch.Stop();
+                if (hasCookie)
+                {
+                    SetLoginStatus(true);
+                }
             }
             catch (Exception ex)
             {
@@ -368,6 +372,29 @@ namespace Bilibili.AspNetCore.Apis.Services
             if (result == null || result.Code != 0)
             {
                 _logger.LogWarning($"心跳请求失败，错误代码：{result.Code}，{result.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 获取登录状态
+        /// </summary>
+        /// <returns></returns>
+        public bool GetLoginStatus()
+        {
+            return _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && _cookieService.HasCookie();
+        }
+
+        public void SetLoginStatus(bool isLogin)
+        {
+            if (isLogin)
+            {
+                _cache.Set(CacheKeyConstant.LOGIN_STATUS, true);
+            }
+            else
+            {
+                _cache.Remove(CacheKeyConstant.USERINFO_CACHE_KEY);
+                _cache.Remove(CacheKeyConstant.LOGIN_STATUS);
+                _cookieService.RemoveCookie();
             }
         }
 

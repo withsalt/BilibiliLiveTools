@@ -1,0 +1,198 @@
+// Variables
+$font-primary: 'Open Sans', Arial, sans-serif;
+
+$brand-primary: #33cccc;
+$brand-black: #000000;
+$brand-white: #ffffff;
+
+$screen-lg: 1200px;
+$screen-md: 992px;
+$screen-sm: 768px;
+$screen-xs: 480px;
+
+// Mixin
+@mixin fh5co-translateX($translatex) {
+	-moz-transform: translateX($translatex);
+	-webkit-transform: translateX($translatex);
+	-ms-transform: translateX($translatex);
+	-o-transform: translateX($translatex);
+	transform: translateX($translatex);
+}
+@mixin transition($transition, $ease: 'ease') {
+    -moz-transition:    all $transition unquote($ease);
+    -o-transition:      all $transition unquote($ease);
+    -webkit-transition: all $transition unquote($ease);
+    -ms-transition: 		all $transition unquote($ease);
+    transition:         all $transition unquote($ease);
+}
+@mixin inline-block() {
+	display:-moz-inline-stack;
+	display:inline-block;
+	zoom:1;
+	*display:inline;
+}
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+     -moz-border-radius: $radius;
+      -ms-border-radius: $radius;
+          border-radius: $radius;
+}
+@mixin box-shadow-none() {
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	-o-box-shadow: none;
+	box-shadow: none;
+}
+
+
+/* =======================================================
+*
+* 	Template Style 
+*	Edit this section
+*
+* ======================================================= */
+
+// Template Base
+
+body {
+	font-family: $font-primary;
+	line-height: 1.5;
+	font-size: 16px;
+	color: #848484;
+	background-color: lighten(#e3e3e3, 5%);
+	&.style-2 {
+		background-color: $brand-white;
+		background-size: cover;
+		background-position: -30% center;
+		background-repeat: no-repeat;
+		background-image: url(../images/bg_2.jpg);
+		height: 100%;
+	}
+	&.style-3 {
+		background: $brand-white url(../images/geometry2.png) repeat;
+	}
+}
+a {
+	color: $brand-primary;
+	@include transition(.3s);
+	&:hover {
+		color: darken($brand-primary, 10%);
+	}
+}
+.menu {
+	padding: 0;
+	margin: 30px 0 0 0;
+	li {
+		list-style: none;
+		margin-bottom: 10px;
+		@include inline-block;
+		a {
+			padding: 5px;
+		}
+		&.active {
+			a {
+				color: lighten($brand-black, 70%);
+			}
+		}
+	}
+}
+
+.fh5co-form {
+	padding: 30px;
+	margin-top: 4em;
+	-webkit-box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+	-moz-box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+	-o-box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+	box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+	background: $brand-white;
+	.style-2 & {
+		-webkit-box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+		-moz-box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+		-o-box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+		box-shadow: -4px 7px 46px 2px rgba(0,0,0,0.1);
+	}
+	@media screen and (max-width: $screen-sm) {
+		padding: 15px;
+	}
+	h2 {
+		text-transform: uppercase;
+		letter-spacing: 2px;
+		font-size: 20px;
+		margin: 0 0 30px 0;
+		color: $brand-black;
+	}
+	.form-group {
+		margin-bottom: 30px;
+		p {
+			font-size: 14px;
+			color: #9f9f9f;
+			font-weight: 300;
+			a {
+				color: $brand-black;
+			}
+		}
+	}
+	label {
+		font-weight: 300;
+		font-size: 14px;
+		font-weight: 300;
+	}
+	.form-control {
+		font-size: 16px;
+		font-weight: 300;
+		height: 50px;
+		padding-left: 0;
+		padding-right: 0;
+		border: none;
+		border-bottom: 1px solid rgba($brand-black, .1);
+		@include box-shadow-none;
+		@include border-radius(0px);	
+		@include transition(.3s);
+		&::-webkit-input-placeholder {
+		  color: rgba($brand-black, .3);
+		  text-transform: uppercase;
+		}
+		&::-moz-placeholder {
+		  color: rgba($brand-black, .3);
+		  text-transform: uppercase;
+		}
+		&:-ms-input-placeholder {
+		  color: rgba($brand-black, .3);
+		  text-transform: uppercase;
+		}
+		&:-moz-placeholder {
+		  color: rgba($brand-black, .3);
+		  text-transform: uppercase;
+		}
+		&:focus, &:active {
+			border-bottom: 1px solid rgba($brand-black, .4);
+		}
+	}
+}
+
+.btn-primary {
+	height: 50px;
+	padding-right: 20px;
+	padding-left: 20px;
+	border: none;
+	background: $brand-primary;
+	color: $brand-white;
+	-webkit-box-shadow: -2px 10px 20px -1px rgba($brand-primary, .4);
+	-moz-box-shadow: -2px 10px 20px -1px rgba($brand-primary, .4);
+	-o-box-shadow: -2px 10px 20px -1px rgba($brand-primary, .4);
+	box-shadow: -2px 10px 20px -1px rgba($brand-primary, .4);
+	&:hover, &:focus, &:active {
+		color: $brand-white;
+		background: lighten($brand-primary, 5%)!important;
+		outline: none;
+	}
+}
+
+input, textarea { color: #000; }
+.placeholder { color: #aaa; }
+
+.animate-box {
+	.js & {
+		opacity: 0;
+	}
+}

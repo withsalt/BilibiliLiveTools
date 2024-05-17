@@ -39,11 +39,17 @@ namespace BilibiliAutoLiver.Services
             try
             {
                 var userInfo = await Login();
+                if (userInfo == null)
+                {
+                    _logger.LogWarning("用户未登录！");
+                    return;
+                }
                 //登录成功之后，启动定时任务
                 await _jobScheduler.StartAsync(token);
 
 #if DEBUG
                 _logger.LogInformation("Debug模式，不开启推流");
+                return;
 #endif
 
                 //开始推流
@@ -67,10 +73,10 @@ namespace BilibiliAutoLiver.Services
                 userInfo = await _accountService.LoginByQrCode();
                 if (userInfo == null)
                 {
-                    Environment.Exit(-1);
+                    return null;
                 }
             }
-            _cache.Set<bool>(CacheKeyConstant.LOGIN_STATUS, true);
+            _accountService.SetLoginStatus(true);
             _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
             return userInfo;
         }

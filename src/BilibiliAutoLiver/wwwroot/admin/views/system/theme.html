@@ -1,0 +1,85 @@
+<!-- 主题设置模板 -->
+
+<script type="text/html" template lay-done="layui.data.theme();">
+  {{# 
+    var local = layui.data(layui.setter.tableName);
+    var theme = local.theme || {};
+    var color = theme.color || {};
+    var themeColorIndex =  parseInt((theme && theme.color) ? theme.color.index : 0) || 0;
+  }}
+
+  <div class="layui-card-header">
+    <strong>主题设置</strong>
+  </div>
+  <div class="layui-card-body layadmin-setTheme">
+    <h5><strong>配色方案</strong></h5>
+    <ul class="layadmin-setTheme-color">
+      {{# layui.each(layui.setter.theme.color, function(index, item){ }}
+        <li layadmin-event="setTheme" data-index="{{ index }}" data-alias="{{ item.alias }}" 
+        {{- index === themeColorIndex ? 'class="layui-this"' : '' }} title="{{ item.alias }}">
+          <div class="layadmin-setTheme-header" style="background-color: {{ item.header }};"></div>
+          <div class="layadmin-setTheme-side" style="background-color: {{ item.main }};">
+            <div class="layadmin-setTheme-logo" style="background-color: {{ item.logo }};"></div>
+          </div>
+        </li>
+      {{# }); }}
+    </ul>
+    <h5><strong>自定义配色</strong></h5>
+    <ul class="layadmin-setTheme-custom">
+      <li>主题色 <div class="set-custom-theme" data-name="main" lay-options="{color: '{{= color.main }}'}"></div></li>
+      <li>选中色 <div class="set-custom-theme" data-name="selected" lay-options="{color: '{{= color.selected }}'}"></div></li>
+      <li>LOGO 背景色 <div class="set-custom-theme" data-name="logo" lay-options="{color: '{{= color.logo }}'}"></div></li>
+      <li>头部拦背景色 <div class="set-custom-theme" data-name="header" lay-options="{color: '{{= color.header }}'}"></div></li>
+      <li>恢复默认主题 <div class="set-default-theme"><button class="layui-btn layui-btn-primary"><i class="layui-icon layui-icon-refresh-1"></i></button></div></li>
+    </ul>
+</script>
+
+<script>
+layui.data.theme = function(){
+  layui.use(['form', 'colorpicker'], function(){
+    var $ = layui.$;
+    var layer = layui.layer;
+    var form = layui.form
+    var colorpicker = layui.colorpicker
+    var admin = layui.admin;
+    var view = layui.view;
+    
+
+    var local = layui.data(layui.setter.tableName);
+    var theme = local.theme || {};
+    var color = theme.color || {};
+
+    // 自定义配色
+    colorpicker.render({
+      elem: '.set-custom-theme',
+      done: function(value){
+        var elem = this.elem;
+        var NAME = elem.data('name');
+
+        color[NAME] = value;
+        
+        admin.theme({
+          color: color
+        });
+      }
+    });
+
+    // 恢复默认主题
+    $('.set-default-theme').on('click', function() {
+      layer.confirm('确认恢复默认主题吗？', function(i) {
+        layer.close(i);
+        admin.events.setTheme($('.layadmin-setTheme-color>li:eq(0)'));
+        admin.initTheme(0);
+        view('LAY_adminPopupTheme').render('system/theme');
+      })
+    });
+    
+    // 事件-隐藏开关
+    form.on('switch(system-theme-sideicon)', function(){
+      admin.theme({
+        hideSideIcon: this.checked
+      })
+    });
+  });
+};
+</script>

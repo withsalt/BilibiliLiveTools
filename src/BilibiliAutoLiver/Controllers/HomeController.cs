@@ -35,57 +35,9 @@ namespace BilibiliAutoLiver.Controllers
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            IndexPageStatusDto pageSatus = await Status();
-            ViewData[nameof(IndexPageStatusDto)] = pageSatus;
             return View();
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IndexPageStatusDto> Status()
-        {
-            IndexPageStatusDto pageSatus = new IndexPageStatusDto();
-            if (_cache.TryGetValue<bool>(CacheKeyConstant.LOGIN_STATUS, out bool status) && status)
-            {
-                if (_cookieService.HasCookie())
-                {
-                    pageSatus = await _cache.GetOrCreateAsync<IndexPageStatusDto>(CacheKeyConstant.INDEX_PAGE_CACHE_KEY, async (cacheEntry) =>
-                    {
-                        cacheEntry.AbsoluteExpiration = DateTime.UtcNow.AddMinutes(30);
-
-                        var cachePageStatus = new IndexPageStatusDto();
-                        cachePageStatus.LoginStatus = new QrCodeLoginStatus()
-                        {
-                            IsLogged = true
-                        };
-                        cachePageStatus.UserInfo = await _accountService.GetUserInfo();
-                        cachePageStatus.LiveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
-                        return cachePageStatus;
-                    });
-                }
-                else
-                {
-                    pageSatus.LoginStatus = new QrCodeLoginStatus();
-                    pageSatus.LoginStatus.IsLogged = false;
-                }
-            }
-            else
-            {
-                if (_accountService.TryGetQrCodeLoginStatus(out var loginStatus))
-                {
-                    pageSatus.LoginStatus = loginStatus;
-                    pageSatus.LoginStatus.IsLogged = false;
-                }
-                else
-                {
-                    //Î´µÇÂ¼
-                    pageSatus.LoginStatus = new QrCodeLoginStatus();
-                    pageSatus.LoginStatus.IsLogged = false;
-                }
-            }
-            return pageSatus;
         }
 
         [AllowAnonymous]

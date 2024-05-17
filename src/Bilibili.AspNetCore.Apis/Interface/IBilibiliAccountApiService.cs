@@ -62,5 +62,9 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// </summary>
         /// <returns></returns>
         Task<bool> CookieNeedToRefresh();
+
+        bool GetLoginStatus();
+
+        void SetLoginStatus(bool isLogin);
     }
 }

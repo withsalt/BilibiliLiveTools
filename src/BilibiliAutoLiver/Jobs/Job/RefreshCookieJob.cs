@@ -65,7 +65,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                     if (!cookieWillExpired.Item1)
                     {
                         updateStatus = true;
-                        _logger.LogInformation($"定时刷新Cookie完成，Cookie过期时间：{cookieWillExpired.Item2.ToString("yyyy-MM-dd HH:mm:ss")}，无需刷新。");
+                        _logger.LogInformation($"定时刷新Cookie完成，无需刷新。Cookie过期时间：{cookieWillExpired.Item2.ToString("yyyy-MM-dd HH:mm:ss")}。");
                         return;
                     }
                 }
