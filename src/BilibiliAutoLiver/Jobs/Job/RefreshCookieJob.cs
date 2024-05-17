@@ -110,8 +110,8 @@ namespace BilibiliAutoLiver.Jobs.Job
                 {
                     Id = 1,
                     Name = $"{this.GetType().Name}Service",
-                    IntervalTime = 30,  //10分钟
-                    StartTime = DateTime.Now.AddSeconds(10)
+                    IntervalTime = 600,  //10分钟
+                    StartTime = DateTime.Now.AddSeconds(60)
                 };
                 return _jobMetadata;
             }

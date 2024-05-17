@@ -19,25 +19,19 @@ namespace BilibiliAutoLiver.Services
         private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
         private readonly IJobSchedulerService _jobScheduler;
-        private readonly LiveSettings _liveSetting;
-        private readonly IPushStreamServiceV1 _pushServiceV1;
-        private readonly IPushStreamServiceV2 _pushServiceV2;
+        private readonly IPushStreamProxyService _pushProxyService;
 
         public StartupService(ILogger<StartupService> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
             , IJobSchedulerService jobScheduler
-            , IOptions<LiveSettings> liveSettingOptions
-            , IPushStreamServiceV1 pushServiceV1
-            , IPushStreamServiceV2 pushServiceV2)
+            , IPushStreamProxyService pushProxyService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _jobScheduler = jobScheduler ?? throw new ArgumentNullException(nameof(jobScheduler));
-            _liveSetting = liveSettingOptions.Value ?? throw new ArgumentNullException(nameof(liveSettingOptions));
-            _pushServiceV1 = pushServiceV1 ?? throw new ArgumentNullException(nameof(pushServiceV1));
-            _pushServiceV2 = pushServiceV2 ?? throw new ArgumentNullException(nameof(pushServiceV2));
+            _pushProxyService = pushProxyService ?? throw new ArgumentNullException(nameof(pushProxyService));
         }
 
         public async Task Start(CancellationToken token)
@@ -47,18 +41,16 @@ namespace BilibiliAutoLiver.Services
                 var userInfo = await Login();
                 //登录成功之后，启动定时任务
                 await _jobScheduler.StartAsync(token);
+
+#if DEBUG
+                _logger.LogInformation("Debug模式，不开启推流");
+#endif
+
                 //开始推流
-                if (_liveSetting.V2?.IsEnabled == true)
-                {
-                    await StartPushV2();
-                    return;
-                }
-                if (_liveSetting.V1?.IsEnabled == true)
-                {
-                    await StartPushV1();
-                    return;
-                }
-                throw new NotSupportedException("V1和V2两种推流方式，至少启用一种！");
+                await _pushProxyService.CheckLiveSetting();
+                await _pushProxyService.CheckLiveRoom();
+                await _pushProxyService.CheckFFmpegBinary();
+                await _pushProxyService.Start();
             }
             catch (Exception ex)
             {
@@ -81,38 +73,6 @@ namespace BilibiliAutoLiver.Services
             _cache.Set<bool>(CacheKeyConstant.LOGIN_STATUS, true);
             _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
             return userInfo;
-        }
-
-        public async Task StartPushV1()
-        {
-            try
-            {
-                await _pushServiceV1.CheckLiveSetting();
-                await _pushServiceV1.CheckLiveRoom();
-                await _pushServiceV1.CheckFFmpegBinary();
-                await _pushServiceV1.Start();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"开启v1推流失败（{ex.Message}），应用程序退出。");
-                Environment.Exit(-1);
-            }
-        }
-
-        public async Task StartPushV2()
-        {
-            try
-            {
-                await _pushServiceV2.CheckLiveSetting();
-                await _pushServiceV2.CheckLiveRoom();
-                await _pushServiceV2.CheckFFmpegBinary();
-                await _pushServiceV2.Start();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"开启v2推流失败（{ex.Message}），应用程序退出。");
-                Environment.Exit(-1);
-            }
         }
     }
 }

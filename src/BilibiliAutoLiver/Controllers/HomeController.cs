@@ -6,12 +6,14 @@ using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -41,6 +43,7 @@ namespace BilibiliAutoLiver.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IndexPageStatusDto> Status()
         {
             IndexPageStatusDto pageSatus = new IndexPageStatusDto();
@@ -85,6 +88,7 @@ namespace BilibiliAutoLiver.Controllers
             return pageSatus;
         }
 
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

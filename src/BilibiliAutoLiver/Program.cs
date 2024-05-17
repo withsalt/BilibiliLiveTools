@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using NLog.Web;
 using System.Threading;
 using BilibiliAutoLiver.Jobs;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace BilibiliAutoLiver
 {
@@ -43,6 +44,7 @@ namespace BilibiliAutoLiver
 
             builder.Services.AddSingleton<IPushStreamServiceV1, PushStreamServiceV1>();
             builder.Services.AddSingleton<IPushStreamServiceV2, PushStreamServiceV2>();
+            builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
             builder.Services.AddTransient<IStartupService, StartupService>();
 
             builder.Services.AddCors(options =>
@@ -52,6 +54,15 @@ namespace BilibiliAutoLiver
                     policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
                 });
             });
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.ExpireTimeSpan = TimeSpan.FromDays(3650*10);
+                    options.SlidingExpiration = true;
+                    options.AccessDeniedPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Login";
+                });
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -74,6 +85,7 @@ namespace BilibiliAutoLiver
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
