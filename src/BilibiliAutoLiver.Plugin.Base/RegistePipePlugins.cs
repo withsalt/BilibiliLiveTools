@@ -50,7 +50,7 @@ namespace BilibiliAutoLiver.Plugin.Base
                         {
                             continue;
                         }
-                        logger.LogInformation($"从{fileName}加载插件{pluginType.FullName}");
+                        logger.LogInformation($"加载插件{pipeProcess.Name}（{fileName}），默认状态：{(pipeProcess.IsEnabled ? "启用" : "禁用")}");
                         container.Add(pipeProcess);
                         exists.Add(pluginType.FullName);
                     }
