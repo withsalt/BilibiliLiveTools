@@ -93,7 +93,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                         result = _httpClient.Execute<UserInfo>(_navApi, HttpMethod.Get).GetAwaiter().GetResult();
                         if (result.Code == 0 && result.Data?.IsLogin == true)
                         {
-                            _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(30));
+                            _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(60));
                         }
                     }
                 }

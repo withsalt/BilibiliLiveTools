@@ -35,16 +35,19 @@ namespace BilibiliAutoLiver.Controllers
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var userInfo = await _accountService.GetUserInfo();
+
+            return View(new IndexPageViewModel()
+            {
+                UserInfo = userInfo,
+            });
         }
 
-        [AllowAnonymous]
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Console()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
     }
 }

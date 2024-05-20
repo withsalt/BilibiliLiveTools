@@ -78,6 +78,8 @@ namespace BilibiliAutoLiver.Controllers
             await _pushStreamProxyService.Stop();
             //登出
             await HttpContext.SignOutAsync();
+            //重新请求登录二维码
+            _ = await LoginByQrCode();
             return RedirectToAction("Login", "Account");
         }
 

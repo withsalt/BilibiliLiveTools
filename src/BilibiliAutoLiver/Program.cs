@@ -14,6 +14,7 @@ using NLog.Web;
 using System.Threading;
 using BilibiliAutoLiver.Jobs;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver
 {
@@ -21,7 +22,7 @@ namespace BilibiliAutoLiver
     {
         public static void Main(string[] args)
         {
-            Console.Title = $"Bilibili无人值守直播工具 v{Assembly.GetExecutingAssembly().GetName().Version} By withsalt(https://github.com/withsalt)";
+            Console.Title = $"Bilibili无人值守直播工具 v{VersionHelper.GetVersion()} By withsalt(https://github.com/withsalt)";
 
             var builder = WebApplication.CreateBuilder(args);
 
