@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using BilibiliAutoLiver.Jobs.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Quartz;
 
-namespace BilibiliAutoLiver.Jobs
+namespace BilibiliAutoLiver.Jobs.Scheduler
 {
     public class QuartzJobHostedService : IHostedService
     {

@@ -9,6 +9,7 @@ namespace BilibiliAutoLiver.DependencyInjection
         public static IServiceCollection ConfigureSettings(this IServiceCollection services, IHostApplicationBuilder builder)
         {
             services.Configure<LiveSettings>(builder.Configuration.GetSection(LiveSettings.Position));
+            services.Configure<AppSettings>(builder.Configuration.GetSection(AppSettings.Position));
             return services;
         }
     }

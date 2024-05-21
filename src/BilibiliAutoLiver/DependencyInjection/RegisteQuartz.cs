@@ -1,5 +1,4 @@
 ﻿using System;
-using BilibiliAutoLiver.Jobs;
 using BilibiliAutoLiver.Jobs.Job;
 using BilibiliAutoLiver.Jobs.Scheduler;
 using Microsoft.Extensions.DependencyInjection;

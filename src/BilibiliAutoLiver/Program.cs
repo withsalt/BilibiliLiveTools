@@ -48,6 +48,10 @@ namespace BilibiliAutoLiver
             builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
             builder.Services.AddTransient<IStartupService, StartupService>();
 
+            //Db
+            builder.Services.AddDatabase();
+            builder.Services.AddRepository();
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(GlobalConfigConstant.DefaultOriginsName, policy =>
@@ -93,6 +97,9 @@ namespace BilibiliAutoLiver
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            //初始化数据库
+            app.InitializeDatabase();
 
             app.Lifetime.ApplicationStarted.Register((obj, token)
                 => app.Services.GetRequiredService<IStartupService>().Start(token), null);
