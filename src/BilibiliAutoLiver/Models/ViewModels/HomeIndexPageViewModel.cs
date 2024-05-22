@@ -2,7 +2,7 @@
 
 namespace BilibiliAutoLiver.Models.ViewModels
 {
-    public class IndexPageViewModel
+    public class HomeIndexPageViewModel
     {
         public UserInfo UserInfo { get; set; }
     }

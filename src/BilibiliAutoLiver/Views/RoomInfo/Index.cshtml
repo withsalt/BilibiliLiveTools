@@ -1,173 +1,148 @@
-﻿@model IndexPageViewModel
+﻿@model RoomInfoIndexPageViewModel;
 @{
-    Layout = "";
+    Layout = "_Layout";
+    ViewData["Title"] = "直播间设置";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Bilibili无人值守直播工具 v@(VersionHelper.GetVersion())</title>
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="~/admin/layui/css/layui.css" rel="stylesheet">
-    <link href="~/admin/adminui/dist/css/admin.css" rel="stylesheet">
-</head>
-<body class="layui-layout-body" id="LAY_home_iframe">
-    <div id="LAY_app" style="visibility: hidden">
-        <div class="layui-layout layui-layout-admin">
-            <div class="layui-header">
-                <!-- 头部区域 -->
-                <ul class="layui-nav layui-layout-left">
-                    <li class="layui-nav-item layadmin-flexible" lay-unselect>
-                        <a href="javascript:;" layadmin-event="flexible" title="侧边伸缩">
-                            <i class="layui-icon layui-icon-shrink-right" id="LAY_app_flexible"></i>
-                        </a>
-                    </li>
-                    <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                        <a href="https://github.com/withsalt" target="_blank" title="Github">
-                            <i class="layui-icon layui-icon-website"></i>
-                        </a>
-                    </li>
-                    <li class="layui-nav-item" lay-unselect>
-                        <a href="javascript:;" layadmin-event="refresh" title="刷新">
-                            <i class="layui-icon layui-icon-refresh-3"></i>
-                        </a>
-                    </li>
-                </ul>
-                <ul class="layui-nav layui-layout-right" lay-filter="layadmin-layout-right">
-                    <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                        <a href="javascript:;" layadmin-event="note">
-                            <i class="layui-icon layui-icon-note"></i>
-                        </a>
-                    </li>
-                    <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                        <a href="javascript:;" layadmin-event="theme">
-                            <i class="layui-icon layui-icon-theme"></i>
-                        </a>
-                    </li>
-                    <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                        <a href="javascript:;" layadmin-event="fullscreen">
-                            <i class="layui-icon layui-icon-screen-full"></i>
-                        </a>
-                    </li>
-                    <li class="layui-nav-item" lay-unselect>
-                        <a href="javascript:;">
-                            <cite>@Model?.UserInfo?.Uname</cite>
-                        </a>
-                        <dl class="layui-nav-child">
-                            <dd layadmin-event="logout" style="text-align: center;"><a>退出</a></dd>
-                        </dl>
-                    </li>
-
-                    <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                        <a href="javascript:;" layadmin-event="about"><i class="layui-icon layui-icon-more-vertical"></i></a>
-                    </li>
-                    <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-unselect>
-                        <a href="javascript:;" layadmin-event="more"><i class="layui-icon layui-icon-more-vertical"></i></a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 侧边菜单 -->
-            <div class="layui-side layui-side-menu">
-                <div class="layui-side-scroll">
-                    <div class="layui-logo" lay-href="@Url.Action("Console", "Home")">
-                        <span>Bilibili Live Tools</span>
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">直播间设置</div>
+            <div class="layui-card-body" pad15>
+                <div class="layui-form" lay-filter="">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">直播Id</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="roomId" value="@Model.LiveRoomInfo.room_id" lay-verify="roomId" autocomplete="off" disabled class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">直播间Id，无法修改。</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">直播分类</label>
+                        <div class="layui-input-inline">
+                            <select name="areaId" lay-search>
+                                <option value="">请选择</option>
+                                @{
+                                    foreach (var pItem in Model.LiveAreas)
+                                    {
+                                        <optgroup label="@pItem.name">
+                                            @{
+                                                if (pItem.list != null && pItem.list.Count > 0)
+                                                {
+                                                    foreach (var child in pItem.list)
+                                                    {
+                                                        @Html.Raw($"<option value=\"{child.id}\" {(Model.LiveRoomInfo.area_v2_id == child.id ? "selected" : "")}>{child.name}</option>")
+                                                    }
+                                                }
+                                            }
+                                        </optgroup>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">选择正确的直播间分类，错误的分类可能会导致直播间被封。</div>
                     </div>
 
-                    <ul class="layui-nav layui-nav-tree" lay-accordion id="LAY-system-side-menu" lay-filter="layadmin-system-side-menu">
-                        <li data-name="home" class="layui-nav-item layui-nav-itemed">
-                            <a href="javascript:;" lay-tips="主页" lay-direction="2">
-                                <i class="layui-icon layui-icon-home"></i>
-                                <cite>主页</cite>
-                            </a>
-                            <dl class="layui-nav-child">
-                                <dd data-name="console" class="layui-this">
-                                    <a lay-href="@Url.Action("Console", "Home")">控制台</a>
-                                </dd>
-                            </dl>
-                        </li>
-                        <li data-name="component" class="layui-nav-item layui-nav-itemed">
-                            <a href="javascript:;" lay-tips="直播设置" lay-direction="2">
-                                <i class="layui-icon layui-icon-component"></i>
-                                <cite>直播设置</cite>
-                            </a>
-                            <dl class="layui-nav-child">
-                                <dd data-name="roomInfo">
-                                    <a lay-href="component/button/index.html">直播设置</a>
-                                </dd>
-                                <dd data-name="easy-model">
-                                    <a lay-href="component/button/index.html">简易模式</a>
-                                </dd>
-                                <dd data-name="adv-model">
-                                    <a lay-href="component/button/index.html">高级模式</a>
-                                </dd>
-                            </dl>
-                        </li>
-                        <li data-name="senior" class="layui-nav-item layui-nav-itemed">
-                            <a href="javascript:;" lay-tips="直播监控" lay-direction="2">
-                                <i class="layui-icon layui-icon-senior"></i>
-                                <cite>直播监控</cite>
-                            </a>
-                            <dl class="layui-nav-child">
-                                <dd>
-                                    <a lay-href="senior/im/">监控设置</a>
-                                </dd>
-                            </dl>
-                        </li>
-                        <li data-name="get" class="layui-nav-item">
-                            <a href="javascript:;" layadmin-event="about" lay-tips="关于" lay-direction="2">
-                                <i class="layui-icon layui-icon-auz"></i>
-                                <cite>关于</cite>
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">直播名称</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="roomName" value="@Model.LiveRoomInfo.title" lay-verify="roomName" autocomplete="off" placeholder="请输入直播间名称" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">自动重试</label>
+                        <div class="layui-input-inline">
+                            <input type="radio" name="isAutoRetryValue" lay-filter="isAutoRetry" value="1" title="是" @(Model.LiveSetting?.IsAutoRetry == true ? "checked" : "")>
+                            <input type="radio" name="isAutoRetryValue" lay-filter="isAutoRetry" value="0" title="否" @(Model.LiveSetting?.IsAutoRetry == true ? "" : "checked")>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">当直播推流异常终止后，是否自动重新开启推流。</div>
+                    </div>
+                    <div class="layui-form-item" id="retrySet" style="@(Model.LiveSetting?.IsAutoRetry == true ? "" : "display:none")">
+                        <label class="layui-form-label">重试间隔时间</label>
+                        <div class="layui-input-inline">
+                            <input type="number" name="retryInterval" lay-affix="number" placeholder="单位：秒" value="@(Model.LiveSetting == null ? "30" : Model.LiveSetting.RetryInterval)" step="10" min="30" max="300" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">单位：秒，不能小于30秒。</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-filter="submit_liveinfo" lay-submit>确认修改</button>
+                            <button type="reset" id="reset" class="layui-btn layui-btn-primary">重新加载</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- 页面标签 -->
-            <div class="layadmin-pagetabs" id="LAY_app_tabs">
-                <div class="layui-icon layadmin-tabs-control layui-icon-prev" layadmin-event="leftPage"></div>
-                <div class="layui-icon layadmin-tabs-control layui-icon-next" layadmin-event="rightPage"></div>
-                <div class="layui-icon layadmin-tabs-control layui-icon-down">
-                    <ul class="layui-nav layadmin-tabs-select" lay-filter="layadmin-pagetabs-nav">
-                        <li class="layui-nav-item" lay-unselect>
-                            <a href="javascript:;"></a>
-                            <dl class="layui-nav-child layui-anim-fadein">
-                                <dd layadmin-event="closeThisTabs"><a href="javascript:;">关闭当前标签页</a></dd>
-                                <dd layadmin-event="closeOtherTabs"><a href="javascript:;">关闭其它标签页</a></dd>
-                                <dd layadmin-event="closeAllTabs"><a href="javascript:;">关闭全部标签页</a></dd>
-                            </dl>
-                        </li>
-                    </ul>
-                </div>
-                <div class="layui-tab" lay-unauto lay-allowClose="true" lay-filter="layadmin-layout-tabs">
-                    <ul class="layui-tab-title" id="LAY_app_tabsheader">
-                        <li lay-id="@Url.Action("Console", "Home")" lay-attr="@Url.Action("Console", "Home")" class="layui-this"><i class="layui-icon layui-icon-home"></i></li>
-                    </ul>
-                </div>
-            </div>
-
-
-            <!-- 主体内容 -->
-            <div class="layui-body" id="LAY_app_body">
-                <div class="layadmin-tabsbody-item layui-show">
-                    <iframe src="@Url.Action("Console", "Home")" frameborder="0" class="layadmin-iframe"></iframe>
-                </div>
-            </div>
-
-            <!-- 辅助元素，一般用于移动设备下遮罩 -->
-            <div class="layadmin-body-shade" layadmin-event="shade"></div>
         </div>
     </div>
+</div>
 
-    <script src="~/admin/layui/layui.js"></script>
+@section Styles {
+    <style>
+        .layui-form-label {
+            width: 100px;
+        }
+
+        .layui-form-item .layui-input-inline {
+            width: 210px;
+        }
+    </style>
+}
+
+@section Scripts {
     <script>
         layui.config({
-            base: '@Url.Content("~/admin/")' // 静态资源所在路径
-        }).use(['index']);
+            base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
+        }).use(['form', 'layer', 'jquery'], function () {
+            $ = layui.jquery;
+            var layer = layui.layer,
+                form = layui.form;
+            form.on('radio(isAutoRetry)', function (data) {
+                if (data.value == 1) {
+                    $('#retrySet').show();
+                } else {
+                    $('#retrySet').hide();
+                }
+            });
+
+            $("#reset").click(function () {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                location.reload();
+            });
+
+            form.on('submit(submit_liveinfo)', function (data) {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                $.ajax({
+                    type: "post",
+                    url: "@Url.Action("Update", "RoomInfo")",
+                    cache: false,
+                    data: JSON.stringify(data.field),
+                    contentType: 'application/json',
+                    dataType: 'json', // 返回对象
+                    success: function (data) {
+                        layer.close(loadIndex);
+                        if (!data) {
+                            layer.msg("保存失败，返回参数为空", { icon: 5 });
+                            return;
+                        }
+                        if (data.code != 0) {
+                            layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        layer.msg('保存成功', { icon: 1 });
+                    },
+                    error: function (data) {
+                        layer.close(loadIndex);
+                        layer.msg("保存失败，未知错误", { icon: 5 });
+                        console.log(data);
+                    }
+                });
+
+                return false;
+            });
+        });
     </script>
-</body>
-</html>
+}

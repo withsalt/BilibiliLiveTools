@@ -54,7 +54,7 @@ namespace BilibiliAutoLiver
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(GlobalConfigConstant.DefaultOriginsName, policy =>
+                options.AddPolicy(GlobalConfigConstant.DEFAULT_ORIGINS_NAME, policy =>
                 {
                     policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
                 });
@@ -84,7 +84,7 @@ namespace BilibiliAutoLiver
             }
 
             //øÁ”Ú
-            app.UseCors(GlobalConfigConstant.DefaultOriginsName);
+            app.UseCors(GlobalConfigConstant.DEFAULT_ORIGINS_NAME);
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

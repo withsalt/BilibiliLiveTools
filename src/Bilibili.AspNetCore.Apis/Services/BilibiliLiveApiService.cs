@@ -302,7 +302,7 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         private async Task Delay(string operationName)
         {
-            int sleepMsec = new Random().Next(500, 1500);
+            int sleepMsec = new Random().Next(1000, 3000);
             _logger.LogDebug($"执行{operationName}操作完成，休眠{sleepMsec}ms，避免被B站频繁操作。");
             await Task.Delay(sleepMsec);
         }

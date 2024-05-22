@@ -35,7 +35,7 @@ namespace BilibiliAutoLiver.Controllers
         {
             var userInfo = await _accountService.GetUserInfo();
 
-            return View(new IndexPageViewModel()
+            return View(new HomeIndexPageViewModel()
             {
                 UserInfo = userInfo,
             });
