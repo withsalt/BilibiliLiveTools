@@ -15,19 +15,13 @@ namespace BilibiliAutoLiver.Jobs.Job
     public class SendHeartBeatJob : BaseJobDescribe, IJob
     {
         private readonly ILogger<SendHeartBeatJob> _logger;
-        private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
-        private readonly IBilibiliCookieService _cookieService;
 
         public SendHeartBeatJob(ILogger<SendHeartBeatJob> logger
-            , IMemoryCache cache
-            , IBilibiliAccountApiService accountService
-            , IBilibiliCookieService cookieService)
+            , IBilibiliAccountApiService accountService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
-            _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
         }
 
         public async Task Execute(IJobExecutionContext context)

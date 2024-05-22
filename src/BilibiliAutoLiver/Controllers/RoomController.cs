@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
@@ -116,6 +117,36 @@ namespace BilibiliAutoLiver.Controllers
                 _logger.LogWarning(ex, $"更新直播间信息失败，{ex.Message}");
                 return new ResultModel<string>(-1, ex.Message);
             }
+        }
+
+        /// <summary>
+        /// 导出分区信息为Markdown格式
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExportAreas()
+        {
+            List<LiveAreaItem> info = await _liveApiService.GetLiveAreas();
+            if (info == null || info.Count == 0)
+            {
+                throw new Exception("获取直播分区失败。");
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("### 直播间分区信息");
+            sb.AppendLine();
+            sb.AppendLine("|  AreaId | 分类名称  | 分区名称  |");
+            sb.AppendLine("| :------------ | :------------ | :------------ |");
+            foreach (var bigCate in info)
+            {
+                foreach (var item in bigCate.list)
+                {
+                    sb.AppendLine($" | {item.id} | {item.name} | {item.parent_name} | ");
+                }
+            }
+            return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/markdown; charset=UTF-8", "AreasInfo.md");
         }
     }
 }

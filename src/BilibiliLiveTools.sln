@@ -7,10 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiverTests", "Bilib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliAutoLiver", "BilibiliAutoLiver\BilibiliAutoLiver.csproj", "{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLive.Tool.UpdateArea", "BilibiliLive.Tool.UpdateArea\BilibiliLive.Tool.UpdateArea.csproj", "{B0C4C98B-21EE-4156-9339-45B49474C34C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLive.Tool.Monitor", "BilibiliLive.Tool.Monitor\BilibiliLive.Tool.Monitor.csproj", "{2FDC01E0-1941-4973-9AE4-3B135B9711AF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bilibili.AspNetCore.Apis", "Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj", "{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliAutoLiver.Plugin.Base", "BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj", "{97566CD2-E90B-499A-A74F-003E85E1D769}"
@@ -33,14 +29,6 @@ Global
 		{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B0C4C98B-21EE-4156-9339-45B49474C34C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2FDC01E0-1941-4973-9AE4-3B135B9711AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2FDC01E0-1941-4973-9AE4-3B135B9711AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2FDC01E0-1941-4973-9AE4-3B135B9711AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2FDC01E0-1941-4973-9AE4-3B135B9711AF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}.Release|Any CPU.ActiveCfg = Release|Any CPU

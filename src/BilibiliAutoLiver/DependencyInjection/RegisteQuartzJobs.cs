@@ -7,7 +7,7 @@ using Quartz.AspNetCore;
 
 namespace BilibiliAutoLiver.DependencyInjection
 {
-    public static class RegisteQuartz
+    public static class RegisteQuartzJobs
     {
         public static IServiceCollection AddQuartz(this IServiceCollection services)
         {
@@ -40,6 +40,7 @@ namespace BilibiliAutoLiver.DependencyInjection
             //add base job
             services.AddTransient<RefreshCookieJob>();
             services.AddTransient<SendHeartBeatJob>();
+            services.AddTransient<MonitorClientJob>();
             // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
             services.AddQuartzServer(options =>
             {

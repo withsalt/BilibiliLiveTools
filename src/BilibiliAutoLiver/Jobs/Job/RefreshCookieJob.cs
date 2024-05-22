@@ -37,7 +37,7 @@ namespace BilibiliAutoLiver.Jobs.Job
 
         private async Task RefreshCookie()
         {
-            if (_cache.TryGetValue(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME, out DateTime lastRefreshTime) && lastRefreshTime != DateTime.MinValue)
+            if (_cache.TryGetValue(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME_CACHE_KEY, out DateTime lastRefreshTime) && lastRefreshTime != DateTime.MinValue)
             {
                 if ((DateTime.UtcNow - lastRefreshTime).TotalHours < 6)
                 {
@@ -90,7 +90,7 @@ namespace BilibiliAutoLiver.Jobs.Job
             finally
             {
                 if (updateStatus)
-                    _cache.Set(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME, DateTime.UtcNow);
+                    _cache.Set(CacheKeyConstant.LAST_REFRESH_COOKIE_TIME_CACHE_KEY, DateTime.UtcNow);
             }
         }
 

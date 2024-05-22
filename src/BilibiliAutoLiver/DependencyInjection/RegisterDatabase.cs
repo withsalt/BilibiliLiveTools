@@ -66,6 +66,7 @@ namespace BilibiliAutoLiver.DependencyInjection
         {
             services.AddScoped<IPushSettingRepository, PushSettingRepository>();
             services.AddScoped<ILiveSettingRepository, LiveSettingRepository>();
+            services.AddScoped<IMonitorSettingRepository, MonitorSettingRepository>();
             return services;
         }
 

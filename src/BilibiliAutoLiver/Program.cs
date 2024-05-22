@@ -42,6 +42,8 @@ namespace BilibiliAutoLiver
             builder.Services.AddFFmpegService();
             //插件
             builder.Services.AddPipePlugins();
+            //邮件服务
+            builder.Services.AddTransient<IEmailNoticeService, EmailNoticeService>();
 
             builder.Services.AddSingleton<IPushStreamServiceV1, PushStreamServiceV1>();
             builder.Services.AddSingleton<IPushStreamServiceV2, PushStreamServiceV2>();

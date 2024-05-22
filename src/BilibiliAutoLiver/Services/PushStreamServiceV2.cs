@@ -20,7 +20,7 @@ namespace BilibiliAutoLiver.Services
 {
     public class PushStreamServiceV2 : BasePushStreamService, IPushStreamServiceV2
     {
-        private readonly ILogger<PushStreamServiceV1> _logger;
+        private readonly ILogger<PushStreamServiceV2> _logger;
         private readonly IBilibiliAccountApiService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
@@ -32,7 +32,7 @@ namespace BilibiliAutoLiver.Services
         private Action _cancel = null;
         private readonly static object _locker = new object();
 
-        public PushStreamServiceV2(ILogger<PushStreamServiceV1> logger
+        public PushStreamServiceV2(ILogger<PushStreamServiceV2> logger
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IOptions<LiveSettings> liveSettingOptions
