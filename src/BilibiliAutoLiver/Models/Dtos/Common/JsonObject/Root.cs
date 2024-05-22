@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PiPlayer.Models.Common.JsonObject
+namespace BilibiliAutoLiver.Models.Dtos.Common.JsonObject
 {
     public interface IRoot<T> where T : class
     {

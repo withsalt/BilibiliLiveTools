@@ -1,4 +1,4 @@
-﻿namespace PiPlayer.Models.Common.JsonObject
+﻿namespace BilibiliAutoLiver.Models.Dtos.Common.JsonObject
 {
     /// <summary>
     /// Data 数据

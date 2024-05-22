@@ -1,7 +1,7 @@
 ﻿using System;
-using PiPlayer.Models.Common.JsonObject;
+using BilibiliAutoLiver.Models.Dtos.Common.JsonObject;
 
-namespace PiPlayer.Models.Common
+namespace BilibiliAutoLiver.Models.Dtos.Common
 {
     public class ResultModel<T> : IRoot<T> where T : class
     {

@@ -5,6 +5,7 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.Dtos.Common;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
@@ -12,21 +13,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using PiPlayer.Models.Common;
 
 namespace BilibiliAutoLiver.Controllers
 {
     [Authorize]
-    public class RoomInfoController : Controller
+    public class RoomController : Controller
     {
-        private readonly ILogger<RoomInfoController> _logger;
+        private readonly ILogger<RoomController> _logger;
         private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookieService;
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly ILiveSettingRepository _liveSettingRepos;
 
-        public RoomInfoController(ILogger<RoomInfoController> logger
+        public RoomController(ILogger<RoomController> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService

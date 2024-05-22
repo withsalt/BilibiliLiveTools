@@ -1,0 +1,56 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "直播间设置";
+}
+
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">简易模式</div>
+            <div class="layui-card-body">
+                <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">推流视频</li>
+                        <li>推流桌面</li>
+                        <li>推流摄像头</li>
+                        <li>推流摄像头（高级）</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <div class="layui-tab-item layui-show">
+                            你也可以触发 tab 事件
+                        </div>
+                        <div class="layui-tab-item">内容2</div>
+                        <div class="layui-tab-item">内容3</div>
+                        <div class="layui-tab-item">内容4</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-card-header">高级模式</div>
+            <div class="layui-card-body">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        
+    </style>
+}
+
+@section Scripts {
+    <script>
+        layui.config({
+            base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
+        }).use(['form', 'layer', 'jquery'], function () {
+            $ = layui.jquery;
+            var layer = layui.layer,
+                form = layui.form;
+
+        });
+    </script>
+}
