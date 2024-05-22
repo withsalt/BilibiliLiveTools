@@ -63,8 +63,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                 LiveRoomInfo lastPlayInfo = _cache.Get<LiveRoomInfo>(CacheKeyConstant.LIVE_STATUS_CACHE_KEY);
                 if (lastPlayInfo == null)
                 {
-                    //第一次存缓存强制设置直播状态为1，免得第一次开启时就发送通知
-                    playInfo.live_status = 1;
+                    lastPlayInfo = playInfo;
                     _cache.Set(CacheKeyConstant.LIVE_STATUS_CACHE_KEY, playInfo);
                     return;
                 }
