@@ -58,7 +58,7 @@ namespace BilibiliAutoLiver.Controllers
         {
             MonitorSetting setting = await _repository.GetCacheAsync();
             string key = string.Format(CacheKeyConstant.LIVE_LOGS_CACHE_KEY, roomId);
-            var queue = _cache.Get<Queue<string>>(key);
+            Queue<string> queue = _cache.Get<Queue<string>>(key);
             if (queue?.Any() != true)
             {
                 return new ResultModel<List<string>>(0)

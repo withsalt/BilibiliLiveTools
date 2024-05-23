@@ -48,6 +48,11 @@ namespace BilibiliAutoLiver.Jobs.Job
                 MonitorSetting setting = await _provider.GetRequiredService<IMonitorSettingRepository>().GetCacheAsync();
                 if (setting == null || !setting.IsEnabled)
                 {
+                    if (setting != null)
+                    {
+                        _cache.Remove(CacheKeyConstant.LIVE_STATUS_CACHE_KEY);
+                        _cache.Remove(string.Format(CacheKeyConstant.LIVE_LOGS_CACHE_KEY, setting.RoomId));
+                    }
                     return;
                 }
 
@@ -85,13 +90,17 @@ namespace BilibiliAutoLiver.Jobs.Job
         {
             _logger.LogInformation($"获取直播间{roomId}状态成功，当前状态：{(playInfo.is_living ? "直播中" : "停止直播")}");
             string key = string.Format(CacheKeyConstant.LIVE_LOGS_CACHE_KEY, roomId);
-            var queue = _cache.Get<Queue<string>>(key);
+            Queue<string> queue = _cache.Get<Queue<string>>(key);
             if (queue == null)
             {
-                queue = new Queue<string>(6);
+                queue = new Queue<string>(30);
             }
-            string log = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]直播间：{playInfo.title}，当前状态：{(playInfo.is_living ? "直播中" : "停止直播")}";
+            string log = $"【{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}】直播间：{playInfo.title}，当前状态：{(playInfo.is_living ? "直播中" : "停止直播")}";
             queue.Enqueue(log);
+            if (queue.Count > 6)
+            {
+                _ = queue.Dequeue();
+            }
             _cache.Set(key, queue);
         }
 

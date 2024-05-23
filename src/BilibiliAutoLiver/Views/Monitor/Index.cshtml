@@ -108,11 +108,11 @@
         <div class="layui-card">
             <div class="layui-card-header">运行日志</div>
             <div class="layui-card-body" pad15>
-                <div class="layui-timeline-content layui-text">
-                    <ul>
+                <blockquote class="layui-elem-quote layui-quote-nm">
+                    <div class="layui-timeline-content layui-text" id="logs">
                         <li>还没有监控日志哟~</li>
-                    </ul>
-                </div>
+                    </div>
+                </blockquote>
             </div>
         </div>
     </div>
@@ -248,8 +248,12 @@
                         if (!data) {
                             console.log("返回参数为空！");
                         }
-                        if (data.code == 0 && data.data) {
-                            console.log(data.data);
+                        if (data.code == 0 && data.data.length > 0) {
+                            var html = "";
+                            for (var i = data.data.length - 1; i >= 0; i--) {
+                                html += "<li>" + data.data[i] + "</li>";
+                            }
+                            $("#logs").html(html);
                         }
                     },
                     error: function (data) {
@@ -258,7 +262,7 @@
                 });
             }
 
-            setInterval(update, 3000);
+            setInterval(update, 1500);
         });
     </script>
 }
