@@ -8,5 +8,7 @@ namespace BilibiliAutoLiver.Repository.Interface
     public interface IMonitorSettingRepository : IBaseRepository<MonitorSetting, long>, IRepositoryDependency
     {
         Task<MonitorSetting> GetCacheAsync();
+
+        void RemoveCache();
     }
 }

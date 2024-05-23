@@ -1,65 +1,56 @@
-﻿using FreeSql.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace BilibiliAutoLiver.Models.Entities
+namespace BilibiliAutoLiver.Models.Dtos
 {
-    public class MonitorSetting : IBaseEntity
+    public class MonitorEmailUpdateRequest
     {
-        public bool IsEnabled { get; set; }
-
-        /// <summary>
-        /// 监控直播间Id
-        /// </summary>
-        public long RoomId { get; set; }
-
-        /// <summary>
-        /// 直播间地址
-        /// </summary>
-        [Column(DbType = "text")]
-        public string RoomUrl { get; set; }
-
         /// <summary>
         /// 是否启用邮件通知
         /// </summary>
+        [Required]
         public bool IsEnableEmailNotice { get; set; }
 
         /// <summary>
         /// SMTP服务地址
         /// </summary>
-        [Column(StringLength = 255)]
+        [Required]
         public string SmtpServer { get; set; }
 
         /// <summary>
         /// 是否启用SSL
         /// </summary>
-        public bool SmtpSsl { get; set; } = false;
+        [Required]
+        public bool SmtpSsl { get; set; }
 
         /// <summary>
         /// SMTP端口
         /// </summary>
-        public int SmtpPort { get; set; } = 25;
+        [Required]
+        [Range(25, 2525)]
+        public int SmtpPort { get; set; }
 
         /// <summary>
         /// 发件人地址
         /// </summary>
-        [Column(StringLength = 255)]
+        [Required]
         public string MailAddress { get; set; }
 
         /// <summary>
         /// 发件人名称
         /// </summary>
-        [Column(StringLength = 255)]
+        [Required]
         public string MailName { get; set; }
 
         /// <summary>
         /// 密码
         /// </summary>
-        [Column(StringLength = 255)]
+        [Required]
         public string Password { get; set; }
 
         /// <summary>
         /// 接收人
         /// </summary>
-        [Column(StringLength = 255)]
+        [Required]
         public string Receivers { get; set; }
     }
 }

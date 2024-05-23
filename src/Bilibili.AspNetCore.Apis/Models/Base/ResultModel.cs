@@ -5,6 +5,26 @@ namespace Bilibili.AspNetCore.Apis.Models.Base
 {
     public class ResultModel<T> where T : class
     {
+        public ResultModel()
+        {
+
+        }
+
+        public ResultModel(int code)
+        {
+            Code = code;
+            if (code == 0)
+            {
+                Message = "Success";
+            }
+        }
+
+        public ResultModel(int code, string message)
+        {
+            Code = code;
+            Message = message;
+        }
+
         /// <summary>
         /// 
         /// </summary>

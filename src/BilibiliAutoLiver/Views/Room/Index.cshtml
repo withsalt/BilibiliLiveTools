@@ -52,8 +52,8 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label">自动重试</label>
                         <div class="layui-input-inline">
-                            <input type="radio" name="isAutoRetryValue" lay-filter="isAutoRetry" value="1" title="是" @(Model.LiveSetting?.IsAutoRetry == true ? "checked" : "")>
-                            <input type="radio" name="isAutoRetryValue" lay-filter="isAutoRetry" value="0" title="否" @(Model.LiveSetting?.IsAutoRetry == true ? "" : "checked")>
+                            <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="1" title="是" @(Model.LiveSetting?.IsAutoRetry == true ? "checked" : "")>
+                            <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="0" title="否" @(Model.LiveSetting?.IsAutoRetry == true ? "" : "checked")>
                         </div>
                         <div class="layui-form-mid layui-word-aux">当直播推流异常终止后，是否自动重新开启推流。</div>
                     </div>
@@ -112,6 +112,14 @@
             });
 
             form.on('submit(submit_liveinfo)', function (data) {
+                if (data.field) {
+                    if (data.field.isAutoRetry == '1') {
+                        data.field.isAutoRetry = true;
+                    }
+                    else {
+                        data.field.isAutoRetry = false;
+                    }
+                }
                 var loadIndex = layer.load(2, {
                     timeout: 300000
                 });

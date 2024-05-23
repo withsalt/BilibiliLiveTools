@@ -34,5 +34,10 @@ namespace BilibiliAutoLiver.Repository
             });
             return setting;
         }
+
+        public void RemoveCache()
+        {
+            _cache.Remove(CacheKeyConstant.IS_ENABLED_MONITOR_CACHE_KEY);
+        }
     }
 }

@@ -27,16 +27,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// 是否开启自动重试
         /// </summary>
         [Required]
-        [Range(0, 1)]
-        public int IsAutoRetryValue { get; set; }
-
-        public bool IsAutoRetry
-        {
-            get
-            {
-                return IsAutoRetryValue == 1;
-            }
-        }
+        public bool IsAutoRetry { get; set; }
 
         /// <summary>
         /// 重试间隔时间

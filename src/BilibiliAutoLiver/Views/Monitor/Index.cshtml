@@ -1,0 +1,239 @@
+﻿@model MonitorIndexPageViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "直播监控";
+}
+
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">监控直播间设置</div>
+            <div class="layui-card-body" pad15>
+                <div class="layui-form" lay-filter="">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">监控直播间地址</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="roomUrl" id="roomUrl" value="@Model.MonitorSetting?.RoomUrl" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">比如：https://live.bilibili.com/21614697</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">监控直播间Id</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="roomId" id="roomId" value="@Model.MonitorSetting?.RoomId" autocomplete="off" disabled class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">是否启用</label>
+                        <div class="layui-input-inline">
+                            <input type="checkbox" name="isEnabled" lay-skin="switch" @(Model.MonitorSetting?.IsEnabled == true ? "checked" : "")>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-filter="submit_monitor_room" lay-submit>确认修改</button>
+                            <button type="reset" id="reset1" class="layui-btn layui-btn-primary">重新加载</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-card-header">邮件发信设置</div>
+            <div class="layui-card-body" pad15>
+                <div class="layui-form" lay-filter="">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">SMTP服务器</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="smtpServer" value="@Model.MonitorSetting?.SmtpServer" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">比如：mail.163.com</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">是否启用SSL</label>
+                        <div class="layui-input-inline">
+                            <input type="checkbox" name="smtpSsl" lay-skin="switch" @(Model.MonitorSetting?.SmtpSsl == true ? "checked" : "")>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">SMTP端口</label>
+                        <div class="layui-input-inline">
+                            <input type="number" name="smtpPort" value="@(Model.MonitorSetting?.SmtpPort ?? 25)" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">未启用SSL端口为25，启用SSL端口一般为465</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">发件人地址</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="mailAddress" value="@Model.MonitorSetting?.MailAddress" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">发件人名称</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="mailName" value="@Model.MonitorSetting?.MailName" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">密码</label>
+                        <div class="layui-input-inline">
+                            <input type="password" name="password" value="@Model.MonitorSetting?.Password" autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">通知接受人</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="receivers" value="@Model.MonitorSetting?.Receivers" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">多个接收人，用英文';'隔开</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">是否启用</label>
+                        <div class="layui-input-inline">
+                            <input type="checkbox" name="isEnableEmailNotice" lay-skin="switch" @(Model.MonitorSetting?.IsEnableEmailNotice == true ? "checked" : "")>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-filter="submit_monitor_email" lay-submit>确认修改</button>
+                            <button type="reset" id="reset2" class="layui-btn layui-btn-primary">重新加载</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-card-header">运行日志</div>
+            <div class="layui-card-body" pad15>
+                <div class="layui-timeline-content layui-text">
+                    <ul>
+                        <li>叮叮当，叮叮当，铃儿响叮当</li>
+                        <li>今晚滑雪多快乐，我们坐在雪橇上</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .layui-form-label {
+            width: 100px;
+        }
+
+        .layui-form-item .layui-input-inline {
+            width: 210px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        layui.config({
+            base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
+        }).use(['form', 'layer', 'jquery'], function () {
+            $ = layui.jquery;
+            var layer = layui.layer,
+                form = layui.form;
+
+            $("#roomUrl").change(function () {
+                let urlText = $("#roomUrl").val();
+                if (urlText && urlText.startsWith("http")) {
+                    let url = new URL(urlText);
+                    if (url && url.hostname === "live.bilibili.com") {
+                        let pathParts = url.pathname.split('/');
+                        let number = pathParts[1];
+                        if (/^\d+$/.test(number)) {
+                            $("#roomId").val(number);
+                            return;
+                        }
+                    }
+                }
+                $("#roomId").val("");
+            });
+
+            $('#roomUrl').change();
+
+            $("#reset1").click(function () {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                location.reload();
+            });
+
+            $("#reset2").click(function () {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                location.reload();
+            });
+
+            form.on('submit(submit_monitor_room)', function (data) {
+                if (data.field) {
+                    if (data.field.isEnabled == 'on') {
+                        data.field.isEnabled = true;
+                    }
+                    else {
+                        data.field.isEnabled = false;
+                    }
+                }
+                request("@Url.Action("UpdateRoomInfo", "Monitor")", data.field);
+                return false;
+            });
+
+            form.on('submit(submit_monitor_email)', function (data) {
+                if (data.field) {
+                    if (data.field.isEnableEmailNotice == 'on') {
+                        data.field.isEnableEmailNotice = true;
+                    }
+                    else {
+                        data.field.isEnableEmailNotice = false;
+                    }
+                    if (data.field.smtpSsl == 'on') {
+                        data.field.smtpSsl = true;
+                    }
+                    else {
+                        data.field.smtpSsl = false;
+                    }
+                }
+                request("@Url.Action("UpdateEmailInfo", "Monitor")", data.field);
+                return false;
+            });
+
+            function request(url, data) {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                $.ajax({
+                    type: "post",
+                    url: url,
+                    cache: false,
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    dataType: 'json', // 返回对象
+                    success: function (data) {
+                        layer.close(loadIndex);
+                        if (!data) {
+                            layer.msg("保存失败，返回参数为空", { icon: 5 });
+                            return;
+                        }
+                        if (data.code != 0) {
+                            layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        layer.msg('保存成功', { icon: 1 });
+                    },
+                    error: function (data) {
+                        layer.close(loadIndex);
+                        layer.msg("保存失败，未知错误", { icon: 5 });
+                        console.log(data);
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -52,6 +52,10 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Models\Dtos\Common\" />
+	</ItemGroup>
+
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 	  <Exec Command="if not exist &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot; mkdir &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;&#xD;&#xA;xcopy /y /r &quot;$(SolutionDir)BilibiliAutoLiver.Plugin.YoloAI\bin\$(ConfigurationName)\$(TargetFramework)\*.*&quot; &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;" />
 	</Target>
