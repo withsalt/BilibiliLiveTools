@@ -6,8 +6,13 @@
 <div class="layui-row layui-col-space15">
     <div class="layui-col-md12">
         <div class="layui-card">
-            <div class="layui-card-header">简易模式</div>
-            <div class="layui-card-body">
+            <div class="layui-card-header layui-card-header-custum">
+                简易模式
+                <div class="layui-form layui-form-custum">
+                    <input type="checkbox" lay-skin="switch" lay-text="开启|关闭">
+                </div>
+            </div>
+            <div class="layui-card-body" style="display:none">
                 <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
                     <ul class="layui-tab-title">
                         <li class="layui-this">推流视频</li>
@@ -28,9 +33,24 @@
         </div>
 
         <div class="layui-card">
-            <div class="layui-card-header">高级模式</div>
+            <div class="layui-card-header layui-card-header-custum">
+                高级模式
+                <div class="layui-form layui-form-custum">
+                    <input type="checkbox" lay-skin="switch" lay-text="开启|关闭" checked>
+                </div>
+            </div>
             <div class="layui-card-body">
-                
+                <pre class="layui-code" contenteditable="true" lay-options="{height: '300px'}" style="outline:none;height:300px;">
+//FFmpeg推流命令，请自行填写对应操作系统和设备的推流命令
+//填写到此处时，请注意将命令中‘"’用‘\’进行转义，将推流的rtmp连接替换为[[URL]]，[[URL]]不需要双引号。
+//在Windows环境下调用ffmpeg的命令，使用USB摄像头，设备为HD Pro Webcam C920。列出所有可用设备命令：ffmpeg -list_devices true -f dshow -i dummy
+//Windows:
+ffmpeg -f dshow -video_size 1280x720 -i video="HD Pro Webcam C920" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv [[URL]]
+
+//Linux:
+//ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i "/dev/video0" -stream_loop -1 -i "Content/demo_music.m4a" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv [[URL]]
+
+            </pre>
             </div>
         </div>
     </div>
@@ -38,7 +58,19 @@
 
 @section Styles {
     <style>
-        
+        .layui-card-header-custum {
+            display: flex;
+            align-items: center;
+            justify-content: start;
+            height: 50px;
+            font-size: 16px;
+        }
+
+        .layui-form-custum {
+            display: inline-block;
+            margin-left: 15px;
+            margin-top: -8px;
+        }
     </style>
 }
 
@@ -46,11 +78,15 @@
     <script>
         layui.config({
             base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
-        }).use(['form', 'layer', 'jquery'], function () {
+        }).use(['form', 'code', 'layer', 'jquery'], function () {
             $ = layui.jquery;
             var layer = layui.layer,
                 form = layui.form;
 
+            // 执行渲染
+            layui.code({
+                elem: 'pre'
+            });
         });
     </script>
 }
