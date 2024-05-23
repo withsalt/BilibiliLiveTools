@@ -28,6 +28,18 @@ namespace BilibiliAutoLiver.Plugin.Base
             }
         }
 
+        public void Dispose()
+        {
+            if (this.Processes == null || this.Processes.Count == 0)
+            {
+                return;
+            }
+            foreach (IPipeProcess process in Processes)
+            {
+                process.Dispose();
+            }
+        }
+
         public IEnumerable<IPipeProcess> Get()
         {
             return this.Processes;

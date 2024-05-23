@@ -1,8 +1,9 @@
-﻿using SkiaSharp;
+﻿using System;
+using SkiaSharp;
 
 namespace BilibiliAutoLiver.Plugin.Base
 {
-    public interface IPipeProcess
+    public interface IPipeProcess : IDisposable
     {
         /// <summary>
         /// 插件执行序号

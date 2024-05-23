@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BilibiliAutoLiver.Plugin.Base
 {
-    public interface IPipeContainer
+    public interface IPipeContainer : IDisposable
     {
         IEnumerable<IPipeProcess> Get();
     }

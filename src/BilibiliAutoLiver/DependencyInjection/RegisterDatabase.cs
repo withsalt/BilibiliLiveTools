@@ -37,12 +37,13 @@ namespace BilibiliAutoLiver.DependencyInjection
                 var registerResult = ib.TryRegister("Sqlite", () =>
                 {
                     //create builder
-                    IFreeSql fsql = new FreeSqlBuilder()
+                    FreeSqlBuilder  fsqlBuilder = new FreeSqlBuilder()
                         .UseConnectionString(FreeSql.DataType.Sqlite, appSettings.DbConnectionString)
-                        .UseAutoSyncStructure(true)
-                        .Build();
+                        .UseAutoSyncStructure(true);
                     //如果数据库不存在，那么自动创建数据库
-                    CreateDatabaseIfNotExists(fsql, appSettings.DbConnectionString);
+                    CreateDatabaseIfNotExists(fsqlBuilder, appSettings.DbConnectionString);
+                    //必须在构建之前创建数据库出来
+                    IFreeSql fsql = fsqlBuilder.Build();
                     //sql执行日志
                     fsql.Aop.CurdAfter += (s, e) =>
                     {
@@ -133,7 +134,7 @@ namespace BilibiliAutoLiver.DependencyInjection
             fsql.CodeFirst.SyncStructure(tableAssembies.ToArray());
         }
 
-        private static void CreateDatabaseIfNotExists(IFreeSql freeSql, string connectionString)
+        private static void CreateDatabaseIfNotExists(FreeSqlBuilder freeSql, string connectionString)
         {
             SqliteConnectionStringBuilder builder = new SqliteConnectionStringBuilder(connectionString);
             FileInfo file = new FileInfo(builder.DataSource);

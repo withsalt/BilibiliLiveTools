@@ -30,5 +30,10 @@ namespace BilibiliAutoLiver.Plugin.YoloAI
         {
             return bitmap;
         }
+
+        public void Dispose()
+        {
+
+        }
     }
 }

@@ -31,8 +31,11 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj" />
 	  <ProjectReference Include="..\BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj" />
-	  <ProjectReference Include="..\BilibiliAutoLiver.Plugin.YoloAI\BilibiliAutoLiver.Plugin.YoloAI.csproj" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<None Update="runtimes\linux-arm64\bin\ffmpeg">
@@ -48,5 +51,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	  <Exec Command="if not exist &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot; mkdir &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;&#xD;&#xA;xcopy /y /r &quot;$(SolutionDir)BilibiliAutoLiver.Plugin.YoloAI\bin\$(ConfigurationName)\$(TargetFramework)\*.*&quot; &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;" />
+	</Target>
 
 </Project>
