@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliLiverTests", "BilibiliLiverTests\BilibiliLiverTests.csproj", "{28F0ACCC-571A-4F28-B86D-E4EDD004ADC1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BilibiliAutoLiver", "BilibiliAutoLiver\BilibiliAutoLiver.csproj", "{D8BB8AAA-89E0-4F35-8450-E164F1EB2BC0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2BA2D26-87DA-4089-A559-420EBACAD9D1} = {A2BA2D26-87DA-4089-A559-420EBACAD9D1}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bilibili.AspNetCore.Apis", "Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj", "{18517CD0-65FA-49B7-9CA6-350AC40FC3F1}"
 EndProject
