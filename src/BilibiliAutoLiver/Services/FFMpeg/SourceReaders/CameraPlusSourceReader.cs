@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Settings;
@@ -10,7 +8,6 @@ using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
 using BilibiliAutoLiver.Services.FFMpeg.Pipe;
 using FFMpegCore;
-using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 

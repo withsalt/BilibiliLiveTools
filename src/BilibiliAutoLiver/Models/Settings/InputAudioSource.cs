@@ -1,5 +1,4 @@
-﻿using System;
-using BilibiliAutoLiver.Models.Enums;
+﻿using BilibiliAutoLiver.Models.Enums;
 
 namespace BilibiliAutoLiver.Models.Settings
 {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
-using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Jobs.Interface;
 using BilibiliAutoLiver.Models;

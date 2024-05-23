@@ -1,5 +1,4 @@
-﻿using BilibiliAutoLiver.Models;
-using Quartz;
+﻿using Quartz;
 
 namespace BilibiliAutoLiver.Jobs.Interface
 {

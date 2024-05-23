@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,7 +10,6 @@ using BilibiliAutoLiver.Repository;
 using BilibiliAutoLiver.Repository.Base;
 using BilibiliAutoLiver.Repository.Interface;
 using FreeSql;
-using FreeSql.Aop;
 using FreeSql.DataAnnotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,7 +35,7 @@ namespace BilibiliAutoLiver.DependencyInjection
                 var registerResult = ib.TryRegister("Sqlite", () =>
                 {
                     //create builder
-                    FreeSqlBuilder  fsqlBuilder = new FreeSqlBuilder()
+                    FreeSqlBuilder fsqlBuilder = new FreeSqlBuilder()
                         .UseConnectionString(FreeSql.DataType.Sqlite, appSettings.DbConnectionString)
                         .UseAutoSyncStructure(true);
                     //如果数据库不存在，那么自动创建数据库

@@ -1,12 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
-using Bilibili.AspNetCore.Apis.Models;
-using BilibiliAutoLiver.Config;
-using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Entities;
-using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

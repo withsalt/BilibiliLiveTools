@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using BilibiliAutoLiver.Services.Interface;
+﻿using BilibiliAutoLiver.Services.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BilibiliLiverTests.Services

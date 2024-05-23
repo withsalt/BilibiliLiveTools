@@ -8,7 +8,6 @@ using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
-using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
 using BilibiliAutoLiver.Services.FFMpeg.SourceReaders;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
@@ -20,7 +19,7 @@ namespace BilibiliAutoLiver.Services
 {
     public class PushStreamServiceV2 : BasePushStreamService, IPushStreamServiceV2
     {
-        private readonly ILogger<PushStreamServiceV2> _logger;
+        private readonly ILogger<PushStreamServiceV1> _logger;
         private readonly IBilibiliAccountApiService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
@@ -32,7 +31,7 @@ namespace BilibiliAutoLiver.Services
         private Action _cancel = null;
         private readonly static object _locker = new object();
 
-        public PushStreamServiceV2(ILogger<PushStreamServiceV2> logger
+        public PushStreamServiceV2(ILogger<PushStreamServiceV1> logger
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IOptions<LiveSettings> liveSettingOptions
@@ -170,7 +169,7 @@ namespace BilibiliAutoLiver.Services
                 if (sourceReader != null)
                     sourceReader.Dispose();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, $"终止{sourceReader.GetType().Name}失败。");
             }

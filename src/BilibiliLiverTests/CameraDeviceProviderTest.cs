@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
-using FlashCap;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BilibiliLiverTests

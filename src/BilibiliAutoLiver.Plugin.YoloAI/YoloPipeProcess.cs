@@ -1,5 +1,4 @@
-﻿using System;
-using BilibiliAutoLiver.Plugin.Base;
+﻿using BilibiliAutoLiver.Plugin.Base;
 using SkiaSharp;
 
 namespace BilibiliAutoLiver.Plugin.YoloAI

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
-using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders

@@ -1,20 +1,17 @@
 using System;
-using System.Reflection;
 using Bilibili.AspNetCore.Apis.DependencyInjection;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
+using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Plugin.Base;
+using BilibiliAutoLiver.Utils;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using System.Threading;
-using BilibiliAutoLiver.Jobs;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver
 {
@@ -65,7 +62,7 @@ namespace BilibiliAutoLiver
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.ExpireTimeSpan = TimeSpan.FromDays(3650*10);
+                    options.ExpireTimeSpan = TimeSpan.FromDays(3650 * 10);
                     options.SlidingExpiration = true;
                     options.AccessDeniedPath = "/Account/Login";
                     options.LogoutPath = "/Account/Login";

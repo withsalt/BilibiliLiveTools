@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
-using Bilibili.AspNetCore.Apis.Models;
-using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Jobs.Interface;
 using BilibiliAutoLiver.Models;
 using Microsoft.Extensions.Caching.Memory;
@@ -15,13 +13,19 @@ namespace BilibiliAutoLiver.Jobs.Job
     public class SendHeartBeatJob : BaseJobDescribe, IJob
     {
         private readonly ILogger<SendHeartBeatJob> _logger;
+        private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
+        private readonly IBilibiliCookieService _cookieService;
 
         public SendHeartBeatJob(ILogger<SendHeartBeatJob> logger
-            , IBilibiliAccountApiService accountService)
+            , IMemoryCache cache
+            , IBilibiliAccountApiService accountService
+            , IBilibiliCookieService cookieService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
+            _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
         }
 
         public async Task Execute(IJobExecutionContext context)

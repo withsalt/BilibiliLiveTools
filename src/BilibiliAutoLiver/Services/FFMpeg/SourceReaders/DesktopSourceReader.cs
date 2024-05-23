@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
-using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
@@ -49,7 +48,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithCustomArgument($"-offset_y {rectangle.Value.Y}");
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument( opt);
+                    WithMuteArgument(opt);
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -63,7 +62,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     {
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument( opt);
+                    WithMuteArgument(opt);
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -77,7 +76,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     {
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument( opt);
+                    WithMuteArgument(opt);
                 });
             }
             else

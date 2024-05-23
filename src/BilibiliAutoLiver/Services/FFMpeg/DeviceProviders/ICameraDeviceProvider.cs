@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Threading.Tasks;
-using FlashCap;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
 {

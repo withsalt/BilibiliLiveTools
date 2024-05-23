@@ -7,13 +7,13 @@ namespace BilibiliAutoLiver.Models.Entities
         /// <summary>
         /// 直播间分区Id
         /// </summary>
-        public int AreaId {  get; set; }
+        public int AreaId { get; set; }
 
         /// <summary>
         /// 直播间名称
         /// </summary>
         [Column(StringLength = 300, IsNullable = false)]
-        public string RoomName {  get; set; }
+        public string RoomName { get; set; }
 
         /// <summary>
         /// 是否开启自动重试

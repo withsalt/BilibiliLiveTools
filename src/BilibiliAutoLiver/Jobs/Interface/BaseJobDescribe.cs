@@ -4,7 +4,7 @@ using Quartz;
 
 namespace BilibiliAutoLiver.Jobs.Interface
 {
-    public abstract class BaseJobDescribe: IJobDescribe
+    public abstract class BaseJobDescribe : IJobDescribe
     {
         protected abstract JobMetadata JobMetadata { get; }
 
