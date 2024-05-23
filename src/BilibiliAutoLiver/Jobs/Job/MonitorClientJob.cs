@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
@@ -59,7 +61,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                 {
                     throw new Exception("获取直播间信息失败。");
                 }
-                _logger.LogInformation($"获取直播间{setting.RoomId}状态成功，当前状态：{(playInfo.is_living ? "直播中" : "停止直播")}");
+                Log(setting.RoomId, playInfo);
                 LiveRoomInfo lastPlayInfo = _cache.Get<LiveRoomInfo>(CacheKeyConstant.LIVE_STATUS_CACHE_KEY);
                 if (lastPlayInfo == null)
                 {
@@ -77,6 +79,20 @@ namespace BilibiliAutoLiver.Jobs.Job
             {
                 _logger.LogError(ex, $"获取直播间信息时发送错误，{ex.Message}");
             }
+        }
+
+        private void Log(long roomId, LiveRoomInfo playInfo)
+        {
+            _logger.LogInformation($"获取直播间{roomId}状态成功，当前状态：{(playInfo.is_living ? "直播中" : "停止直播")}");
+            string key = string.Format(CacheKeyConstant.LIVE_LOGS_CACHE_KEY, roomId);
+            var queue = _cache.Get<Queue<string>>(key);
+            if (queue == null)
+            {
+                queue = new Queue<string>(6);
+            }
+            string log = $"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}]直播间：{playInfo.title}，当前状态：{(playInfo.is_living ? "直播中" : "停止直播")}";
+            queue.Enqueue(log);
+            _cache.Set(key, queue);
         }
 
         /// <summary>

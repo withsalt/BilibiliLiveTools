@@ -110,8 +110,7 @@
             <div class="layui-card-body" pad15>
                 <div class="layui-timeline-content layui-text">
                     <ul>
-                        <li>叮叮当，叮叮当，铃儿响叮当</li>
-                        <li>今晚滑雪多快乐，我们坐在雪橇上</li>
+                        <li>还没有监控日志哟~</li>
                     </ul>
                 </div>
             </div>
@@ -234,6 +233,32 @@
                     }
                 });
             }
+
+            function update() {
+                var roomId = "@Model.MonitorSetting.RoomId";
+                if (!roomId) {
+                    return;
+                }
+                $.ajax({
+                    type: "get",
+                    url: "@Url.Action("Status", "Monitor")?roomId=" + roomId,
+                    cache: false,
+                    dataType: 'json', // 返回对象
+                    success: function (data) {
+                        if (!data) {
+                            console.log("返回参数为空！");
+                        }
+                        if (data.code == 0 && data.data) {
+                            console.log(data.data);
+                        }
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
+                });
+            }
+
+            setInterval(update, 3000);
         });
     </script>
 }

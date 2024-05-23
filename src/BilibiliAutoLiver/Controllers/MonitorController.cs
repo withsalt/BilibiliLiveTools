@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
@@ -49,6 +51,28 @@ namespace BilibiliAutoLiver.Controllers
                 MonitorSetting = setting
             };
             return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<ResultModel<List<string>>> Status(long roomId)
+        {
+            MonitorSetting setting = await _repository.GetCacheAsync();
+            string key = string.Format(CacheKeyConstant.LIVE_LOGS_CACHE_KEY, roomId);
+            var queue = _cache.Get<Queue<string>>(key);
+            if (queue?.Any() != true)
+            {
+                return new ResultModel<List<string>>(0)
+                {
+                    Data = new List<string>()
+                    {
+                        setting?.IsEnabled == true ? "目前还没有运行日志，稍等一会儿哟~" : $"目前未开启监控哟~",
+                    }
+                };
+            }
+            return new ResultModel<List<string>>(0)
+            {
+                Data = queue.ToList()
+            };
         }
 
         [HttpPost]

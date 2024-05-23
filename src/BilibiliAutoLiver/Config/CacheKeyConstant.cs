@@ -13,5 +13,7 @@
         public const string MAIL_SEND_CACHE_KEY = "MAIL_{0}_SEND_STATUS_KEY";
 
         public const string LIVE_STATUS_CACHE_KEY = "LIVE_STATUS_CACHE_KEY";
+
+        public const string LIVE_LOGS_CACHE_KEY = "LIVE_LOGS_{0}_CACHE_KEY";
     }
 }
