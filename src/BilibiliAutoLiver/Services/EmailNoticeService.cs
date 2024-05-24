@@ -9,15 +9,20 @@ using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services
 {
     public class EmailNoticeService : IEmailNoticeService
     {
         private readonly IMonitorSettingRepository _settingRepository;
+        private readonly ILogger<EmailNoticeService> _logger;
 
-        public EmailNoticeService(IMonitorSettingRepository settingRepository)
+
+        public EmailNoticeService(IMonitorSettingRepository settingRepository
+            , ILogger<EmailNoticeService> logger)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settingRepository = settingRepository ?? throw new ArgumentNullException(nameof(settingRepository));
         }
 
@@ -81,6 +86,7 @@ namespace BilibiliAutoLiver.Services
                     await client.ConnectAsync(setting.SmtpServer, setting.SmtpPort, setting.SmtpSsl);
                     await client.AuthenticateAsync(setting.MailAddress, setting.Password);
                     var rt = await client.SendAsync(message);
+                    _logger.LogInformation($"邮件发送完成：{rt}");
                 }
                 catch (Exception)
                 {
