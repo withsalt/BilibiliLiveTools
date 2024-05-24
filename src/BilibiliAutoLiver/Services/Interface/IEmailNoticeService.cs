@@ -4,9 +4,6 @@ namespace BilibiliAutoLiver.Services.Interface
 {
     public interface IEmailNoticeService
     {
-        Task<(SendStatus, string)> Send(string title
-            , string body
-            , string[] attachments = null
-            , bool isBodyHtml = false);
+        Task<(SendStatus, string)> Send(string title, string body);
     }
 }
