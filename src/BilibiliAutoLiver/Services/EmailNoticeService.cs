@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Net.Mail;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
+using MailKit.Net.Smtp;
+using MimeKit;
+using MimeKit.Text;
+using System.Collections.Generic;
 
 namespace BilibiliAutoLiver.Services
 {
     public class EmailNoticeService : IEmailNoticeService
     {
-        /// <summary>
-        /// 邮箱正则表达式(不区分大小写)，可修改成自定义正则表达式
-        /// </summary>
-        private string RegexText = @"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
-
         private readonly IMonitorSettingRepository _settingRepository;
 
         public EmailNoticeService(IMonitorSettingRepository settingRepository)
@@ -43,10 +39,34 @@ namespace BilibiliAutoLiver.Services
                     return (SendStatus.Disabled, "请先打开配置文件中邮件发送开关。");
                 }
 
-                #region 验证基本信息
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(setting.MailName, setting.MailAddress));
+                message.ReplyTo.Add(new MailboxAddress(setting.MailName, setting.MailAddress));
+                message.Subject = title;
+                message.Body = new TextPart(TextFormat.Text)
+                {
+                    Text = body,
+                };
 
-                Regex reg = new Regex(RegexText, RegexOptions.IgnoreCase);
-                if (!reg.IsMatch(setting.MailAddress))
+                var receiveMailAddress = setting.Receivers?.Split(";");
+                if (receiveMailAddress == null || receiveMailAddress.Length <= 0)
+                {
+                    return (SendStatus.FromMailAddressIsUnmatch, "收件地址为空");
+                }
+                List<string> failedELst = new List<string>();
+                foreach (var email in receiveMailAddress)
+                {
+                    if (MailAddress.TryCreate(email, out var mailAddress) && mailAddress != null)
+                        message.To.Add(new MailboxAddress(Encoding.UTF8, mailAddress.User, mailAddress.Address));
+                    else
+                        failedELst.Add(email);
+                }
+                if (failedELst.Count > 0)
+                {
+                    return (SendStatus.FromMailAddressIsUnmatch, "以下收件地址未通过验证:" + string.Join(',', failedELst));
+                }
+
+                if (!MailAddress.TryCreate(setting.MailAddress, out var address))
                 {
                     return (SendStatus.SendMailAddressIsUnmatch, "发件地址未通过验证");
                 }
@@ -55,62 +75,25 @@ namespace BilibiliAutoLiver.Services
                     return (SendStatus.PassWordIsNull, "发件密码为空");
                 }
 
-                var receiveMailAddress = setting.Receivers?.Split(";");
-                if (receiveMailAddress == null || receiveMailAddress.Length <= 0)
+                MailKit.Net.Smtp.SmtpClient client = new MailKit.Net.Smtp.SmtpClient();
+                try
                 {
-                    return (SendStatus.FromMailAddressIsUnmatch, "收件地址为空");
+                    await client.ConnectAsync(setting.SmtpServer, setting.SmtpPort, setting.SmtpSsl);
+                    await client.AuthenticateAsync(setting.MailAddress, setting.Password);
+                    var rt = await client.SendAsync(message);
                 }
-
-                StringBuilder FailedELst = new StringBuilder();
-                foreach (string item in receiveMailAddress)
+                catch (Exception)
                 {
-                    if (!reg.IsMatch(item))
+                    throw;
+                }
+                finally
+                {
+                    if (client != null)
                     {
-                        FailedELst.Append(Environment.NewLine + item);
+                        await client.DisconnectAsync(true);
+                        client.Dispose();
                     }
                 }
-                if (FailedELst.Length > 0)
-                {
-                    return (SendStatus.FromMailAddressIsUnmatch, "以下收件地址未通过验证:" + FailedELst);
-                }
-
-                #endregion 验证基本信息
-
-                MailMessage mm = new MailMessage
-                {
-                    Priority = MailPriority.Normal,
-                    From = new MailAddress(setting.MailAddress, setting.MailName, Encoding.UTF8)
-                };
-                //ReplyTo 表示对方回复邮件时默认的接收地址，即：你用一个邮箱发信，但却用另一个来收信后两个参数的意义， 同 From 的意义
-                mm.ReplyToList.Add(new MailAddress(setting.MailAddress, setting.MailName, Encoding.UTF8));
-                mm.To.Add(string.Join(',', receiveMailAddress.Where(p => !string.IsNullOrWhiteSpace(p))));
-                //抄送
-                //if (carbonCopy != null && carbonCopy.Length > 0 && isCC)
-                //{
-                //    mm.CC.Add(string.Join(',', carbonCopy.Where(p => !string.IsNullOrWhiteSpace(p))));
-                //}
-                //附件
-                //if (attachments != null && attachments.Length > 0)
-                //{
-                //    foreach (string item in attachments)
-                //    {
-                //        mm.Attachments.Add(new Attachment(item));  //添加附件
-                //    }
-                //}
-                mm.Subject = title;
-                mm.SubjectEncoding = Encoding.UTF8;
-                mm.IsBodyHtml = false;
-                mm.BodyEncoding = Encoding.UTF8;
-                mm.Body = body;
-
-                SmtpClient smtp = new SmtpClient
-                {
-                    EnableSsl = setting.SmtpSsl,
-                    Host = setting.SmtpServer,
-                    Port = setting.SmtpPort,
-                    Credentials = new NetworkCredential(setting.MailAddress, setting.Password)
-                };
-                await smtp.SendMailAsync(mm);
 
                 return (SendStatus.Success, "邮件发送成功");
             }
