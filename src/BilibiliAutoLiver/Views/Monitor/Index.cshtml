@@ -98,6 +98,7 @@
                     <div class="layui-form-item">
                         <div class="layui-input-block">
                             <button class="layui-btn" lay-filter="submit_monitor_email" lay-submit>确认修改</button>
+                            <button class="layui-btn  layui-btn-warm" lay-filter="submit_test_email" lay-submit>发信测试</button>
                             <button type="reset" id="reset2" class="layui-btn layui-btn-primary">重新加载</button>
                         </div>
                     </div>
@@ -203,6 +204,37 @@
                 return false;
             });
 
+            form.on('submit(submit_test_email)', function (data) {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                $.ajax({
+                    type: "post",
+                    url: "@Url.Action("TestEmail", "Monitor")",
+                    cache: false,
+                    contentType: 'application/json',
+                    dataType: 'json', // 返回对象
+                    success: function (data) {
+                        layer.close(loadIndex);
+                        if (!data) {
+                            layer.msg("发送失败，返回参数为空", { icon: 5 });
+                            return;
+                        }
+                        if (data.code != 0) {
+                            layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        layer.msg('发送成功', { icon: 1 });
+                    },
+                    error: function (data) {
+                        layer.close(loadIndex);
+                        layer.msg("发送失败，未知错误", { icon: 5 });
+                        console.log(data);
+                    }
+                });
+                return false;
+            });
+
             function request(url, data) {
                 var loadIndex = layer.load(2, {
                     timeout: 300000
@@ -235,7 +267,7 @@
             }
 
             function update() {
-                var roomId = "@Model.MonitorSetting.RoomId";
+                var roomId = $("#roomId").val();
                 if (!roomId) {
                     return;
                 }

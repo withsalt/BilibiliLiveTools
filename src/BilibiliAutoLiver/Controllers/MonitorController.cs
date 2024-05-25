@@ -10,6 +10,8 @@ using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
+using BilibiliAutoLiver.Services;
+using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -26,13 +28,15 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliCookieService _cookieService;
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly IMonitorSettingRepository _repository;
+        private readonly IEmailNoticeService _emailNoticeService;
 
         public MonitorController(ILogger<MonitorController> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService
             , IBilibiliLiveApiService liveApiService
-            , IMonitorSettingRepository repository)
+            , IMonitorSettingRepository repository
+            , IEmailNoticeService emailNoticeService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -40,6 +44,7 @@ namespace BilibiliAutoLiver.Controllers
             _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _emailNoticeService = emailNoticeService ?? throw new ArgumentNullException(nameof(emailNoticeService));
         }
 
         [HttpGet]
@@ -56,6 +61,16 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public async Task<ResultModel<List<string>>> Status(long roomId)
         {
+            if (roomId <= 0)
+            {
+                return new ResultModel<List<string>>(0)
+                {
+                    Data = new List<string>()
+                    {
+                        $"目前未开启监控哟~",
+                    }
+                };
+            }
             MonitorSetting setting = await _repository.GetCacheAsync();
             string key = string.Format(CacheKeyConstant.LIVE_LOGS_CACHE_KEY, roomId);
             Queue<string> queue = _cache.Get<Queue<string>>(key);
@@ -113,6 +128,36 @@ namespace BilibiliAutoLiver.Controllers
                 _logger.LogError(ex, $"更新监控直播间信息失败，{ex.Message}");
                 return new ResultModel<string>(-1, ex.Message);
             }
+        }
+
+        [HttpPost]
+        public async Task<ResultModel<string>> TestEmail()
+        {
+            try
+            {
+                MonitorSetting setting = await _repository.GetCacheAsync();
+                if (setting == null
+                    || string.IsNullOrWhiteSpace(setting.SmtpServer)
+                    || string.IsNullOrWhiteSpace(setting.MailAddress))
+                {
+                    return new ResultModel<string>(-1, "请先配置发信设置");
+                }
+                if (!setting.IsEnableEmailNotice)
+                {
+                    return new ResultModel<string>(-1, "请先开启邮件通知");
+                }
+                var sendRt = await _emailNoticeService.Send("BilibiliLiveTools发信测试邮件", "当你收到这封邮件的时候，表明你的邮箱已经正确配置。");
+                if (sendRt.Item1 != SendStatus.Success)
+                {
+                    return new ResultModel<string>(-1, sendRt.Item2);
+                }
+                return new ResultModel<string>(0);
+            }
+            catch (Exception ex)
+            {
+                return new ResultModel<string>(-1, ex.Message);
+            }
+
         }
 
         [HttpPost]

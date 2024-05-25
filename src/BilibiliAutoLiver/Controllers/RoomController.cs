@@ -96,8 +96,6 @@ namespace BilibiliAutoLiver.Controllers
                 }
                 liveSetting.AreaId = request.AreaId;
                 liveSetting.RoomName = request.RoomName;
-                liveSetting.IsAutoRetry = request.IsAutoRetry;
-                liveSetting.RetryInterval = request.RetryInterval;
                 liveSetting.UpdatedTime = DateTime.UtcNow;
                 liveSetting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
 

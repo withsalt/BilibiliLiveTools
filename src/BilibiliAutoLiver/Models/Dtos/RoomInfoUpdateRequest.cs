@@ -22,18 +22,5 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// </summary>
         [Required]
         public long RoomId { get; set; }
-
-        /// <summary>
-        /// 是否开启自动重试
-        /// </summary>
-        [Required]
-        public bool IsAutoRetry { get; set; }
-
-        /// <summary>
-        /// 重试间隔时间
-        /// </summary>
-        [Required]
-        [Range(30, 10000)]
-        public int RetryInterval { get; set; }
     }
 }

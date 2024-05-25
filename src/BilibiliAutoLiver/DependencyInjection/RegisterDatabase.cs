@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Entities;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Repository;
 using BilibiliAutoLiver.Repository.Base;
@@ -94,10 +96,19 @@ namespace BilibiliAutoLiver.DependencyInjection
             //同步表结构
             SyncStructure(db);
             //写入种子数据
-            //db.Transaction(() =>
-            //{
-
-            //});
+            db.Transaction(() =>
+            {
+                var pushSetting = new PushSetting()
+                {
+                    Model = ConfigModel.Easy,
+                    FFmpegCommand = "//FFmpeg推流命令，请自行填写对应操作系统和设备的推流命令\r\n//填写到此处时，请注意将命令中‘\"’用‘\\’进行转义，将推流的rtmp连接替换为[[URL]]，[[URL]]不需要双引号。\r\n//在Windows环境下调用ffmpeg的命令，使用USB摄像头，设备为HD Pro Webcam C920。列出所有可用设备命令：ffmpeg -list_devices true -f dshow -i dummy\r\n//Windows:\r\nffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv [[URL]]\r\n\r\n//Linux:\r\n//ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Content/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv [[URL]]\r\n",
+                    IsAutoRetry = true,
+                    RetryInterval= 30,
+                    CreatedTime = DateTime.UtcNow,
+                    CreatedUserId = GlobalConfigConstant.SYS_USERID,
+                };
+                db.Insert(pushSetting).ExecuteAffrows();
+            });
 
             return app;
         }

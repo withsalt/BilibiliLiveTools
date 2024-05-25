@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FreeSql.DataAnnotations;
+using BilibiliAutoLiver.Models.Enums;
 
 namespace BilibiliAutoLiver.Models.Entities
 {
@@ -16,15 +17,24 @@ namespace BilibiliAutoLiver.Models.Entities
         public string Key { get; set; }
 
         /// <summary>
+        /// 配置模式
+        /// </summary>
+        public ConfigModel Model { get; set; }
+
+        /// <summary>
         /// 配置内容
         /// </summary>
         [Column(DbType = "text")]
-        public string Content { get; set; } = "{}";
+        public string FFmpegCommand { get; set; } = "{}";
 
         /// <summary>
-        /// 描述
+        /// 是否开启自动重试
         /// </summary>
-        [Column(StringLength = 600, IsNullable = true)]
-        public string Description { get; set; }
+        public bool IsAutoRetry { get; set; }
+
+        /// <summary>
+        /// 重试间隔时间
+        /// </summary>
+        public int RetryInterval { get; set; }
     }
 }

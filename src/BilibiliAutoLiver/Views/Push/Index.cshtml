@@ -1,0 +1,233 @@
+﻿@model PushIndexPageViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "推流设置";
+}
+
+<div class="layui-row layui-col-space15" style="margin-bottom:50px">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header layui-card-header-custum">
+                简易模式
+                <div class="layui-form layui-form-custum">
+                    <input type="checkbox" name="easyModel" id="easyModel" lay-filter="easyModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Easy ? "checked" : "")>
+                </div>
+            </div>
+            <div class="layui-card-body" id="easyModelBody" style="@(Model.PushSetting.Model == ConfigModel.Easy ? "" : "display:none")">
+                <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">推流视频</li>
+                        <li>推流桌面</li>
+                        <li>推流摄像头</li>
+                        <li>推流摄像头（高级）</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <div class="layui-tab-item layui-show">
+                            你也可以触发 tab 事件
+                        </div>
+                        <div class="layui-tab-item">内容2</div>
+                        <div class="layui-tab-item">内容3</div>
+                        <div class="layui-tab-item">内容4</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-card-header layui-card-header-custum">
+                高级模式
+                <div class="layui-form layui-form-custum">
+                    <input type="checkbox" name="advanceModel" id="advanceModel" lay-filter="advanceModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Easy ? "" : "checked")>
+                </div>
+            </div>
+            <div class="layui-card-body" id="advanceModelBody" style="@(Model.PushSetting.Model == ConfigModel.Easy ? "display:none" : "")">
+                <div class="layui-collapse" lay-accordion>
+                    <div class="layui-colla-item">
+                        <div class="layui-colla-title">填写说明</div>
+                        <div class="layui-colla-content layui-show">
+                            高级模式直接填写ffmpeg推流命令。<br />
+                            1. 命令必须以ffmpeg开头，表示调用ffmpeg命令。<br />
+                            2. 命令必须以[[URL]]结尾，表示获取到的直播间推流地址。<br />
+                            示例：
+                            <br />
+                            <code>ffmpeg -f dshow -video_size 1280x720 -i video="HD Pro Webcam C920" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv [[URL]]</code>
+                            <br />
+                            表示使用1280x720的分辨率，推流摄像头设备“HD Pro Webcam C920”到B站直播，编码方式为H264、帧数30。
+                        </div>
+                    </div>
+                </div>
+                <pre id="ffmpegCommand" class="layui-code" contenteditable="true" style="outline:none;height:350px;">@Html.Raw(Model.PushSetting.FFmpegCommand)</pre>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-card-header layui-card-header-custum">不间断直播设置</div>
+            <div class="layui-card-body" pad15>
+                <div class="layui-form" lay-filter="">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">是否开启不间断直播</label>
+                        <div class="layui-input-inline">
+                            <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="1" title="是" @(Model.PushSetting.IsAutoRetry ? "checked" : "")>
+                            <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="0" title="否">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">当直播推流异常终止后，是否自动重新开启推流。</div>
+                    </div>
+                    <div class="layui-form-item" id="retrySet" style="@(Model.PushSetting.IsAutoRetry ? "" : "display:none")">
+                        <label class="layui-form-label">重试间隔时间</label>
+                        <div class="layui-input-inline">
+                            <input type="number" name="retryInterval" lay-affix="number" placeholder="单位：秒" value="@Model.PushSetting.RetryInterval" step="10" min="30" max="300" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">单位：秒，不能小于30秒。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="layui-btn-container footer-container">
+    <div class="layui-form" lay-filter="">
+        <div class="layui-input-block" style="margin-left:30px;margin-top:8px">
+            <button type="button" class="layui-btn" lay-filter="submit_live_setting" lay-submit>保存设置</button>
+            <button type="button" class="layui-btn layui-bg-orange" lay-filter="submit_start_live">开始直播</button>
+            <button type="button" class="layui-btn layui-bg-red" lay-filter="submit_stop_live">停止直播</button>
+        </div>
+    </div>
+</div>
+
+
+
+@section Styles {
+    <style>
+        .layui-form-label {
+            width: 150px;
+        }
+
+        .layui-card-header-custum {
+            display: flex;
+            align-items: center;
+            justify-content: start;
+            height: 50px;
+            font-size: 16px;
+        }
+
+        .layui-form-custum {
+            display: inline-block;
+            margin-left: 15px;
+            margin-top: -8px;
+        }
+
+        .footer-container {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            width: 100%;
+            height: 55px;
+            background-color: rgba(90, 90, 90, 0.2);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        layui.config({
+            base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
+        }).use(['form', 'code', 'layer', 'jquery'], function () {
+            $ = layui.jquery;
+            var layer = layui.layer,
+                form = layui.form;
+
+            form.on('radio(isAutoRetry)', function (data) {
+                if (data.value == 1) {
+                    $('#retrySet').show();
+                } else {
+                    $('#retrySet').hide();
+                }
+            });
+
+            form.on('switch(easyModel)', function (data) {
+                if (this.checked) {
+                    $('#easyModelBody').show();
+                    $('#advanceModelBody').hide();
+                    $("#advanceModel").prop("checked", false);
+                } else {
+                    $('#easyModelBody').hide();
+                    $('#advanceModelBody').show();
+                    $("#advanceModel").prop("checked", true);
+                }
+                form.render();
+            });
+
+            form.on('switch(advanceModel)', function (data) {
+                if (this.checked) {
+                    $('#easyModelBody').hide();
+                    $('#advanceModelBody').show();
+                    $("#easyModel").prop("checked", false);
+                } else {
+                    $('#easyModelBody').show();
+                    $('#advanceModelBody').hide();
+                    $("#easyModel").prop("checked", true);
+                }
+                form.render();
+            });
+
+            // 执行渲染
+            var codeInst = layui.code({
+                elem: '#ffmpegCommand',
+                title: '命令编辑器',
+                height: '300px',
+                ln: true,
+                header: true,
+            });
+
+            function getFFMpegCommandCode() {
+                let doc = new DOMParser().parseFromString($("#ffmpegCommand").html(), 'text/html');
+                let divs = doc.querySelectorAll('.layui-code-line-content');
+                let code = "";
+                divs.forEach(div => {
+                    code += div.textContent + "\r\n";
+                });
+                return code;
+            }
+
+            form.on('submit(submit_live_setting)', function (data) {
+                var obj = {
+                    isAutoRetry: $('input[name="isAutoRetry"]:checked').val() == 1,
+                    retryInterval: $('input[name="retryInterval"]').val(),
+                    model: $("#easyModel").prop("checked") ? 1 : ($("#advanceModel").prop("checked") ? 2 : 0),
+                    ffmpegCommand: getFFMpegCommandCode(),
+                };
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                $.ajax({
+                    type: "post",
+                    url: "@Url.Action("Update", "Push")",
+                    cache: false,
+                    data: JSON.stringify(obj),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function (data) {
+                        layer.close(loadIndex);
+                        if (!data) {
+                            layer.msg("保存失败，返回参数为空", { icon: 5 });
+                            return;
+                        }
+                        if (data.code != 0) {
+                            layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        layer.msg('保存成功', { icon: 1 });
+                    },
+                    error: function (data) {
+                        layer.close(loadIndex);
+                        layer.msg("保存失败，未知错误", { icon: 5 });
+                        console.log(data);
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+}
