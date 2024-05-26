@@ -36,5 +36,10 @@ namespace BilibiliAutoLiver.Models.Entities
         /// 重试间隔时间
         /// </summary>
         public int RetryInterval { get; set; }
+
+        /// <summary>
+        /// 是否更新了推流设置
+        /// </summary>
+        public bool IsUpdate { get; set; }
     }
 }

@@ -68,7 +68,7 @@
                         <label class="layui-form-label">是否开启不间断直播</label>
                         <div class="layui-input-inline">
                             <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="1" title="是" @(Model.PushSetting.IsAutoRetry ? "checked" : "")>
-                            <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="0" title="否">
+                            <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="0" title="否" @(Model.PushSetting.IsAutoRetry ? "" : "checked")>
                         </div>
                         <div class="layui-form-mid layui-word-aux">当直播推流异常终止后，是否自动重新开启推流。</div>
                     </div>
@@ -138,6 +138,21 @@
             var layer = layui.layer,
                 form = layui.form;
 
+            function getFFMpegCommandCode() {
+                let doc = new DOMParser().parseFromString($("#ffmpegCommand").html(), 'text/html');
+                let divs = doc.querySelectorAll('.layui-code-line-content');
+                let code = "";
+                for (var i = 0; i < divs.length; i++) {
+                    if (i == divs.length - 1) {
+                        code += divs[i].textContent;
+                    }
+                    else {
+                        code += divs[i].textContent + "\r\n";
+                    }
+                }
+                return code;
+            }
+
             form.on('radio(isAutoRetry)', function (data) {
                 if (data.value == 1) {
                     $('#retrySet').show();
@@ -180,16 +195,6 @@
                 ln: true,
                 header: true,
             });
-
-            function getFFMpegCommandCode() {
-                let doc = new DOMParser().parseFromString($("#ffmpegCommand").html(), 'text/html');
-                let divs = doc.querySelectorAll('.layui-code-line-content');
-                let code = "";
-                divs.forEach(div => {
-                    code += div.textContent + "\r\n";
-                });
-                return code;
-            }
 
             form.on('submit(submit_live_setting)', function (data) {
                 var obj = {
