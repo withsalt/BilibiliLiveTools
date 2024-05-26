@@ -16,6 +16,41 @@
             <div class="layui-card-body" id="easyModelBody" style="@(Model.PushSetting.Model == ConfigModel.Easy ? "" : "display:none")">
                 <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
                     <ul class="layui-tab-title">
+                        <li class="layui-this">基础设置</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <div class="layui-tab-item layui-show">
+                            <div class="layui-form" lay-filter="">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">推流分辨率</label>
+                                    <div class="layui-input-inline">
+                                        <select name="pushVideo" lay-verify="required" lay-search>
+                                            <option value="480×320">480×320</option>
+                                            <option value="640×480">640×480</option>
+                                            <option value="800×600">800×600</option>
+                                            <option value="1280×720">1280×720</option>
+                                            <option value="1366×768">1366×768</option>
+                                            <option value="1440×900">1440×900</option>
+                                            <option value="1920×1080">1920×1080</option>
+                                            <option value="2560×1440">2560×1440</option>
+                                            <option value="3840×2160">3840×2160</option>
+                                            <option value="7680×4320">7680×4320</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">自定义输出参数</label>
+                                    <div class="layui-input-inline">
+                                        <textarea name="other" placeholder="自定义的ffmpeg输出参数" class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
+                    <ul class="layui-tab-title">
                         <li class="layui-this">推流视频</li>
                         <li>推流桌面</li>
                         <li>推流摄像头</li>
@@ -23,13 +58,81 @@
                     </ul>
                     <div class="layui-tab-content">
                         <div class="layui-tab-item layui-show">
-                            你也可以触发 tab 事件
+                            <div class="layui-form" lay-filter="">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">推流视频</label>
+                                    <div class="layui-input-inline">
+                                        <select name="pushVideo" lay-verify="required" lay-search>
+                                            <option value="">带搜索的选择框</option>
+                                            <option value="1">layer</option>
+                                            <option value="2">form</option>
+                                            <option value="3">layim</option>
+                                            <option value="4">element</option>
+                                            <option value="5">laytpl</option>
+                                            <option value="6">upload</option>
+                                            <option value="7">laydate</option>
+                                            <option value="8">laypage</option>
+                                            <option value="9">flow</option>
+                                            <option value="10">util</option>
+                                            <option value="11">code</option>
+                                            <option value="12">tree</option>
+                                            <option value="13">layedit</option>
+                                            <option value="14">nav</option>
+                                            <option value="15">tab</option>
+                                            <option value="16">table</option>
+                                            <option value="17">select</option>
+                                            <option value="18">checkbox</option>
+                                            <option value="19">switch</option>
+                                            <option value="20">radio</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">视频是否静音</label>
+                                    <div class="layui-input-inline">
+                                        <input type="checkbox" name="yyy" lay-skin="switch" lay-text="是|否">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">推流音频</label>
+                                    <div class="layui-input-inline">
+                                        <select name="pushVideo" lay-verify="required" lay-search>
+                                            <option value="">带搜索的选择框</option>
+                                            <option value="1">layer</option>
+                                            <option value="2">form</option>
+                                            <option value="3">layim</option>
+                                            <option value="4">element</option>
+                                            <option value="5">laytpl</option>
+                                            <option value="6">upload</option>
+                                            <option value="7">laydate</option>
+                                            <option value="8">laypage</option>
+                                            <option value="9">flow</option>
+                                            <option value="10">util</option>
+                                            <option value="11">code</option>
+                                            <option value="12">tree</option>
+                                            <option value="13">layedit</option>
+                                            <option value="14">nav</option>
+                                            <option value="15">tab</option>
+                                            <option value="16">table</option>
+                                            <option value="17">select</option>
+                                            <option value="18">checkbox</option>
+                                            <option value="19">switch</option>
+                                            <option value="20">radio</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="layui-tab-item">内容2</div>
                         <div class="layui-tab-item">内容3</div>
                         <div class="layui-tab-item">内容4</div>
                     </div>
                 </div>
+
+                <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
+                    解析结果：
+                    <div class="layui-upload-list"></div>
+                </blockquote>
             </div>
         </div>
 
