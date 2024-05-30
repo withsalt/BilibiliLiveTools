@@ -16,17 +16,17 @@ namespace BilibiliAutoLiver.Jobs.Job
         private readonly ILogger<RefreshCookieJob> _logger;
         private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
-        private readonly IBilibiliCookieService _cookieService;
+        private readonly IBilibiliCookieService _cookie;
 
         public RefreshCookieJob(ILogger<RefreshCookieJob> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
-            , IBilibiliCookieService cookieService)
+            , IBilibiliCookieService cookie)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
-            _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+            _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -49,18 +49,18 @@ namespace BilibiliAutoLiver.Jobs.Job
             {
                 _logger.LogInformation("定时刷新Cookie开始。");
                 //刷新cookie
-                if (!_cookieService.HasCookie())
+                if (!_cookie.HasCookie())
                 {
                     _logger.LogInformation("定时刷新Cookie失败，未登录。");
                     return;
                 }
-                if (await _accountService.CookieNeedToRefresh())
+                if (await _cookie.CookieNeedToRefresh())
                 {
                     _logger.LogInformation("检测到Cookie需要刷新，刷新Cookie。");
                 }
                 else
                 {
-                    var cookieWillExpired = _cookieService.WillExpired();
+                    var cookieWillExpired = _cookie.WillExpired();
                     if (!cookieWillExpired.Item1)
                     {
                         updateStatus = true;
@@ -68,7 +68,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                         return;
                     }
                 }
-                updateStatus = await _accountService.RefreshCookie();
+                updateStatus = await _cookie.RefreshCookie();
                 if (!updateStatus)
                 {
                     _logger.LogWarning("定时刷新Cookie失败，具体信息请查看日志。");

@@ -10,8 +10,6 @@ namespace Bilibili.AspNetCore.Apis.DependencyInjection
         {
             //Cookie模块
             services.AddSingleton<IBilibiliCookieService, BilibiliCookieService>();
-            //Http请求相关
-            services.AddSingleton<IHttpClientService, HttpClientService>();
             //账号
             services.AddTransient<IBilibiliAccountApiService, BilibiliAccountApiService>();
             //直播的API

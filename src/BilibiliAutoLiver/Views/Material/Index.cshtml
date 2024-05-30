@@ -74,8 +74,19 @@
 
 
 <div class="layui-card">
-    <div class="layui-card-header">高级应用：制作一个多文件列表</div>
+    <div class="layui-card-header">文件上传</div>
     <div class="layui-card-body">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">类型</label>
+                <div class="layui-input-block">
+                    <select name="uploadType">
+                        <option value="0">视频</option>
+                        <option value="1">音频</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         <div class="layui-upload">
             <button type="button" class="layui-btn layui-btn-normal" id="test-upload-testList">选择多文件</button>
             <div class="layui-upload-list">

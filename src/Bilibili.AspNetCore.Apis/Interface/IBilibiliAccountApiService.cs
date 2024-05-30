@@ -51,18 +51,6 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// <returns></returns>
         Task HeartBeat();
 
-        /// <summary>
-        /// 刷新Cookie
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> RefreshCookie();
-
-        /// <summary>
-        /// 是否需要刷新Cookie
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> CookieNeedToRefresh();
-
         bool GetLoginStatus();
 
         void SetLoginStatus(bool isLogin);

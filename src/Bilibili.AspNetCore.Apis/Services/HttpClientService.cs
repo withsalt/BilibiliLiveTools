@@ -11,20 +11,18 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
 using Bilibili.AspNetCore.Apis.Models.Enums;
 using Bilibili.AspNetCore.Apis.Utils;
+using BilibiliAutoLiver.Config;
 using Microsoft.Extensions.Logging;
 
 namespace Bilibili.AspNetCore.Apis.Services
 {
     public class HttpClientService : IHttpClientService
     {
-        private readonly ILogger<HttpClientService> _logger;
-        private readonly IBilibiliCookieService _bilibiliCookie;
+        private readonly IBilibiliCookieService _cookie;
 
-        public HttpClientService(ILogger<HttpClientService> logger
-            , IBilibiliCookieService bilibiliCookie)
+        public HttpClientService(IBilibiliCookieService cookie)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _bilibiliCookie = bilibiliCookie ?? throw new ArgumentNullException(nameof(bilibiliCookie));
+            _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
         }
 
         public async Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true, bool getRowData = false) where T : class
@@ -48,12 +46,12 @@ namespace Bilibili.AspNetCore.Apis.Services
                 httpClient.DefaultRequestHeaders.Add("sec-fetch-dest", "empty");
                 httpClient.DefaultRequestHeaders.Add("sec-fetch-mode", "cors");
                 httpClient.DefaultRequestHeaders.Add("sec-fetch-site", "same-site");
-                httpClient.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+                httpClient.DefaultRequestHeaders.Add("user-agent", GlobalConfigConstant.USER_AGENT);
                 httpClient.DefaultRequestHeaders.Add("cache-control", "no-cache");
 
                 if (withCookie)
                 {
-                    httpClient.DefaultRequestHeaders.Add("cookie", _bilibiliCookie.GetString());
+                    httpClient.DefaultRequestHeaders.Add("cookie", _cookie.GetString());
                 }
 
                 HttpResponseMessage response = null;
@@ -169,7 +167,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                                 cookies.Add(cookieItem);
                             }
                         }
-                        resultObj.Cookies = new ReadOnlyCollection<CookieHeaderValue>(cookies);
+                        resultObj.Cookies = cookies;
                     }
                     return resultObj;
                 }
@@ -194,6 +192,15 @@ namespace Bilibili.AspNetCore.Apis.Services
                 return map;
             }
             Type t = obj.GetType();
+            if (obj is Dictionary<string, string>)
+            {
+                var paramDic = obj as Dictionary<string, string>;
+                if (paramDic?.Any() == true)
+                {
+                    return paramDic;
+                }
+                return map;
+            }
             PropertyInfo[] pi = t.GetProperties(BindingFlags.Public | BindingFlags.Instance); // 获取当前type公共属性
             foreach (PropertyInfo p in pi)
             {
@@ -203,7 +210,11 @@ namespace Bilibili.AspNetCore.Apis.Services
                     // 进行判NULL处理 
                     if (m.Invoke(obj, new object[] { }) != null || !isIgnoreNull)
                     {
-                        string value = m.Invoke(obj, new object[] { }).ToString();
+                        string value = null;
+                        if (m.ReturnType == typeof(String))
+                            value = m.Invoke(obj, new object[] { }).ToString();
+                        else
+                            value = JsonUtil.SerializeObject(m.Invoke(obj, new object[] { }));
                         map.Add(p.Name, string.IsNullOrEmpty(value) ? null : value); // 向字典添加元素
                     }
                 }

@@ -55,12 +55,11 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly IBilibiliCookieService _cookie;
 
         public BilibiliLiveApiService(ILogger<BilibiliLiveApiService> logger
-            , IHttpClientService httpClient
             , IBilibiliCookieService cookie)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
+            _httpClient = new HttpClientService(_cookie);
         }
 
         public async Task<MyLiveRoomInfo> GetMyLiveRoomInfo()
@@ -302,7 +301,7 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         private async Task Delay(string operationName)
         {
-            int sleepMsec = new Random().Next(1000, 3000);
+            int sleepMsec = new Random().Next(100, 500);
             _logger.LogDebug($"执行{operationName}操作完成，休眠{sleepMsec}ms，避免被B站频繁操作。");
             await Task.Delay(sleepMsec);
         }

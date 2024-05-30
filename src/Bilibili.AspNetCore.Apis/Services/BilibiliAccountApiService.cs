@@ -5,15 +5,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Constants;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
-using Bilibili.AspNetCore.Apis.Models.Enums;
 using Bilibili.AspNetCore.Apis.Utils;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -38,25 +35,8 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// </summary>
         private const string _qrCodeHasScanedApi = "https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key={0}&source=main_mini";
 
-        /// <summary>
-        /// 获取cookie是否需要刷新
-        /// </summary>
-        private const string _cookieInfo = "https://passport.bilibili.com/x/passport-login/web/cookie/info";
-
-        private const string _getRefreshCsrf = "https://www.bilibili.com/correspond/1/{0}";
-
-        /// <summary>
-        /// 刷新cookie
-        /// </summary>
-        private const string _refreshCookie = "https://passport.bilibili.com/x/passport-login/web/cookie/refresh";
-
-        /// <summary>
-        /// 确认刷新
-        /// </summary>
-        private const string _confirmRefresh = "https://passport.bilibili.com/x/passport-login/web/confirm/refresh";
-
         private readonly IHttpClientService _httpClient;
-        private readonly IBilibiliCookieService _cookieService;
+        private readonly IBilibiliCookieService _cookie;
         private readonly ILogger<BilibiliAccountApiService> _logger;
         private readonly IServer _server;
         private readonly IMemoryCache _cache;
@@ -64,16 +44,15 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly static object _locker = new object();
 
         public BilibiliAccountApiService(ILogger<BilibiliAccountApiService> logger
-            , IHttpClientService httpClient
-            , IBilibiliCookieService cookieService
+            , IBilibiliCookieService cookie
             , IServer server
             , IMemoryCache cache)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+            _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
             _server = server ?? throw new ArgumentNullException(nameof(IServer));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _httpClient = new HttpClientService(_cookie);
         }
 
         public Task<UserInfo> GetUserInfo(bool withCache = true)
@@ -116,14 +95,14 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task<UserInfo> LoginByCookie()
         {
-            if (!_cookieService.HasCookie())
+            if (!_cookie.HasCookie())
             {
                 return null;
             }
-            if (_cookieService.WillExpired().Item1)
+            if (_cookie.WillExpired().Item1)
             {
-                _logger.LogInformation($"Cookie即将过期，过期时间：{_cookieService.WillExpired().Item2}，刷新Cookie。");
-                await RefreshCookie();
+                _logger.LogInformation($"Cookie即将过期，过期时间：{_cookie.WillExpired().Item2}，刷新Cookie。");
+                await _cookie.RefreshCookie();
             }
             UserInfo userInfo = await GetUserInfo();
             if (userInfo == null)
@@ -131,10 +110,10 @@ namespace Bilibili.AspNetCore.Apis.Services
                 _logger.LogInformation("通过Cookie获取用户信息失败。");
                 return null;
             }
-            if (await CookieNeedToRefresh())
+            if (await _cookie.CookieNeedToRefresh())
             {
                 _logger.LogInformation("检测到Cookie需要刷新，刷新Cookie。");
-                await RefreshCookie();
+                await _cookie.RefreshCookie();
             }
             return userInfo;
         }
@@ -144,7 +123,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             UserInfo userInfo = null;
             try
             {
-                await _cookieService.RemoveCookie();
+                await _cookie.RemoveCookie();
                 _logger.LogWarning("开始使用扫描二维码登录！");
                 List<string> endpoints = GetEndpoint();
                 if (endpoints?.Any() != true)
@@ -193,7 +172,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                             if (scanResult.Data.status == QrCodeStatus.Scaned)
                             {
                                 _logger.LogInformation("已执行登录确认。");
-                                await _cookieService.SaveCookie(scanResult.Cookies, scanResult.Data.refresh_token);
+                                await _cookie.SaveCookie(scanResult.Cookies, scanResult.Data.refresh_token);
                                 userInfo = await LoginByCookie();
                                 if (userInfo == null)
                                 {
@@ -216,7 +195,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                     }
 
                     qrCodeExp.Stop();
-                    hasCookie = _cookieService.HasCookie();
+                    hasCookie = _cookie.HasCookie();
                     genIndex++;
                 }
 
@@ -251,91 +230,6 @@ namespace Bilibili.AspNetCore.Apis.Services
             return false;
         }
 
-        public async Task<bool> RefreshCookie()
-        {
-            try
-            {
-                if (!_cookieService.HasCookie())
-                {
-                    throw new Exception("未登录，请先登录！");
-                }
-                string key = GetCorrespondPath();
-                var refreshCsrfRt = await _httpClient.Execute<string>(string.Format(_getRefreshCsrf, key), HttpMethod.Get, getRowData: true);
-                if (string.IsNullOrWhiteSpace(refreshCsrfRt.Data))
-                {
-                    throw new Exception($"获取refresh csrf失败！");
-                }
-
-                string pattern = @"<div id=""1-name"">(?<content>.*?)</div>";
-                Match match = Regex.Match(refreshCsrfRt.Data, pattern);
-                if (!match.Success)
-                {
-                    throw new Exception($"获取refresh csrf失败，返回内容：{refreshCsrfRt.Data}");
-                }
-                string refreshCsrf = match.Groups["content"]?.Value;
-                if (string.IsNullOrWhiteSpace(refreshCsrf))
-                {
-                    throw new Exception($"获取refresh csrf失败");
-                }
-                //刷新cookie
-                RefreshCookieModel refreshCookieModel = new RefreshCookieModel()
-                {
-                    csrf = _cookieService.GetCsrf(),
-                    refresh_csrf = refreshCsrf,
-                    refresh_token = _cookieService.GetRefreshToken()
-                };
-                ResultModel<RefreshCookieResult> refreshCookieResult = await _httpClient.Execute<RefreshCookieResult>(_refreshCookie, HttpMethod.Post, refreshCookieModel, BodyFormat.Form_UrlEncoded);
-                if (refreshCookieResult == null)
-                {
-                    throw new Exception($"刷新cookie失败。{refreshCookieResult?.Message}");
-                }
-                if (refreshCookieResult.Code != 0)
-                {
-                    throw new Exception($"刷新cookie失败。{refreshCookieResult?.Message}");
-                }
-                if (string.IsNullOrWhiteSpace(refreshCookieResult?.Data.refresh_token) || refreshCookieResult.Cookies?.Any() != true)
-                {
-                    throw new Exception($"刷新cookie失败。返回数据为空");
-                }
-                await _cookieService.SaveCookie(refreshCookieResult.Cookies, refreshCookieResult.Data.refresh_token);
-                //确认刷新cookie
-                ConfirmRefreshModel confirmRefreshModel = new ConfirmRefreshModel()
-                {
-                    csrf = _cookieService.GetCsrf(),
-                    refresh_token = refreshCookieModel.refresh_token,
-                };
-                ResultModel<object> confirmRefreshResult = await _httpClient.Execute<object>(_confirmRefresh, HttpMethod.Post, confirmRefreshModel, BodyFormat.Form_UrlEncoded);
-                if (confirmRefreshResult == null || confirmRefreshResult.Code != 0)
-                {
-                    throw new Exception($"刷新cookie失，确认更新失败。{confirmRefreshResult?.Message}");
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "刷新Cookie失败，404可能是接口请求频次限制");
-                return false;
-            }
-        }
-
-        public async Task<bool> CookieNeedToRefresh()
-        {
-            try
-            {
-                var result = await _httpClient.Execute<CookieInfo>(_cookieInfo, HttpMethod.Get);
-                if (result == null || result.Code != 0 || result.Data == null)
-                {
-                    throw new Exception($"获取Cookie信息失败！{result?.Message}");
-                }
-                return result.Data.refresh;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"校验Cookie是否有效失败，{ex.Message}");
-                return false;
-            }
-        }
-
         public async Task<QrCodeUrl> GenerateQrCode()
         {
             var result = await _httpClient.Execute<QrCodeUrl>(_generateQrCodeApi, HttpMethod.Get, withCookie: false);
@@ -356,14 +250,14 @@ namespace Bilibili.AspNetCore.Apis.Services
             ResultModel<QrCodeScanResult> result = await _httpClient.Execute<QrCodeScanResult>(string.Format(_qrCodeHasScanedApi, qrCodeKey), HttpMethod.Get, withCookie: false);
             if (result == null || result.Data == null)
             {
-                throw new Exception("获取{}二维码是否扫描结果为空！");
+                throw new Exception("获取二维码是否扫描结果为空！");
             }
             return result;
         }
 
         public async Task HeartBeat()
         {
-            if (!_cookieService.HasCookie())
+            if (!_cookie.HasCookie())
             {
                 _logger.LogWarning($"心跳请求失败，未登录");
                 return;
@@ -381,7 +275,7 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// <returns></returns>
         public bool GetLoginStatus()
         {
-            return _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && _cookieService.HasCookie();
+            return _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && _cookie.HasCookie();
         }
 
         public void SetLoginStatus(bool isLogin)
@@ -394,34 +288,11 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 _cache.Remove(CacheKeyConstant.USERINFO_CACHE_KEY);
                 _cache.Remove(CacheKeyConstant.LOGIN_STATUS);
-                _cookieService.RemoveCookie();
+                _cookie.RemoveCookie();
             }
         }
 
         #region private
-
-        private string GetCorrespondPath()
-        {
-            var publicKeyPEM = @"
-            -----BEGIN PUBLIC KEY-----
-            MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLgd2OAkcGVtoE3ThUREbio0Eg
-            Uc/prcajMKXvkCKFCWhJYJcLkcM2DKKcSeFpD/j6Boy538YXnR6VhcuUJOhH2x71
-            nzPjfdTcqMz7djHum0qSZA0AyCBDABUqCrfNgCiJ00Ra7GmRj+YCK1NJEuewlb40
-            JNrRuoEUXpabUzGB8QIDAQAB
-            -----END PUBLIC KEY-----";
-
-            string ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-            var oaepsha256 = RSAEncryptionPadding.OaepSHA256;
-            using var rsa = RSA.Create();
-            rsa.ImportFromPem(publicKeyPEM);
-            var encryptedData = rsa.Encrypt(Encoding.UTF8.GetBytes($"refresh_{ts}"), oaepsha256);
-            var sb = new StringBuilder();
-            foreach (var b in encryptedData)
-            {
-                sb.AppendFormat("{0:x2}", b);
-            }
-            return sb.ToString();
-        }
 
         /// <summary>
         /// 获取监听地址

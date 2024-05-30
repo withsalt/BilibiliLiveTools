@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 
 namespace Bilibili.AspNetCore.Apis.Models.Base
@@ -43,6 +44,6 @@ namespace Bilibili.AspNetCore.Apis.Models.Base
         /// <summary>
         /// Cookies
         /// </summary>
-        public ReadOnlyCollection<CookieHeaderValue> Cookies { get; set; }
+        public IEnumerable<CookieHeaderValue> Cookies { get; set; }
     }
 }

@@ -5,11 +5,15 @@ using System.Net.Http.Headers;
 
 namespace Bilibili.AspNetCore.Apis.Models
 {
-    public class CookiesConfig
+    public class CookiesData
     {
         public IEnumerable<CookieHeaderValue> Cookies { get; set; }
 
         public string RefreshToken { get; set; }
+
+        public bool HasTicket {  get; set; }
+
+        public DateTime TicketExpireIn { get; set; }
 
         /// <summary>
         /// 是否过期

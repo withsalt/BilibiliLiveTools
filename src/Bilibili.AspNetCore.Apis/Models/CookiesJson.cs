@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace Bilibili.AspNetCore.Apis.Models
 {
@@ -16,7 +18,7 @@ namespace Bilibili.AspNetCore.Apis.Models
 
         }
 
-        public CookiesJson(CookiesConfig cookiesConfig)
+        public CookiesJson(CookiesData cookiesConfig)
         {
             if (cookiesConfig == null || cookiesConfig.Cookies?.Any() != true || string.IsNullOrWhiteSpace(cookiesConfig.RefreshToken))
             {
@@ -28,28 +30,6 @@ namespace Bilibili.AspNetCore.Apis.Models
                 Cookies.Add(item.ToString());
             }
             RefreshToken = cookiesConfig.RefreshToken;
-        }
-
-        public CookiesConfig ConvertTo()
-        {
-            List<CookieHeaderValue> cookies = new List<CookieHeaderValue>();
-            foreach (var item in Cookies)
-            {
-                if (CookieHeaderValue.TryParse(item, out var value))
-                {
-                    cookies.Add(value);
-                }
-                else
-                {
-                    throw new Exception($"Try parse \"{item}\" to cookie header value failed.");
-                }
-            }
-            CookiesConfig cookiesConfig = new CookiesConfig()
-            {
-                Cookies = cookies,
-                RefreshToken = RefreshToken
-            };
-            return cookiesConfig;
         }
     }
 }

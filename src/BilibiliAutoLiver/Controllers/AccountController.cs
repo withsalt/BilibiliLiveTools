@@ -20,19 +20,19 @@ namespace BilibiliAutoLiver.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
-        private readonly IBilibiliCookieService _cookieService;
+        private readonly IBilibiliCookieService _cookie;
         private readonly IPushStreamProxyService _pushStreamProxyService;
 
         public AccountController(ILogger<AccountController> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
-            , IBilibiliCookieService cookieService
+            , IBilibiliCookieService cookie
             , IPushStreamProxyService pushStreamProxyService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
-            _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+            _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
             _pushStreamProxyService = pushStreamProxyService ?? throw new ArgumentNullException(nameof(pushStreamProxyService));
         }
 
@@ -106,7 +106,7 @@ namespace BilibiliAutoLiver.Controllers
         {
             try
             {
-                await _accountService.RefreshCookie();
+                await _cookie.RefreshCookie();
                 _logger.LogInformation("强制重新刷新Cookie成功。");
                 return Content("刷新成功");
             }

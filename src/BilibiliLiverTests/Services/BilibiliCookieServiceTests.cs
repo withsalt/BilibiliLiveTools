@@ -80,6 +80,21 @@ namespace BilibiliLiverTests.Services
             }
         }
 
+        [TestMethod()]
+        public async Task CookieNeedToRefreshTest()
+        {
+            var result = await _cookieService.CookieNeedToRefresh();
+        }
+
+        [TestMethod()]
+        public async Task RefreshCookieTest()
+        {
+            UserInfo userInfo = await _accountService.LoginByCookie();
+
+            await _cookieService.RefreshCookie();
+
+            userInfo = await _accountService.LoginByCookie();
+        }
 
 
         [TestMethod()]

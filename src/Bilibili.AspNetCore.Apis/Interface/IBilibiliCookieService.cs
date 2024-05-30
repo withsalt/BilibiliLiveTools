@@ -16,7 +16,7 @@ namespace Bilibili.AspNetCore.Apis.Interface
 
         string GetString(bool force = false);
 
-        CookiesConfig GetCookies(bool force = false);
+        CookiesData GetCookies(bool force = false);
 
         /// <summary>
         /// 是否要过期了
@@ -42,5 +42,17 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// </summary>
         /// <returns></returns>
         string GetRefreshToken();
+
+        /// <summary>
+        /// 刷新Cookie
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> RefreshCookie();
+
+        /// <summary>
+        /// 是否需要刷新Cookie
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> CookieNeedToRefresh();
     }
 }
