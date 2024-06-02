@@ -1,15 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Mail;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
-using MailKit.Net.Smtp;
+using Microsoft.Extensions.Logging;
 using MimeKit;
 using MimeKit.Text;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services
 {

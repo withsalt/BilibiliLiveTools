@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,11 +11,10 @@ using Bilibili.AspNetCore.Apis.Models.Base;
 using Bilibili.AspNetCore.Apis.Models.Enums;
 using Bilibili.AspNetCore.Apis.Utils;
 using BilibiliAutoLiver.Config;
-using Microsoft.Extensions.Logging;
 
 namespace Bilibili.AspNetCore.Apis.Services
 {
-    public class HttpClientService : IHttpClientService
+    internal class HttpClientService : IHttpClientService
     {
         private readonly IBilibiliCookieService _cookie;
 
@@ -25,7 +23,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
         }
 
-        public async Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true, bool getRowData = false) where T : class
+        public async Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true, string cookie = null, bool getRowData = false) where T : class
         {
             using (HttpClient httpClient = new HttpClient(new HttpClientHandler()
             {
@@ -51,7 +49,10 @@ namespace Bilibili.AspNetCore.Apis.Services
 
                 if (withCookie)
                 {
-                    httpClient.DefaultRequestHeaders.Add("cookie", _cookie.GetString());
+                    if (!string.IsNullOrWhiteSpace(cookie))
+                        httpClient.DefaultRequestHeaders.Add("cookie", cookie);
+                    else
+                        httpClient.DefaultRequestHeaders.Add("cookie", _cookie.GetString());
                 }
 
                 HttpResponseMessage response = null;

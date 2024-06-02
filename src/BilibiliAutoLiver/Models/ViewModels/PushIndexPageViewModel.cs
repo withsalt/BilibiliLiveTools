@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Bilibili.AspNetCore.Apis.Models;
-using BilibiliAutoLiver.Models.Entities;
+﻿using BilibiliAutoLiver.Models.Entities;
 
 namespace BilibiliAutoLiver.Models.ViewModels
 {

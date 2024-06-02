@@ -11,7 +11,7 @@ namespace Bilibili.AspNetCore.Apis.Models
 
         public string RefreshToken { get; set; }
 
-        public bool HasTicket {  get; set; }
+        public bool HasTicket { get; set; }
 
         public DateTime TicketExpireIn { get; set; }
 

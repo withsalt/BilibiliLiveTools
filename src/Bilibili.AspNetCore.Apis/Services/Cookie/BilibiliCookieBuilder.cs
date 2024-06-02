@@ -5,8 +5,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 using System.Threading.Tasks;
+using System.Web;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bilibili.AspNetCore.Apis.Services.Cookie
 {
-    public class BilibiliCookieBuilder
+    internal class BilibiliCookieBuilder
     {
         private readonly IHttpClientService _httpClient;
         private readonly ILogger<BilibiliCookieService> _logger;
@@ -31,9 +31,14 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
         /// </summary>
         private const string _getBiliTicket = "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket";
 
+        /// <summary>
+        /// 激活buvid3 buvid4
+        /// </summary>
+        private const string _activeBuvidfp = "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi";
+
         private readonly CookiesJson _cookiesJson;
         private readonly List<CookieHeaderValue> _cookies = new List<CookieHeaderValue>();
-        private readonly long _timestamp = DateTimeOffset.Now.AddMinutes(-1).ToUnixTimeMilliseconds() / 1000;
+        private readonly ulong _timestamp = (ulong)(DateTimeOffset.Now.AddMinutes(-1).ToUnixTimeMilliseconds() / 1000);
 
         public BilibiliCookieBuilder(ILogger<BilibiliCookieService> logger
             , IHttpClientService httpClient
@@ -114,10 +119,8 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
             return this;
         }
 
-
         public BilibiliCookieBuilder SetBuvidFp()
         {
-            //新增buvid_fp
             if (_cookies.Any(p => p.Cookies?.Any(a => a.Name.Equals("buvid_fp", StringComparison.OrdinalIgnoreCase)) == true))
             {
                 return this;
@@ -126,18 +129,58 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
             {
                 throw new ArgumentException("请先调用SetUuid获取UUID");
             }
-            string a = "876CB7109F-98DE-BDBE-8E108-510E1044B4D4239710infoc";
-            long b = 1717144979;
-            //5ef17bddfff3db9e5ef17bddfff3db9f
-            var fp = new CalculateBuvid3_4().GenBuvidFp(a, b);
+            if (!_cookies.Any(p => p.Cookies?.Any(a => a.Name.Equals("buvid3", StringComparison.OrdinalIgnoreCase)) == true))
+            {
+                throw new ArgumentException("请先调用SetBuvid3_4获取buvid3/buvid4");
+            }
+            Buvid3_4Calculator calculator = new Buvid3_4Calculator(_uuid, _timestamp);
+            var payload = calculator.GetPayload();
+            var fp = calculator.Generate();
             var buvid_fp_plain = CopyFromExistCookie("buvid_fp_plain", "undefined");
             _cookies.Add(buvid_fp_plain);
             var buvid_fp = CopyFromExistCookie("buvid_fp", fp);
             _cookies.Add(buvid_fp);
             var fingerprint = CopyFromExistCookie("fingerprint", fp);
             _cookies.Add(fingerprint);
+
+            try
+            {
+                bool rt = ActiveBuvidfp(payload)
+                    .ConfigureAwait(false)
+                    .GetAwaiter()
+                    .GetResult();
+                if (!rt)
+                {
+                    throw new Exception("Active buvid_fp失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex.Message);
+            }
             return this;
         }
+
+        private async Task<bool> ActiveBuvidfp(string payload)
+        {
+            CookiesData cookiesData = new CookiesData()
+            {
+                Cookies = _cookies,
+                RefreshToken = _cookiesJson.RefreshToken,
+            };
+            string cookie = cookiesData.GetCookieString();
+            ResultModel<CookieInfo> result = await _httpClient.Execute<CookieInfo>(_activeBuvidfp, HttpMethod.Post, payload, withCookie: true, cookie: cookie);
+            if (result == null || result.Data == null)
+            {
+                throw new Exception("Active buvid_fp失败，返回数据为空");
+            }
+            if (result.Code != 0)
+            {
+                throw new Exception($"Active buvid_fp失败，{result.Message}");
+            }
+            return true;
+        }
+
 
         public BilibiliCookieBuilder SetTicket()
         {
@@ -150,12 +193,12 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
                 var ticketInfo = GetTicket().ConfigureAwait(false).GetAwaiter().GetResult();
                 var bili_ticket = CopyFromExistCookie("bili_ticket", ticketInfo.ticket);
                 _cookies.Add(bili_ticket);
-                var bili_ticket_expires = CopyFromExistCookie("bili_ticket_expires", (_timestamp + ticketInfo.ttl).ToString());
+                var bili_ticket_expires = CopyFromExistCookie("bili_ticket_expires", (_timestamp + (ulong)ticketInfo.ttl).ToString());
                 _cookies.Add(bili_ticket_expires);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"获取Ticket失败，{ex.Message}");
+                _logger.LogWarning(ex, $"获取Ticket失败，{ex.Message}");
             }
             return this;
         }
@@ -177,7 +220,7 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
 
         #region private
 
-        private string GenBLsid(long timestamp)
+        private string GenBLsid(ulong timestamp)
         {
             var random = new Random();
             StringBuilder ret = new StringBuilder();

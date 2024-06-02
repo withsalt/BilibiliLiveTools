@@ -2,24 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Constants;
 using Bilibili.AspNetCore.Apis.Exceptions;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
+using Bilibili.AspNetCore.Apis.Models.Base;
+using Bilibili.AspNetCore.Apis.Models.Enums;
+using Bilibili.AspNetCore.Apis.Services.Cookie;
 using Bilibili.AspNetCore.Apis.Utils;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Bilibili.AspNetCore.Apis.Models.Base;
-using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using Bilibili.AspNetCore.Apis.Models.Enums;
-using Bilibili.AspNetCore.Apis.Services.Cookie;
 
 namespace Bilibili.AspNetCore.Apis.Services
 {
@@ -27,6 +25,7 @@ namespace Bilibili.AspNetCore.Apis.Services
     {
         private readonly ILogger<BilibiliCookieService> _logger;
         private readonly IMemoryCache _cache;
+        private readonly IHttpClientService _httpClient;
 
         private static readonly object _locker = new object();
 
@@ -51,8 +50,6 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// 确认刷新
         /// </summary>
         private const string _confirmRefresh = "https://passport.bilibili.com/x/passport-login/web/confirm/refresh";
-
-        private readonly IHttpClientService _httpClient;
 
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
             , IMemoryCache cache)
@@ -166,7 +163,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                     //构建Cookie（注意：有先后顺序）
                     CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, result)
                         .SetBnut().SetUuid().SetLsid()
-                        .SetBuvidFp().SetBuvid3_4().SetTicket()
+                        .SetBuvid3_4().SetBuvidFp().SetTicket()
                         .Build();
                     //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
                     entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow) : TimeSpan.FromMinutes(10);

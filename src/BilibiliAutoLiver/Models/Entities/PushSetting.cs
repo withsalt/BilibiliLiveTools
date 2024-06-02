@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using FreeSql.DataAnnotations;
 using BilibiliAutoLiver.Models.Enums;
+using FreeSql.DataAnnotations;
 
 namespace BilibiliAutoLiver.Models.Entities
 {

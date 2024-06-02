@@ -1,9 +1,9 @@
 ﻿using System;
 using Bilibili.AspNetCore.Apis.DependencyInjection;
 using BilibiliAutoLiver.DependencyInjection;
+using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Plugin.Base;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
