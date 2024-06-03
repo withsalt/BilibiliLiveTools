@@ -166,7 +166,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                         .SetBuvid3_4().SetBuvidFp().SetTicket()
                         .Build();
                     //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
-                    entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow) : TimeSpan.FromMinutes(10);
+                    entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
                     return cookies;
                 });
                 return cookiesConfig;
