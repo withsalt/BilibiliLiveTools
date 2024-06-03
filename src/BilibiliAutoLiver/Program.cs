@@ -1,5 +1,6 @@
 using System;
 using Bilibili.AspNetCore.Apis.DependencyInjection;
+using Bilibili.AspNetCore.Apis.Providers;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Plugin.Base;
@@ -47,9 +48,13 @@ namespace BilibiliAutoLiver
             builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
             builder.Services.AddTransient<IStartupService, StartupService>();
 
+
             //Db
             builder.Services.AddDatabase();
             builder.Services.AddRepository();
+
+            //Cookie²Ö´¢Ìá¹©Æ÷
+            builder.Services.AddTransient<IBilibiliCookieRepositoryProvider, BilibiliCookieDbRepositoryProvider>();
 
             builder.Services.AddCors(options =>
             {

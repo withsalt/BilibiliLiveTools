@@ -14,6 +14,7 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
 using Bilibili.AspNetCore.Apis.Models.Enums;
+using Bilibili.AspNetCore.Apis.Providers;
 using Bilibili.AspNetCore.Apis.Services.Cookie;
 using Bilibili.AspNetCore.Apis.Utils;
 using Microsoft.Extensions.Caching.Memory;
@@ -26,10 +27,7 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly ILogger<BilibiliCookieService> _logger;
         private readonly IMemoryCache _cache;
         private readonly IHttpClientService _httpClient;
-
-        private static readonly object _locker = new object();
-
-        private string _cookiePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cookies.json");
+        private readonly IBilibiliCookieRepositoryProvider _cookieRepository;
 
         /// <summary>
         /// 获取cookie是否需要刷新
@@ -52,10 +50,12 @@ namespace Bilibili.AspNetCore.Apis.Services
         private const string _confirmRefresh = "https://passport.bilibili.com/x/passport-login/web/confirm/refresh";
 
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
-            , IMemoryCache cache)
+            , IMemoryCache cache
+            , IBilibiliCookieRepositoryProvider cookieRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _cookieRepository = cookieRepository ?? throw new ArgumentNullException(nameof(cookieRepository));
             _httpClient = new HttpClientService(this);
         }
 
@@ -71,21 +71,14 @@ namespace Bilibili.AspNetCore.Apis.Services
             };
             if (cookiesConfig.IsExpired) throw new ArgumentException("Cookie has expired");
             string json = JsonUtil.SerializeObject(new CookiesJson(cookiesConfig), true);
-            await File.WriteAllTextAsync(_cookiePath, json);
+            await _cookieRepository.Write(json);
             _ = GetCookies(true);
         }
 
-        public Task RemoveCookie()
+        public async Task RemoveCookie()
         {
-            lock (_locker)
-            {
-                _cache.Remove(CacheKeyConstant.COOKIE_KEY);
-                if (File.Exists(_cookiePath))
-                {
-                    File.Delete(_cookiePath);
-                }
-                return Task.CompletedTask;
-            }
+            await _cookieRepository.Delete();
+            _cache.Remove(CacheKeyConstant.COOKIE_KEY);
         }
 
         public bool HasCookie()
@@ -143,34 +136,24 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public CookiesData GetCookies(bool force = false)
         {
-            lock (_locker)
+            if (force)
             {
-                if (force)
-                {
-                    _cache.Remove(CacheKeyConstant.COOKIE_KEY);
-                }
-                CookiesData cookiesConfig = _cache.GetOrCreate(CacheKeyConstant.COOKIE_KEY, entry =>
-                {
-                    if (!File.Exists(_cookiePath))
-                    {
-                        throw new CookieException("File 'cookie.json' not fount.");
-                    }
-                    string result = File.ReadAllText(_cookiePath)?.Trim('\r', '\n', ' ');
-                    if (string.IsNullOrWhiteSpace(result))
-                    {
-                        throw new CookieException("'Cookie内容为空，请先登录");
-                    }
-                    //构建Cookie（注意：有先后顺序）
-                    CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, result)
-                        .SetBnut().SetUuid().SetLsid()
-                        .SetBuvid3_4().SetBuvidFp().SetTicket()
-                        .Build();
-                    //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
-                    entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
-                    return cookies;
-                });
-                return cookiesConfig;
+                _cache.Remove(CacheKeyConstant.COOKIE_KEY);
             }
+            CookiesData cookiesConfig = _cache.GetOrCreate(CacheKeyConstant.COOKIE_KEY, entry =>
+            {
+                string cookieStr = _cookieRepository.Read()
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                //构建Cookie（注意：有先后顺序）
+                CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, cookieStr)
+                    .SetBnut().SetUuid().SetLsid()
+                    .SetBuvid3_4().SetBuvidFp().SetTicket()
+                    .Build();
+                //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
+                entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
+                return cookies;
+            });
+            return cookiesConfig;
         }
 
         public string GetCsrf()
