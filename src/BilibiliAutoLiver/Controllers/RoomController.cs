@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -47,8 +48,38 @@ namespace BilibiliAutoLiver.Controllers
         {
             MyLiveRoomInfo myLiveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
             List<LiveAreaItem> liveAreas = await _liveApiService.GetLiveAreas();
-            LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
 
+            //可能在B站修改了信息，所以需要判断数据库中是否一致，不一致反向更新
+            LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
+            if (liveSetting == null)
+            {
+                liveSetting = new LiveSetting()
+                {
+                    AreaId = myLiveRoomInfo.area_v2_id,
+                    RoomName = myLiveRoomInfo.audit_info.audit_title,
+                    Content = myLiveRoomInfo.announce.content,
+                    CreatedTime = DateTime.UtcNow,
+                    CreatedUserId = GlobalConfigConstant.SYS_USERID,
+                    UpdatedTime = DateTime.UtcNow,
+                    UpdatedUserId = GlobalConfigConstant.SYS_USERID,
+                };
+                await _repository.InsertAsync(liveSetting);
+            }
+            else
+            {
+                //更新分区
+                if (liveSetting.AreaId != myLiveRoomInfo.area_v2_id
+                    || liveSetting.RoomName != myLiveRoomInfo.audit_info.audit_title
+                    || liveSetting.Content != myLiveRoomInfo.announce.content)
+                {
+                    liveSetting.AreaId = myLiveRoomInfo.area_v2_id;
+                    liveSetting.RoomName = myLiveRoomInfo.audit_info.audit_title;
+                    liveSetting.Content = myLiveRoomInfo.announce.content;
+                    liveSetting.UpdatedTime = DateTime.UtcNow;
+                    liveSetting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
+                    await _repository.UpdateAsync(liveSetting);
+                }
+            }
             RoomInfoIndexPageViewModel viewModel = new RoomInfoIndexPageViewModel()
             {
                 LiveRoomInfo = myLiveRoomInfo,
@@ -70,22 +101,6 @@ namespace BilibiliAutoLiver.Controllers
                 }
                 //调用B站api，先更新b站直播信息
                 LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
-                if (liveSetting == null || liveSetting.AreaId != request.AreaId)
-                {
-                    //更新分区
-                    if (!await _liveApiService.UpdateLiveRoomArea(request.RoomId, request.AreaId))
-                    {
-                        return new ResultModel<string>(-1, "更新Bilibili直播分区失败");
-                    }
-                }
-                if (liveSetting == null || liveSetting.RoomName != request.RoomName)
-                {
-                    //更新直播名称
-                    if (!await _liveApiService.UpdateLiveRoomName(request.RoomId, request.RoomName))
-                    {
-                        return new ResultModel<string>(-1, "更新Bilibili直播名称失败");
-                    }
-                }
                 if (liveSetting == null)
                 {
                     liveSetting = new LiveSetting()
@@ -94,6 +109,15 @@ namespace BilibiliAutoLiver.Controllers
                         CreatedUserId = GlobalConfigConstant.SYS_USERID,
                     };
                 }
+                //更新分区
+                if (liveSetting.AreaId != request.AreaId || liveSetting.RoomName != request.RoomName)
+                {
+                    if (!await _liveApiService.UpdateLiveRoomInfo(request.RoomId, request.RoomName, request.AreaId))
+                    {
+                        return new ResultModel<string>(-1, "更新Bilibili直播信息失败");
+                    }
+                }
+
                 liveSetting.AreaId = request.AreaId;
                 liveSetting.RoomName = request.RoomName;
                 liveSetting.UpdatedTime = DateTime.UtcNow;
@@ -105,6 +129,48 @@ namespace BilibiliAutoLiver.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"更新直播间信息失败，{ex.Message}");
+                return new ResultModel<string>(-1, ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ResultModel<string>> UpdateNew([FromBody] RoomNewUpdateRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return new ResultModel<string>(-1, "参数错误");
+                }
+                //调用B站api，先更新b站直播信息
+                LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
+                if (liveSetting == null)
+                {
+                    liveSetting = new LiveSetting()
+                    {
+                        CreatedTime = DateTime.UtcNow,
+                        CreatedUserId = GlobalConfigConstant.SYS_USERID,
+                    };
+                }
+                //更新公告
+                if (liveSetting.Content != request.Content)
+                {
+                    if (!await _liveApiService.UpdateRoomNews(request.RoomId, request.Content))
+                    {
+                        return new ResultModel<string>(-1, "更新Bilibili直播间公告失败");
+                    }
+                }
+
+                liveSetting.UpdatedTime = DateTime.UtcNow;
+                liveSetting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
+                liveSetting.Content = request.Content;
+
+                await _repository.InsertOrUpdateAsync(liveSetting);
+                return new ResultModel<string>(0);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"更新直播间公告失败，{ex.Message}");
                 return new ResultModel<string>(-1, ex.Message);
             }
         }

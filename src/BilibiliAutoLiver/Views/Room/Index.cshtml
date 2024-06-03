@@ -46,13 +46,46 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label">直播名称</label>
                         <div class="layui-input-inline">
-                            <input type="text" name="roomName" value="@Model.LiveRoomInfo.title" lay-verify="roomName" autocomplete="off" placeholder="请输入直播间名称" class="layui-input">
+                            <input type="text" name="roomName" value="@Model.LiveRoomInfo?.audit_info?.audit_title" @(Model.LiveRoomInfo?.audit_info?.audit_title_status != 2 ? "disabled" : "") lay-verify="roomName" autocomplete="off" placeholder="直播间名称不能超过12个字符" class="layui-input">
+                            <input type="hidden" name="roomNameStatus" value="@(Model.LiveRoomInfo?.audit_info?.audit_title_status != 2 ? "1" : "0")" autocomplete="off" class="layui-input">
                         </div>
+                        @{
+                            if (Model.LiveRoomInfo?.audit_info?.audit_title_status != 2)
+                            {
+                                <div class="layui-form-mid layui-word-aux"><b style="color:darkorange">直播间名称正在审核中</b></div>
+                            }
+                        }
                     </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block">
                             <button class="layui-btn" lay-filter="submit_liveinfo" lay-submit>确认修改</button>
-                            <button type="reset" id="reset" class="layui-btn layui-btn-primary">重新加载</button>
+                            <button type="reset" id="reset1" class="layui-btn layui-btn-primary">重新加载</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">直播间公告</div>
+            <div class="layui-card-body" pad15>
+                <div class="layui-form" lay-filter="">
+                    <div class="layui-form-item" style="display:none">
+                        <label class="layui-form-label">直播Id</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="roomId" value="@Model.LiveRoomInfo.room_id" lay-verify="roomId" autocomplete="off" disabled class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">直播间Id，无法修改。</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">直播公告</label>
+                        <div class="layui-input-inline">
+                            <textarea type="text" name="content" autocomplete="off" placeholder="直播间公告不能超过60个字符" class="layui-textarea">@Model.LiveRoomInfo?.announce?.content</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-filter="submit_live_new" lay-submit>确认修改</button>
+                            <button type="reset" id="reset2" class="layui-btn layui-btn-primary">重新加载</button>
                         </div>
                     </div>
                 </div>
@@ -81,9 +114,16 @@
             $ = layui.jquery;
             var layer = layui.layer,
                 form = layui.form;
-            
 
-            $("#reset").click(function () {
+
+            $("#reset1").click(function () {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                location.reload();
+            });
+
+            $("#reset2").click(function () {
                 var loadIndex = layer.load(2, {
                     timeout: 300000
                 });
@@ -91,6 +131,11 @@
             });
 
             form.on('submit(submit_liveinfo)', function (data) {
+                if (data.field.roomNameStatus == 1) {
+                    layer.msg("直播间名称正在审核中，暂不支持修改", { icon: 5 });
+                    return;
+                }
+
                 var loadIndex = layer.load(2, {
                     timeout: 300000
                 });
@@ -112,6 +157,41 @@
                             return;
                         }
                         layer.msg('保存成功', { icon: 1 });
+                        $("#reset1").click();
+                    },
+                    error: function (data) {
+                        layer.close(loadIndex);
+                        layer.msg("保存失败，未知错误", { icon: 5 });
+                        console.log(data);
+                    }
+                });
+
+                return false;
+            });
+
+            form.on('submit(submit_live_new)', function (data) {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                $.ajax({
+                    type: "post",
+                    url: "@Url.Action("UpdateNew", "Room")",
+                    cache: false,
+                    data: JSON.stringify(data.field),
+                    contentType: 'application/json',
+                    dataType: 'json', // 返回对象
+                    success: function (data) {
+                        layer.close(loadIndex);
+                        if (!data) {
+                            layer.msg("保存失败，返回参数为空", { icon: 5 });
+                            return;
+                        }
+                        if (data.code != 0) {
+                            layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        layer.msg('保存成功', { icon: 1 });
+                        $("#reset2").click();
                     },
                     error: function (data) {
                         layer.close(loadIndex);

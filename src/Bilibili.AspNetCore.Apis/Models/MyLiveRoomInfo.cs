@@ -177,5 +177,36 @@
         /// 
         /// </summary>
         public string nft_dmark { get; set; }
+
+        /// <summary>
+        /// 公告信息
+        /// </summary>
+        public announce announce { get; set; }
+
+        /// <summary>
+        /// 直播间名称审核信息
+        /// </summary>
+        public audit_info audit_info { get; set; }
+    }
+
+    public class announce
+    {
+        public string content { get; set; }
+
+        public long ctime { get; set; }
+
+        public long mtime { get; set; }
+    }
+
+    public class audit_info
+    {
+        public string audit_title { get; set; }
+
+        /// <summary>
+        /// 1：审核中，2：正常
+        /// </summary>
+        public int audit_title_status { get; set; }
+
+        public string audit_title_reason { get; set; }
     }
 }

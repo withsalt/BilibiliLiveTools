@@ -26,14 +26,6 @@ namespace BilibiliLiverTests.Services
         }
 
         [TestMethod()]
-        public async Task UpdateLiveRoomNameTest()
-        {
-            var info = await _apiService.GetMyLiveRoomInfo();
-            bool reslt = await _apiService.UpdateLiveRoomName(info.room_id, info.title);
-            Assert.IsTrue(reslt);
-        }
-
-        [TestMethod()]
         public async Task GetLiveAreasTest()
         {
             var info = await _apiService.GetLiveAreas();
@@ -64,27 +56,10 @@ namespace BilibiliLiverTests.Services
         }
 
         [TestMethod()]
-        public async Task UpdateLiveRoomAreaTest()
-        {
-            var info = await _apiService.GetMyLiveRoomInfo();
-            var reslt = await _apiService.UpdateLiveRoomArea(info.room_id, 369);
-            Assert.IsTrue(reslt);
-        }
-
-        [TestMethod()]
         public async Task GetRoomPlayInfoTest()
         {
             var reslt = await _apiService.GetRoomPlayInfo(21614697);
             Assert.IsNotNull(reslt);
-        }
-
-        [TestMethod()]
-        public async Task Test1()
-        {
-            var info = await _apiService.GetMyLiveRoomInfo();
-            var r1 = await _apiService.UpdateLiveRoomArea(info.room_id, 33);
-            await Task.Delay(5000);
-            var r2 = await _apiService.UpdateLiveRoomName(info.room_id, "白噪音");
         }
     }
 }

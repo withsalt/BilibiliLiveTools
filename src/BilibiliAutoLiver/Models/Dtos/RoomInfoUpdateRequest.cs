@@ -8,13 +8,14 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// 直播间分区Id
         /// </summary>
         [Required]
-        [Range(1, 10000)]
+        [Range(1, 1000000)]
         public int AreaId { get; set; }
 
         /// <summary>
         /// 直播间名称
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "直播间名称不能为空")]
+        [MaxLength(12, ErrorMessage = "直播间名称不能超过12个字符")]
         public string RoomName { get; set; }
 
         /// <summary>

@@ -9,5 +9,7 @@
         public const string USERINFO_CACHE_KEY = "USERINFO_CACHE_KEY";
 
         public const string LOGIN_STATUS = "LOGIN_STATUS";
+
+        public const string ALL_LIVE_AREAS_CACHE_KEY = "ALL_LIVE_AREAS_CACHE_KEY";
     }
 }

@@ -125,27 +125,15 @@ namespace BilibiliAutoLiver.Services.Base
                 _logger.ThrowLogError("当前用户未开通直播间！");
             }
             _logger.LogInformation($"获取直播间信息成功，当前直播间地址：https://live.bilibili.com/{liveRoomInfo.room_id}，名称：{liveRoomInfo.title}，分区：{liveRoomInfo.parent_name}·{liveRoomInfo.area_v2_name}，直播状态：{(liveRoomInfo.live_status == 1 ? "直播中" : "未开启")}");
-            //检查名称
-            if (liveRoomInfo.title != _liveSetting.LiveRoomName)
+            //检查名称和分区
+            if (liveRoomInfo.title != _liveSetting.LiveRoomName || liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
             {
-                bool result = await _api.UpdateLiveRoomName(liveRoomInfo.room_id, _liveSetting.LiveRoomName);
+                bool result = await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, _liveSetting.LiveRoomName, _liveSetting.LiveAreaId);
                 if (!result)
                 {
-                    _logger.ThrowLogError($"修改直播间名称为【{_liveSetting.LiveRoomName}】失败！");
+                    _logger.ThrowLogError($"修改直播间名称为【{_liveSetting.LiveRoomName}】，分区为【{_liveSetting.LiveAreaId}】失败！");
                 }
-                _logger.LogInformation($"修改直播间名称为：{_liveSetting.LiveRoomName}，成功！");
-                await Task.Delay(1000);
-            }
-            //检查分区
-            if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
-            {
-                bool result = await _api.UpdateLiveRoomArea(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
-                if (!result)
-                {
-                    _logger.ThrowLogError($"修改直播间分区为【{_liveSetting.LiveAreaId}】失败！");
-                }
-                _logger.LogInformation($"修改直播间分区为：{_liveSetting.LiveAreaId}，成功！");
-                await Task.Delay(1000);
+                _logger.LogInformation($"修改直播间名称为【{_liveSetting.LiveRoomName}】，分区为【{_liveSetting.LiveAreaId}】成功！");
             }
         }
 

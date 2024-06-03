@@ -8,6 +8,8 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
 using Bilibili.AspNetCore.Apis.Models.Enums;
+using Bilibili.AspNetCore.Apis.Constants;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace Bilibili.AspNetCore.Apis.Services
@@ -28,6 +30,11 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// 更新直播间名称
         /// </summary>
         private const string _updateLiveRoomNameApi = "https://api.live.bilibili.com/room/v1/Room/update";
+
+        /// <summary>
+        /// 更新直播间公告
+        /// </summary>
+        private const string _updateRoomNews = "https://api.live.bilibili.com/xlive/app-blink/v1/index/updateRoomNews";
 
         /// <summary>
         /// 获取直播种类
@@ -53,12 +60,15 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly ILogger<BilibiliLiveApiService> _logger;
         private readonly IHttpClientService _httpClient;
         private readonly IBilibiliCookieService _cookie;
+        private readonly IMemoryCache _cache;
 
         public BilibiliLiveApiService(ILogger<BilibiliLiveApiService> logger
-            , IBilibiliCookieService cookie)
+            , IBilibiliCookieService cookie
+            , IMemoryCache cache)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _httpClient = new HttpClientService(_cookie);
         }
 
@@ -92,16 +102,22 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task<List<LiveAreaItem>> GetLiveAreas()
         {
-            var result = await _httpClient.Execute<List<LiveAreaItem>>(_getLiveCategoryApi, HttpMethod.Get, null, BodyFormat.Json, false);
-            if (result == null)
+            var data = await _cache.GetOrCreateAsync(CacheKeyConstant.ALL_LIVE_AREAS_CACHE_KEY, async p =>
             {
-                throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, "返回内容为空");
-            }
-            if (result.Code != 0)
-            {
-                throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, result.Message);
-            }
-            return result.Data;
+                p.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60);
+
+                var result = await _httpClient.Execute<List<LiveAreaItem>>(_getLiveCategoryApi, HttpMethod.Get, null, BodyFormat.Json, false);
+                if (result == null)
+                {
+                    throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, "返回内容为空");
+                }
+                if (result.Code != 0)
+                {
+                    throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, result.Message);
+                }
+                return result.Data;
+            });
+            return data;
         }
 
         public async Task<RoomPlayInfo> GetRoomPlayInfo(long roomId)
@@ -122,45 +138,23 @@ namespace Bilibili.AspNetCore.Apis.Services
             return result.Data;
         }
 
-        public async Task<bool> UpdateLiveRoomName(long roomId, string title)
+
+        public async Task<bool> UpdateLiveRoomInfo(long roomId, string title, int areaId)
         {
             if (string.IsNullOrWhiteSpace(title))
             {
-                throw new ArgumentNullException(nameof(title), "直播间名称不能为空！");
+                throw new ArgumentNullException("title", "title不能为空");
             }
-            var postData = new
+            if (title.Length > 20)
             {
-                room_id = roomId,
-                title,
-                csrf_token = _cookie.GetCsrf(),
-                csrf = _cookie.GetCsrf(),
-            };
-            try
-            {
-                var result = await _httpClient.Execute<object>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
-                if (result == null)
-                {
-                    throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
-                }
-                if (result.Code != 0)
-                {
-                    throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, result.Message);
-                }
-                return result.Code == 0;
+                throw new ArgumentOutOfRangeException("title", "title不能超过20个字");
             }
-            finally
-            {
-                await Delay(nameof(UpdateLiveRoomName));
-            }
-        }
-
-        public async Task<bool> UpdateLiveRoomArea(long roomId, int areaId)
-        {
             _ = await CheckArea(areaId);
             var postData = new
             {
                 room_id = roomId,
                 area_id = areaId,
+                title = title,
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
@@ -179,7 +173,44 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             finally
             {
-                await Delay(nameof(UpdateLiveRoomArea));
+                await Delay(nameof(UpdateLiveRoomInfo));
+            }
+        }
+
+        public async Task<bool> UpdateRoomNews(long roomId, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content", "content不能为空");
+            }
+            if (content.Length > 60)
+            {
+                throw new ArgumentOutOfRangeException("content", "content不能超过60个字");
+            }
+            var postData = new
+            {
+                room_id = roomId,
+                uid = _cookie.GetUserId(),
+                content = content,
+                csrf_token = _cookie.GetCsrf(),
+                csrf = _cookie.GetCsrf(),
+            };
+            try
+            {
+                var result = await _httpClient.Execute<ResultModel<object>>(_updateRoomNews, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                if (result == null)
+                {
+                    throw new ApiRequestException(_updateRoomNews, HttpMethod.Post, "返回内容为空");
+                }
+                if (result.Code != 0)
+                {
+                    throw new ApiRequestException(_updateRoomNews, HttpMethod.Post, result.Message);
+                }
+                return result.Code == 0;
+            }
+            finally
+            {
+                await Delay(nameof(UpdateRoomNews));
             }
         }
 
@@ -191,6 +222,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                 room_id = roomId,
                 platform = "pc",
                 area_v2 = areaItem.id,
+                backup_stream = 0,
                 csrf_token = _cookie.GetCsrf(),
                 csrf = _cookie.GetCsrf(),
             };
@@ -301,7 +333,7 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         private async Task Delay(string operationName)
         {
-            int sleepMsec = new Random().Next(2000, 3000);
+            int sleepMsec = new Random().Next(100, 1000);
             _logger.LogDebug($"执行{operationName}操作完成，休眠{sleepMsec}ms，避免被B站频繁操作。");
             await Task.Delay(sleepMsec);
         }

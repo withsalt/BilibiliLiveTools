@@ -20,14 +20,6 @@ namespace Bilibili.AspNetCore.Apis.Interface
         Task<LiveRoomInfo> GetLiveRoomInfo(long roomId);
 
         /// <summary>
-        /// 更新直播间房间号
-        /// </summary>
-        /// <param name="roomId"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        Task<bool> UpdateLiveRoomName(long roomId, string title);
-
-        /// <summary>
         /// 获取直播间分类
         /// </summary>
         /// <returns></returns>
@@ -52,7 +44,15 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// <param name="roomId"></param>
         /// <param name="areaId"></param>
         /// <returns></returns>
-        Task<bool> UpdateLiveRoomArea(long roomId, int areaId);
+        Task<bool> UpdateLiveRoomInfo(long roomId, string title, int areaId);
+
+        /// <summary>
+        /// 更新直播间公告
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        Task<bool> UpdateRoomNews(long roomId, string content);
 
         /// <summary>
         /// 开始直播

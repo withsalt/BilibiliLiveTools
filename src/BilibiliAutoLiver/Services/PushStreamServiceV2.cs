@@ -206,13 +206,9 @@ namespace BilibiliAutoLiver.Services
             }
             //获取直播间信息
             var liveRoomInfo = await _api.GetMyLiveRoomInfo();
-            if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
+            if (liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId || liveRoomInfo.title != _liveSetting.LiveRoomName)
             {
-                await _api.UpdateLiveRoomArea(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
-            }
-            if (liveRoomInfo.title != _liveSetting.LiveRoomName)
-            {
-                await _api.UpdateLiveRoomName(liveRoomInfo.room_id, _liveSetting.LiveRoomName);
+                await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, _liveSetting.LiveRoomName, _liveSetting.LiveAreaId);
             }
             //开启直播
             StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
