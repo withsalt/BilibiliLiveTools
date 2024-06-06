@@ -149,13 +149,14 @@
                         <div class="layui-colla-title">填写说明</div>
                         <div class="layui-colla-content layui-show">
                             高级模式直接填写ffmpeg推流命令。<br />
-                            1. 命令必须以ffmpeg开头，表示调用ffmpeg命令。<br />
-                            2. 命令必须以[[URL]]结尾，表示获取到的直播间推流地址。<br />
+                            1. 命令必须以ffmpeg开头，表示调用ffmpeg命令。且必须以[[URL]]结尾，表示获取到的直播间推流地址。<br />
+                            2. Windows下列出所有可用设备命令（在控制台执行，不要填写到下面）：ffmpeg -list_devices true -f dshow -i dummy<br />
+                            3. 可以使用“//”进行行注释<br />
                             示例：
                             <br />
                             <code>ffmpeg -f dshow -video_size 1280x720 -i video="HD Pro Webcam C920" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv [[URL]]</code>
                             <br />
-                            表示使用1280x720的分辨率，推流摄像头设备“HD Pro Webcam C920”到B站直播，编码方式为H264、帧数30。
+                            使用1280x720的分辨率，推流摄像头设备“HD Pro Webcam C920”到B站直播，编码方式为H264、帧数30。
                         </div>
                     </div>
                 </div>
