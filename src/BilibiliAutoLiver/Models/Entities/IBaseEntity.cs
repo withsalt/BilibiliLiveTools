@@ -27,7 +27,7 @@ namespace BilibiliAutoLiver.Models.Entities
         /// 创建时间
         /// </summary>
         [Description("创建时间")]
-        [Column(Position = -3, CanUpdate = false, ServerTime = DateTimeKind.Local, IsNullable = true)]
+        [Column(Position = -3, CanUpdate = false, IsNullable = true)]
         public virtual DateTime? CreatedTime { get; set; }
 
         /// <summary>

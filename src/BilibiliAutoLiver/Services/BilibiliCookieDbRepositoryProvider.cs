@@ -15,29 +15,35 @@ namespace BilibiliAutoLiver.Services
 {
     public class BilibiliCookieDbRepositoryProvider : IBilibiliCookieRepositoryProvider
     {
-        private readonly ICookieSettingRepository _repository;
+        private readonly IServiceProvider _serviceProvider;
 
         private static readonly object _locker = new object();
 
 
-        public BilibiliCookieDbRepositoryProvider(IServiceProvider repository)
+        public BilibiliCookieDbRepositoryProvider(IServiceProvider serviceProvider)
         {
-            _repository = repository.GetService<ICookieSettingRepository>() ?? throw new ArgumentNullException(nameof(repository));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         public Task Delete()
         {
             lock (_locker)
             {
-                var allCookies = _repository.Where(p => !p.IsDeleted).ToList();
-                _repository.Delete(allCookies);
+                ICookieSettingRepository repository = GetCookieSettingRepository();
+                List<CookieSetting> allCookies = repository.Where(p => !p.IsDeleted).ToList();
+                if (allCookies?.Any() != true)
+                {
+                    return Task.CompletedTask;
+                }
+                repository.Delete(allCookies);
                 return Task.CompletedTask;
             }
         }
 
         public async Task<string> Read()
         {
-            CookieSetting cookieSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
+            ICookieSettingRepository repository = GetCookieSettingRepository();
+            CookieSetting cookieSetting = await repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
             if (cookieSetting == null)
             {
                 throw new CookieException("没有已保存的Cookie，请先登录");
@@ -53,8 +59,9 @@ namespace BilibiliAutoLiver.Services
         {
             lock (_locker)
             {
-                CookieSetting cookieSetting = _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).First();
-                if(cookieSetting == null)
+                ICookieSettingRepository repository = GetCookieSettingRepository();
+                CookieSetting cookieSetting = repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).First();
+                if (cookieSetting == null)
                 {
                     cookieSetting = new CookieSetting()
                     {
@@ -67,8 +74,17 @@ namespace BilibiliAutoLiver.Services
                 cookieSetting.UpdatedTime = DateTime.UtcNow;
                 cookieSetting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
 
-                _repository.InsertOrUpdate(cookieSetting);
+                repository.InsertOrUpdate(cookieSetting);
                 return Task.CompletedTask;
+            }
+        }
+
+        private ICookieSettingRepository GetCookieSettingRepository()
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                ICookieSettingRepository repository = scope.ServiceProvider.GetRequiredService<ICookieSettingRepository>();
+                return repository;
             }
         }
     }

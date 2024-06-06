@@ -20,7 +20,7 @@ namespace Bilibili.AspNetCore.Apis.DependencyInjection
                 services.AddSingleton<IBilibiliCookieRepositoryProvider, BilibiliCookieFileRepositoryProvider>();
             }
             //Cookie模块
-            services.AddSingleton<IBilibiliCookieService, BilibiliCookieService>();
+            services.AddTransient<IBilibiliCookieService, BilibiliCookieService>();
             //账号
             services.AddTransient<IBilibiliAccountApiService, BilibiliAccountApiService>();
             //直播的API

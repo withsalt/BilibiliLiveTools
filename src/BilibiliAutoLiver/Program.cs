@@ -30,10 +30,18 @@ namespace BilibiliAutoLiver
 
             //配置初始化
             builder.Services.ConfigureSettings(builder);
+
+            //Db
+            builder.Services.AddDatabase();
+            builder.Services.AddRepository();
+
+            //Cookie仓储提供器
+            builder.Services.AddSingleton<IBilibiliCookieRepositoryProvider, BilibiliCookieDbRepositoryProvider>();
+
             //缓存
             builder.Services.AddMemoryCache();
             //添加Bilibili相关的服务
-            builder.Services.AddBilibiliApis();
+            builder.Services.AddBilibiliApis(false);
             //定时任务
             builder.Services.AddQuartz();
             //FFMpeg
@@ -47,14 +55,6 @@ namespace BilibiliAutoLiver
             builder.Services.AddSingleton<IPushStreamServiceV2, PushStreamServiceV2>();
             builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
             builder.Services.AddTransient<IStartupService, StartupService>();
-
-
-            //Db
-            builder.Services.AddDatabase();
-            builder.Services.AddRepository();
-
-            //Cookie仓储提供器
-            builder.Services.AddTransient<IBilibiliCookieRepositoryProvider, BilibiliCookieDbRepositoryProvider>();
 
             builder.Services.AddCors(options =>
             {
@@ -74,8 +74,11 @@ namespace BilibiliAutoLiver
                 });
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews()
-                .AddRazorRuntimeCompilation(); ;
+#if DEBUG
+            builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+#else
+            builder.Services.AddControllersWithViews();
+#endif
 
             var app = builder.Build();
 

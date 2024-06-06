@@ -7,17 +7,17 @@
 		<Version>4.0.2</Version>
 		<Description>B站无人值守直播工具。</Description>
 	</PropertyGroup>
-	
+
 	<ItemGroup>
 		<Content Remove="cookies.json" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
 		<PackageReference Include="MailKit" Version="4.6.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.5" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.5" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11" />
 		<PackageReference Include="Quartz.AspNetCore" Version="3.9.0" />
 		<PackageReference Include="Quartz.Plugins" Version="3.9.0" />
@@ -34,8 +34,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj" />
-	  <ProjectReference Include="..\BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj" />
+		<ProjectReference Include="..\Bilibili.AspNetCore.Apis\Bilibili.AspNetCore.Apis.csproj" />
+		<ProjectReference Include="..\BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>
@@ -44,13 +44,13 @@
 
 	<ItemGroup>
 		<None Update="runtimes\linux-arm64\bin\ffmpeg">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="runtimes\linux-arm\bin\ffmpeg">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="runtimes\linux-x64\bin\ffmpeg">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="runtimes\win-x64\bin\ffmpeg.exe">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -58,11 +58,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Models\Dtos\Common\" />
+		<Folder Include="Models\Dtos\Common\" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="if not exist &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot; mkdir &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;&#xD;&#xA;xcopy /y /r &quot;$(SolutionDir)BilibiliAutoLiver.Plugin.YoloAI\bin\$(ConfigurationName)\$(TargetFramework)\*.*&quot; &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;" />
+		<Exec Command="if not exist &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot; mkdir &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;&#xD;&#xA;xcopy /y /r &quot;$(SolutionDir)BilibiliAutoLiver.Plugin.YoloAI\bin\$(ConfigurationName)\$(TargetFramework)\*.*&quot; &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;" />
 	</Target>
 
 </Project>
