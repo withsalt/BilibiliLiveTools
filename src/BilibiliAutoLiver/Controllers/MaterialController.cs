@@ -2,13 +2,13 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
+using BilibiliAutoLiver.Models.Dtos.FileUpload;
 using BilibiliAutoLiver.Repository.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using PiPlayer.Models.ViewModels.Response.FileUpload;
 
 namespace BilibiliAutoLiver.Controllers
 {

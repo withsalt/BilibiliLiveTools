@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
-using BilibiliAutoLiver.Models.Settings;
-using BilibiliAutoLiver.Repository.Interface;
-using BilibiliAutoLiver.Services.Interface;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Repository.Interface;
+using BilibiliAutoLiver.Services.Interface;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BilibiliAutoLiver.Services
+namespace BilibiliAutoLiver.Services.PushService
 {
     public class PushStreamProxyService : IPushStreamProxyService
     {
         private readonly IAdvancePushStreamService _advancePush;
         private readonly INormalPushStreamService _normalPush;
-        private readonly LiveSettings _liveSetting;
         private readonly IServiceProvider _serviceProvider;
 
         public PushStreamProxyService(IServiceProvider serviceProvider
@@ -34,12 +30,7 @@ namespace BilibiliAutoLiver.Services
             {
                 pushSetting = scope.ServiceProvider.GetRequiredService<IPushSettingRepository>().Where(p => !p.IsDeleted).First();
             }
-            if (pushSetting == null)
-            {
-                throw new ArgumentNullException("未配置推流设置");
-            }
-
-            if (pushSetting.Model == ConfigModel.Easy)
+            if (pushSetting == null || pushSetting.Model == ConfigModel.Easy)
                 return _normalPush;
             else if (pushSetting.Model == ConfigModel.Advance)
                 return _advancePush;

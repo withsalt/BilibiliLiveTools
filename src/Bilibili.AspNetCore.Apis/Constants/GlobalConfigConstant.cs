@@ -1,4 +1,4 @@
-﻿namespace BilibiliAutoLiver.Config
+﻿namespace Bilibili.AspNetCore.Apis.Constants
 {
     static class GlobalConfigConstant
     {

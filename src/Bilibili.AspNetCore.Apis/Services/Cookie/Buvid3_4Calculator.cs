@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using Bilibili.AspNetCore.Apis.Constants;
 using Bilibili.AspNetCore.Apis.Utils;
-using BilibiliAutoLiver.Config;
 
 namespace Bilibili.AspNetCore.Apis.Services.Cookie
 {

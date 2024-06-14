@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Enums;
-using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
-using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.SourceReaders;
 using BilibiliAutoLiver.Services.Interface;
@@ -16,9 +13,8 @@ using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-namespace BilibiliAutoLiver.Services
+namespace BilibiliAutoLiver.Services.PushService
 {
     public class NormalPushStreamService : BasePushStreamService, INormalPushStreamService
     {

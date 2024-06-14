@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
-namespace PiPlayer.Models.ViewModels.Response.FileUpload
+namespace BilibiliAutoLiver.Models.Dtos.FileUpload
 {
     public class UploadParams
     {

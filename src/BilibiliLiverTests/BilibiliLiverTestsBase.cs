@@ -4,6 +4,7 @@ using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Services.PushService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -38,8 +39,8 @@ namespace BilibiliLiverTests
             //邮件服务
             builder.Services.AddTransient<IEmailNoticeService, EmailNoticeService>();
 
-            builder.Services.AddSingleton<IAdvancePushStreamService, AdvancePushStreamService>();
             builder.Services.AddSingleton<INormalPushStreamService, NormalPushStreamService>();
+            builder.Services.AddSingleton<IAdvancePushStreamService, AdvancePushStreamService>();
             builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
 
 

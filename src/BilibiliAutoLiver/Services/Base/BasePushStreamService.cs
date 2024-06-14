@@ -4,16 +4,12 @@ using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
-using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace BilibiliAutoLiver.Services.Base
 {

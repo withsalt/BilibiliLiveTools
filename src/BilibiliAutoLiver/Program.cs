@@ -6,6 +6,7 @@ using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Services.PushService;
 using BilibiliAutoLiver.Utils;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -51,8 +52,8 @@ namespace BilibiliAutoLiver
             //ÓÊ¼þ·þÎñ
             builder.Services.AddTransient<IEmailNoticeService, EmailNoticeService>();
 
-            builder.Services.AddSingleton<IAdvancePushStreamService, AdvancePushStreamService>();
             builder.Services.AddSingleton<INormalPushStreamService, NormalPushStreamService>();
+            builder.Services.AddSingleton<IAdvancePushStreamService, AdvancePushStreamService>();
             builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
             builder.Services.AddTransient<IStartupService, StartupService>();
 

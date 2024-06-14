@@ -1,5 +1,4 @@
-﻿using FreeSql;
-using FreeSql.DataAnnotations;
+﻿using FreeSql.DataAnnotations;
 
 namespace BilibiliAutoLiver.Models.Entities
 {

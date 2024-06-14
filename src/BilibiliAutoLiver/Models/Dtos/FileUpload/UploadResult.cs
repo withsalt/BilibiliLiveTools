@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PiPlayer.Models.ViewModels.Response.FileUpload
+namespace BilibiliAutoLiver.Models.Dtos.FileUpload
 {
     public class UploadResult
     {

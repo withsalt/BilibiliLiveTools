@@ -5,15 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
-using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace BilibiliAutoLiver.Services
+namespace BilibiliAutoLiver.Services.PushService
 {
     public class AdvancePushStreamService : BasePushStreamService, IAdvancePushStreamService
     {
