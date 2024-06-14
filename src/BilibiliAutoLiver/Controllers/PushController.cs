@@ -9,6 +9,7 @@ using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
+using BilibiliAutoLiver.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -103,29 +104,9 @@ namespace BilibiliAutoLiver.Controllers
                 return new ResultModel<string>(-1, "推流命令不能为空");
             }
             //解析推流命令 
-            var cmdLines = request.FFmpegCommand
-                .ReplaceLineEndings()
-                .Split(Environment.NewLine)
-                .Where(p => !string.IsNullOrWhiteSpace(p))
-                .Select(p => p.Trim(' ', '\r', '\n'))
-                .Where(p => !string.IsNullOrWhiteSpace(p) && !p.StartsWith("//"))
-                .ToList();
-            if (!cmdLines.Any())
+            if (!CmdAnalyzer.TryParse(request.FFmpegCommand, out string message, out _))
             {
-                return new ResultModel<string>(-1, "代码不规范，程序两行泪（没有找到ffmpeg开头，且以[[URL]]结尾的推流命令）");
-            }
-            var ffmpegCmdLines = cmdLines.Where(p => p.StartsWith("ffmpeg", StringComparison.OrdinalIgnoreCase) && p.EndsWith("[[URL]]")).ToArray();
-            if (ffmpegCmdLines.Length == 0)
-            {
-                return new ResultModel<string>(-1, "代码不规范，程序两行泪（没有找到ffmpeg开头，且以[[URL]]结尾的推流命令）");
-            }
-            if (ffmpegCmdLines.Length > 1)
-            {
-                return new ResultModel<string>(-1, "代码不规范，程序两行泪（存在多条ffmpeg命令，请注释不需要的推流命令）");
-            }
-            if (cmdLines.Count(p => !p.StartsWith("//") && !(p.StartsWith("ffmpeg", StringComparison.OrdinalIgnoreCase) && p.EndsWith("[[URL]]"))) >= 1)
-            {
-                return new ResultModel<string>(-1, "代码不规范，程序两行泪（存在无法解析的命令，建议用‘//’进行注释）");
+                return new ResultModel<string>(-1, message);
             }
             setting.FFmpegCommand = request.FFmpegCommand;
             return new ResultModel<string>(0);

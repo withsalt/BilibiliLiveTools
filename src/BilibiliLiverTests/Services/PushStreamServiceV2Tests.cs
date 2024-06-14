@@ -7,11 +7,11 @@ namespace BilibiliLiverTests.Services
     [TestClass()]
     public class PushStreamServiceV2Tests : BilibiliLiverTestsBase
     {
-        private readonly IPushStreamServiceV2 _pushStream;
+        private readonly INormalPushStreamService _pushStream;
 
         public PushStreamServiceV2Tests()
         {
-            _pushStream = (IPushStreamServiceV2)ServiceProvider.GetService(typeof(IPushStreamServiceV2));
+            _pushStream = (INormalPushStreamService)ServiceProvider.GetService(typeof(INormalPushStreamService));
             if (_pushStream == null)
             {
                 Assert.Fail();

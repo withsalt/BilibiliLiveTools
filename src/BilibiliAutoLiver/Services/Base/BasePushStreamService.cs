@@ -3,8 +3,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using BilibiliAutoLiver.Extensions;
+using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.Entities;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
+using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
+using BilibiliAutoLiver.Utils;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -16,24 +23,42 @@ namespace BilibiliAutoLiver.Services.Base
         private readonly IBilibiliAccountApiService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
-        private readonly LiveSettings _liveSetting;
+        private readonly IServiceProvider _serviceProvider;
 
         public BasePushStreamService(ILogger logger
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
-            , IOptions<LiveSettings> liveSettingOptions
+            , IServiceProvider serviceProvider
             , IFFMpegService ffmpeg)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
-            _liveSetting = liveSettingOptions.Value ?? throw new ArgumentNullException(nameof(liveSettingOptions));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         public abstract Task Start();
 
         public abstract Task Stop();
+
+        /// <summary>
+        /// 获取推送设置
+        /// </summary>
+        /// <returns></returns>
+        public async Task<SettingDto> GetSetting()
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var pushSetting = await scope.ServiceProvider.GetRequiredService<IPushSettingRepository>().Where(p => !p.IsDeleted).FirstAsync();
+                var liveSetting = await scope.ServiceProvider.GetRequiredService<ILiveSettingRepository>().Where(p => !p.IsDeleted).FirstAsync();
+                return new SettingDto()
+                {
+                    PushSetting = pushSetting,
+                    LiveSetting = liveSetting
+                };
+            }
+        }
 
         /// <summary>
         /// 测试FFmpeg
@@ -60,45 +85,40 @@ namespace BilibiliAutoLiver.Services.Base
         /// <summary>
         /// 检查配置文件
         /// </summary>
-        public Task CheckLiveSetting()
+        public async Task CheckLiveSetting()
         {
-            if (_liveSetting.LiveAreaId <= 0)
+            var setting = await GetSetting();
+            if (setting.LiveSetting == null)
             {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveAreaId填写错误！");
+                _logger.ThrowLogError("请先配置直播间信息");
             }
-            if (string.IsNullOrWhiteSpace(_liveSetting.LiveRoomName))
+            if (setting.PushSetting == null)
             {
-                _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.LiveRoomName不能为空！");
+                _logger.ThrowLogError("请先配置推流信息");
             }
-            if (_liveSetting.V1?.IsEnabled != true && _liveSetting.V2?.IsEnabled != true)
+            if (!setting.PushSetting.IsUpdate)
             {
-                _logger.ThrowLogError("V1和V2两种推流方式，至少启用一种！");
+                _logger.ThrowLogError("还未配置推流信息，请先完善推流配置");
             }
-            if (_liveSetting.V2?.IsEnabled == true)
+            if (setting.LiveSetting.AreaId <= 0)
             {
-                if (_liveSetting.V2.Input == null)
+                _logger.ThrowLogError("直播间分区信息未填写或填写错误");
+            }
+            if (string.IsNullOrWhiteSpace(setting.LiveSetting.RoomName))
+            {
+                _logger.ThrowLogError("直播间名称未填写");
+            }
+            if (setting.PushSetting.Model == ConfigModel.Advance)
+            {
+                if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, out string message, out _))
                 {
-                    _logger.ThrowLogError("配置文件appsettings.json中，需要配置LiveSetting.V2.Input输入源！");
+                    _logger.ThrowLogError(message);
                 }
             }
-            if (_liveSetting.V2?.IsEnabled != true && _liveSetting.V1?.IsEnabled == true)
+            if (setting.PushSetting.Model == ConfigModel.Easy)
             {
-                string cmd = _liveSetting.V1?.FFmpegCommands?.GetTargetOSPlatformCommand();
-                if (string.IsNullOrWhiteSpace(cmd))
-                {
-                    _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不能为空！");
-                }
-                int markIndex = cmd.IndexOf("[[URL]]");
-                if (markIndex < 5)
-                {
-                    _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确，命令中未找到 '[[URL]]'标记。");
-                }
-                if (cmd[markIndex - 1] == '\"')
-                {
-                    _logger.ThrowLogError("配置文件appsettings.json中，LiveSetting.V1.FFmpegCommands不正确， '[[URL]]'标记前后无需“\"”。");
-                }
+                _logger.ThrowLogError("暂不支持简易模式");
             }
-            return Task.CompletedTask;
         }
 
 
@@ -107,6 +127,11 @@ namespace BilibiliAutoLiver.Services.Base
         /// </summary>
         public async Task CheckLiveRoom()
         {
+            var setting = await GetSetting();
+            if (setting.LiveSetting == null)
+            {
+                _logger.ThrowLogError("请先配置直播间信息");
+            }
             //登录
             var userInfo = await _account.GetUserInfo();
             if (userInfo == null || !userInfo.IsLogin)
@@ -126,21 +151,21 @@ namespace BilibiliAutoLiver.Services.Base
             }
             _logger.LogInformation($"获取直播间信息成功，当前直播间地址：https://live.bilibili.com/{liveRoomInfo.room_id}，名称：{liveRoomInfo.title}，分区：{liveRoomInfo.parent_name}·{liveRoomInfo.area_v2_name}，直播状态：{(liveRoomInfo.live_status == 1 ? "直播中" : "未开启")}");
             //检查名称和分区
-            if (liveRoomInfo.title != _liveSetting.LiveRoomName || liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
+            if (liveRoomInfo.title != setting.LiveSetting.RoomName || liveRoomInfo.area_v2_id != setting.LiveSetting.AreaId)
             {
-                bool result = await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, _liveSetting.LiveRoomName, _liveSetting.LiveAreaId);
+                bool result = await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, setting.LiveSetting.RoomName, setting.LiveSetting.AreaId);
                 if (!result)
                 {
-                    _logger.ThrowLogError($"修改直播间名称为【{_liveSetting.LiveRoomName}】，分区为【{_liveSetting.LiveAreaId}】失败！");
+                    _logger.ThrowLogError($"修改直播间名称为【{setting.LiveSetting.RoomName}】，分区为【{setting.LiveSetting.AreaId}】失败！");
                 }
-                _logger.LogInformation($"修改直播间名称为【{_liveSetting.LiveRoomName}】，分区为【{_liveSetting.LiveAreaId}】成功！");
+                _logger.LogInformation($"修改直播间名称为【{setting.LiveSetting.RoomName}】，分区为【{setting.LiveSetting.AreaId}】成功！");
             }
         }
 
-        protected async Task Delay(CancellationTokenSource tokenSource)
+        protected async Task Delay(int sec, CancellationTokenSource tokenSource)
         {
-            _logger.LogWarning($"等待{_liveSetting.RetryDelay}s后重新推流...");
-            await Task.Delay(_liveSetting.RetryDelay * 1000, tokenSource.Token);
+            _logger.LogWarning($"等待{sec}s后重新推流...");
+            await Task.Delay(sec * 1000, tokenSource.Token);
         }
 
         public void Dispose()

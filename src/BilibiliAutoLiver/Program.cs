@@ -51,8 +51,8 @@ namespace BilibiliAutoLiver
             //ÓÊ¼þ·þÎñ
             builder.Services.AddTransient<IEmailNoticeService, EmailNoticeService>();
 
-            builder.Services.AddSingleton<IPushStreamServiceV1, PushStreamServiceV1>();
-            builder.Services.AddSingleton<IPushStreamServiceV2, PushStreamServiceV2>();
+            builder.Services.AddSingleton<IAdvancePushStreamService, AdvancePushStreamService>();
+            builder.Services.AddSingleton<INormalPushStreamService, NormalPushStreamService>();
             builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
             builder.Services.AddTransient<IStartupService, StartupService>();
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Models.Settings;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
@@ -14,29 +15,28 @@ using Microsoft.Extensions.Options;
 
 namespace BilibiliAutoLiver.Services
 {
-    public class PushStreamServiceV1 : BasePushStreamService, IPushStreamServiceV1
+    public class AdvancePushStreamService : BasePushStreamService, IAdvancePushStreamService
     {
-        private readonly ILogger<PushStreamServiceV1> _logger;
+        private readonly ILogger<AdvancePushStreamService> _logger;
         private readonly IBilibiliAccountApiService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
-        private readonly LiveSettings _liveSetting;
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
         private readonly static object _locker = new object();
 
-        public PushStreamServiceV1(ILogger<PushStreamServiceV1> logger
+        public AdvancePushStreamService(ILogger<AdvancePushStreamService> logger
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IOptions<LiveSettings> liveSettingOptions
-            , IFFMpegService ffmpeg) : base(logger, account, api, liveSettingOptions, ffmpeg)
+            , IFFMpegService ffmpeg
+            , IServiceProvider serviceProvider) : base(logger, account, api, serviceProvider, ffmpeg)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
-            _liveSetting = liveSettingOptions.Value ?? throw new ArgumentNullException(nameof(liveSettingOptions));
         }
 
         /// <summary>
@@ -102,6 +102,7 @@ namespace BilibiliAutoLiver.Services
         /// <returns></returns>
         private async Task<ProcessStartInfo> InitLiveProcessStartInfo()
         {
+            SettingDto setting = await GetSetting();
             //检查Cookie是否有效
             UserInfo userInfo = await _account.LoginByCookie();
             if (userInfo == null || !userInfo.IsLogin)
@@ -110,12 +111,12 @@ namespace BilibiliAutoLiver.Services
             }
             //获取直播间信息
             var liveRoomInfo = await _api.GetMyLiveRoomInfo();
-            if (liveRoomInfo.title != _liveSetting.LiveRoomName || liveRoomInfo.area_v2_id != _liveSetting.LiveAreaId)
+            if (liveRoomInfo.title != setting.LiveSetting.RoomName || liveRoomInfo.area_v2_id != setting.LiveSetting.AreaId)
             {
-                await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, _liveSetting.LiveRoomName, _liveSetting.LiveAreaId);
+                await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, setting.LiveSetting.RoomName, setting.LiveSetting.AreaId);
             }
             //开启直播
-            StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, _liveSetting.LiveAreaId);
+            StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, setting.LiveSetting.AreaId);
             string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -123,9 +124,12 @@ namespace BilibiliAutoLiver.Services
             }
             _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
 
-            string newCmd = _liveSetting.V1.FFmpegCommands.GetTargetOSPlatformCommand()
-                .Trim('\r', '\n', ' ')
-                .Replace("[[URL]]", $"\"{url}\"");
+            if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, out string message, out string cmd))
+            {
+                throw new Exception(message);
+            }
+
+            string newCmd = cmd.Replace("[[URL]]", $"\"{url}\"");
             int firstNullChar = newCmd.IndexOf((char)32);
             if (firstNullChar < 0)
             {
@@ -165,6 +169,7 @@ namespace BilibiliAutoLiver.Services
         {
             while (!_tokenSource.IsCancellationRequested)
             {
+                SettingDto setting = await GetSetting();
                 try
                 {
                     //check network
@@ -195,9 +200,9 @@ namespace BilibiliAutoLiver.Services
                         }
                     }
                     //如果开启了自动重试
-                    if (!_tokenSource.IsCancellationRequested)
+                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
                     {
-                        await Delay(_tokenSource);
+                        await Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
                 }
                 catch (OperationCanceledException)
@@ -208,9 +213,9 @@ namespace BilibiliAutoLiver.Services
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
                     //如果开启了自动重试
-                    if (!_tokenSource.IsCancellationRequested)
+                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
                     {
-                        await Delay(_tokenSource);
+                        await Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
                 }
             }

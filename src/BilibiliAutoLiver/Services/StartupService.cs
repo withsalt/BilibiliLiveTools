@@ -44,11 +44,6 @@ namespace BilibiliAutoLiver.Services
                 //登录成功之后，启动定时任务
                 await _jobScheduler.StartAsync(token);
 
-#if DEBUG
-                _logger.LogInformation("Debug模式，不开启推流");
-                return;
-#endif
-
                 //开始推流
                 await _pushProxyService.CheckLiveSetting();
                 await _pushProxyService.CheckLiveRoom();
