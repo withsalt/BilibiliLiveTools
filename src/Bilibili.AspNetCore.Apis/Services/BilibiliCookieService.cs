@@ -47,6 +47,9 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// </summary>
         private const string _confirmRefresh = "https://passport.bilibili.com/x/passport-login/web/confirm/refresh";
 
+        private static string _key = "P*2D4R%aABTi^j3B";
+        private static string _vector = "eRu!V2m4E&sQyAi#";
+
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
             , IMemoryCache cache
             , IBilibiliCookieRepositoryProvider cookieRepository)
@@ -69,7 +72,8 @@ namespace Bilibili.AspNetCore.Apis.Services
             };
             if (cookiesConfig.IsExpired) throw new ArgumentException("Cookie has expired");
             string json = JsonUtil.SerializeObject(new CookiesJson(cookiesConfig), true);
-            await _cookieRepository.Write(json);
+            string data = AES.Encrypt(json, _key, _vector);
+            await _cookieRepository.Write(data);
             _ = GetCookies(true);
         }
 
@@ -142,6 +146,11 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 string cookieStr = _cookieRepository.Read()
                     .ConfigureAwait(false).GetAwaiter().GetResult();
+                
+                if (!AES.TryDecrypt(cookieStr, _key, _vector, out cookieStr))
+                {
+                    return null;
+                }
                 //构建Cookie（注意：有先后顺序）
                 CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, cookieStr)
                     .SetBnut().SetUuid().SetLsid()

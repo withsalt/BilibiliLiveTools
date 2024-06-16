@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
+using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Authentication;
@@ -39,7 +40,7 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public async Task<IActionResult> Login()
         {
-            if (_accountService.GetLoginStatus())
+            if (_accountService.IsLogged())
             {
                 UserInfo userInfo = await _accountService.GetUserInfo();
                 if (userInfo == null)
@@ -72,7 +73,7 @@ namespace BilibiliAutoLiver.Controllers
         {
             _logger.LogInformation("手动操作退出登录。");
             //清除登录状态
-            _accountService.SetLoginStatus(false);
+            _accountService.Logout();
             //停止推流
             await _pushStreamProxyService.Stop();
             //登出
@@ -89,6 +90,10 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public Task<string> LoginByQrCode()
         {
+            if (_cache.Get<bool>(CacheKeyConstant.LOGING_STATUS_CACHE_KEY) == true)
+            {
+                return Task.FromResult("别着急，再等等...");
+            }
             if (_accountService.TryGetQrCodeLoginStatus(out _))
             {
                 return Task.FromResult("正在通过扫描二维码登录");
@@ -120,7 +125,16 @@ namespace BilibiliAutoLiver.Controllers
         [AllowAnonymous]
         public BilibiliAccountLoginStatus Status()
         {
-            if (_accountService.GetLoginStatus())
+            //第一次开启应用，正在尝试通过Cookie登录
+            if (_cache.Get<bool>(CacheKeyConstant.LOGING_STATUS_CACHE_KEY) == true)
+            {
+                return new BilibiliAccountLoginStatus()
+                {
+                    Status = AccountLoginStatus.Waiting,
+                };
+            }
+
+            if (_accountService.IsLogged())
             {
                 return new BilibiliAccountLoginStatus()
                 {

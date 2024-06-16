@@ -4,9 +4,16 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>disable</Nullable>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>4.0.2</Version>
-		<Description>B站无人值守直播工具。</Description>
+		<Version>4.1.0</Version>
+		<Description>哔哩哔哩（B站）无人值守直播工具。</Description>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Models\Dtos\Common\**" />
+	  <Content Remove="Models\Dtos\Common\**" />
+	  <EmbeddedResource Remove="Models\Dtos\Common\**" />
+	  <None Remove="Models\Dtos\Common\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Content Remove="cookies.json" />
@@ -17,7 +24,7 @@
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
 		<PackageReference Include="MailKit" Version="4.6.0" />
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.5" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.6" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11" />
 		<PackageReference Include="Quartz.AspNetCore" Version="3.9.0" />
 		<PackageReference Include="Quartz.Plugins" Version="3.9.0" />
@@ -55,10 +62,6 @@
 		<None Update="runtimes\win-x64\bin\ffmpeg.exe">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Models\Dtos\Common\" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

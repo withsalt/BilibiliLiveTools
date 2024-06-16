@@ -51,8 +51,8 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// <returns></returns>
         Task HeartBeat();
 
-        bool GetLoginStatus();
+        bool IsLogged();
 
-        void SetLoginStatus(bool isLogin);
+        void Logout();
     }
 }

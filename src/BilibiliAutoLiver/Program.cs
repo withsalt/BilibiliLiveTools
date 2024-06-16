@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.DependencyInjection;
 using Bilibili.AspNetCore.Apis.Providers;
 using BilibiliAutoLiver.Config;
@@ -21,7 +23,7 @@ namespace BilibiliAutoLiver
     {
         public static void Main(string[] args)
         {
-            Console.Title = $"Bilibili无人值守直播工具 v{VersionHelper.GetVersion()} By withsalt(https://github.com/withsalt)";
+            Console.Title = $"哔哩哔哩无人值守直播工具 v{VersionHelper.GetVersion()} By withsalt(https://github.com/withsalt)";
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -71,7 +73,9 @@ namespace BilibiliAutoLiver
                     options.ExpireTimeSpan = TimeSpan.FromDays(3650 * 10);
                     options.SlidingExpiration = true;
                     options.AccessDeniedPath = "/Account/Login";
-                    options.LogoutPath = "/Account/Login";
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.ReturnUrlParameter = "";
                 });
 
             // Add services to the container.
@@ -110,7 +114,7 @@ namespace BilibiliAutoLiver
             app.InitializeDatabase();
 
             app.Lifetime.ApplicationStarted.Register((obj, token)
-                => app.Services.GetRequiredService<IStartupService>().Start(token), null);
+                => Task.Run(() => app.Services.GetRequiredService<IStartupService>().Start(token), CancellationToken.None), null);
 
             app.Run();
         }

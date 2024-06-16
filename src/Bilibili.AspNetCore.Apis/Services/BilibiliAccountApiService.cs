@@ -104,17 +104,18 @@ namespace Bilibili.AspNetCore.Apis.Services
                 _logger.LogInformation($"Cookie即将过期，过期时间：{_cookie.WillExpired().Item2}，刷新Cookie。");
                 await _cookie.RefreshCookie();
             }
+            if (await _cookie.CookieNeedToRefresh())
+            {
+                _logger.LogInformation("检测到Cookie需要刷新，刷新Cookie。");
+                await _cookie.RefreshCookie();
+            }
             UserInfo userInfo = await GetUserInfo();
             if (userInfo == null)
             {
                 _logger.LogInformation("通过Cookie获取用户信息失败。");
                 return null;
             }
-            if (await _cookie.CookieNeedToRefresh())
-            {
-                _logger.LogInformation("检测到Cookie需要刷新，刷新Cookie。");
-                await _cookie.RefreshCookie();
-            }
+            _cache.Set(CacheKeyConstant.LOGIN_STATUS, true);
             return userInfo;
         }
 
@@ -150,7 +151,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                         QrCodeEffectiveTime = 180,
                         QrCode = "data:image/png;base64," + Convert.ToBase64String(qrCodeInfo.GetBytes())
                     };
-                    _cache.Set(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY, loginStatus);
+                    _cache.Set(CacheKeyConstant.QR_CODE_LOGIN_STATUS_CACHE_KEY, loginStatus);
 
                     Stopwatch qrCodeExp = Stopwatch.StartNew();
                     while (qrCodeExp.ElapsedMilliseconds < (expTime - 10) * 1000)
@@ -206,7 +207,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                 stopwatch.Stop();
                 if (hasCookie)
                 {
-                    SetLoginStatus(true);
+                    _cache.Set(CacheKeyConstant.LOGIN_STATUS, true);
                 }
             }
             catch (Exception ex)
@@ -215,14 +216,14 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             finally
             {
-                _cache.Remove(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY);
+                _cache.Remove(CacheKeyConstant.QR_CODE_LOGIN_STATUS_CACHE_KEY);
             }
             return userInfo;
         }
 
         public bool TryGetQrCodeLoginStatus(out QrCodeLoginStatus loginStatus)
         {
-            bool result = _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS_CACHE_KEY, out loginStatus);
+            bool result = _cache.TryGetValue(CacheKeyConstant.QR_CODE_LOGIN_STATUS_CACHE_KEY, out loginStatus);
             if (result && loginStatus != null)
             {
                 return result;
@@ -273,23 +274,16 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// 获取登录状态
         /// </summary>
         /// <returns></returns>
-        public bool GetLoginStatus()
+        public bool IsLogged()
         {
             return _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && _cookie.HasCookie();
         }
 
-        public void SetLoginStatus(bool isLogin)
+        public void Logout()
         {
-            if (isLogin)
-            {
-                _cache.Set(CacheKeyConstant.LOGIN_STATUS, true);
-            }
-            else
-            {
-                _cache.Remove(CacheKeyConstant.USERINFO_CACHE_KEY);
-                _cache.Remove(CacheKeyConstant.LOGIN_STATUS);
-                _cookie.RemoveCookie();
-            }
+            _cache.Remove(CacheKeyConstant.USERINFO_CACHE_KEY);
+            _cache.Remove(CacheKeyConstant.LOGIN_STATUS);
+            _cookie.RemoveCookie();
         }
 
         #region private

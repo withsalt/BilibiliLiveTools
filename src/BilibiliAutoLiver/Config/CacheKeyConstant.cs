@@ -2,9 +2,7 @@
 {
     public class CacheKeyConstant
     {
-        public const string LOGIN_STATUS_CACHE_KEY = "PAGE_STATUS_CACHE_KEY";
-
-        public const string INDEX_PAGE_CACHE_KEY = "INDEX_PAGE_CACHE_KEY";
+        public const string LOGING_STATUS_CACHE_KEY = "LOGIN_STATUS_CACHE_KEY";
 
         public const string LAST_REFRESH_COOKIE_TIME_CACHE_KEY = "LAST_REFRESH_COOKIE_TIME_CACHE_KEY";
 

@@ -5,19 +5,23 @@ using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.PushService
 {
     public class PushStreamProxyService : IPushStreamProxyService
     {
+        private readonly ILogger<PushStreamProxyService> _logger;
         private readonly IAdvancePushStreamService _advancePush;
         private readonly INormalPushStreamService _normalPush;
         private readonly IServiceProvider _serviceProvider;
 
-        public PushStreamProxyService(IServiceProvider serviceProvider
+        public PushStreamProxyService(ILogger<PushStreamProxyService> logger
+            , IServiceProvider serviceProvider
             , IAdvancePushStreamService advancePush
             , INormalPushStreamService normalPush)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _advancePush = advancePush ?? throw new ArgumentNullException(nameof(advancePush));
             _normalPush = normalPush ?? throw new ArgumentNullException(nameof(normalPush));
@@ -54,7 +58,17 @@ namespace BilibiliAutoLiver.Services.PushService
 
         public async Task Start()
         {
-            await GetPushStreamService().Start();
+            try
+            {
+                await GetPushStreamService().CheckLiveSetting();
+                await GetPushStreamService().CheckLiveRoom();
+                await GetPushStreamService().CheckFFmpegBinary();
+                await GetPushStreamService().Start();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"开启推流失败，{ex.Message}");
+            }
         }
 
         public async Task Stop()

@@ -23,19 +23,16 @@ namespace BilibiliAutoLiver.Jobs.Job
     {
         private readonly ILogger<MonitorClientJob> _logger;
         private readonly IMemoryCache _cache;
-        //private readonly IEmailNoticeService _email;
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly IServiceProvider _provider;
 
         public MonitorClientJob(ILogger<MonitorClientJob> logger
             , IMemoryCache cache
-            //, IEmailNoticeService email
             , IBilibiliLiveApiService liveApiService
             , IServiceProvider provider)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-            //_email = email ?? throw new ArgumentNullException(nameof(email));
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
@@ -122,12 +119,15 @@ namespace BilibiliAutoLiver.Jobs.Job
                     _logger.LogWarning($"邮件发送过于频繁，忽略本次发送。{reason}");
                     return;
                 }
-                IEmailNoticeService email = _provider.GetRequiredService<IEmailNoticeService>();
-                var result = await email.Send("直播订阅通知", reason);
-                _cache.Set(cacheKey, TimeUtil.Timestamp());
-                if (result.Item1 != SendStatus.Success)
+                using (var scope = _provider.CreateScope())
                 {
-                    throw new Exception(result.Item2);
+                    IEmailNoticeService email = scope.ServiceProvider.GetRequiredService<IEmailNoticeService>();
+                    var result = await email.Send("直播订阅通知", reason);
+                    _cache.Set(cacheKey, TimeUtil.Timestamp());
+                    if (result.Item1 != SendStatus.Success)
+                    {
+                        throw new Exception(result.Item2);
+                    }
                 }
                 _logger.LogInformation("通知邮件已发送！");
             }

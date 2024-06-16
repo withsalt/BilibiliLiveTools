@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
+using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Jobs.Scheduler;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,22 +14,22 @@ namespace BilibiliAutoLiver.Services
     class StartupService : IStartupService
     {
         private readonly ILogger<StartupService> _logger;
-        private readonly IMemoryCache _cache;
         private readonly IBilibiliAccountApiService _accountService;
         private readonly IJobSchedulerService _jobScheduler;
         private readonly IPushStreamProxyService _pushProxyService;
+        private readonly IMemoryCache _cache;
 
         public StartupService(ILogger<StartupService> logger
-            , IMemoryCache cache
             , IBilibiliAccountApiService accountService
             , IJobSchedulerService jobScheduler
-            , IPushStreamProxyService pushProxyService)
+            , IPushStreamProxyService pushProxyService
+            , IMemoryCache cache)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _jobScheduler = jobScheduler ?? throw new ArgumentNullException(nameof(jobScheduler));
             _pushProxyService = pushProxyService ?? throw new ArgumentNullException(nameof(pushProxyService));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         public async Task Start(CancellationToken token)
@@ -43,11 +44,7 @@ namespace BilibiliAutoLiver.Services
                 }
                 //登录成功之后，启动定时任务
                 await _jobScheduler.StartAsync(token);
-
                 //开始推流
-                await _pushProxyService.CheckLiveSetting();
-                await _pushProxyService.CheckLiveRoom();
-                await _pushProxyService.CheckFFmpegBinary();
                 await _pushProxyService.Start();
             }
             catch (Exception ex)
@@ -59,18 +56,32 @@ namespace BilibiliAutoLiver.Services
 
         public async Task<UserInfo> Login()
         {
-            var userInfo = await _accountService.LoginByCookie();
-            if (userInfo == null)
+            try
             {
-                userInfo = await _accountService.LoginByQrCode();
+                _cache.Set(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, true, TimeSpan.FromMinutes(10));
+                //通过保存的Cookie登录
+                var userInfo = await _accountService.LoginByCookie();
+                _cache.Remove(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
                 if (userInfo == null)
                 {
-                    return null;
+                    //通过扫描二维码登录
+                    userInfo = await _accountService.LoginByQrCode();
                 }
+                if (userInfo == null)
+                {
+                    //通过Cookie和二维码登录都未成功，那么挂起，直到完成用户登录
+                    while (_accountService.IsLogged())
+                    {
+                        await Task.Delay(1000);
+                    }
+                }
+                _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
+                return userInfo;
             }
-            _accountService.SetLoginStatus(true);
-            _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
-            return userInfo;
+            finally
+            {
+                _cache.Remove(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
+            }
         }
     }
 }

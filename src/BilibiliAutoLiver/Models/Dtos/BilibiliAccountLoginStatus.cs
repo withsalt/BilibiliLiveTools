@@ -18,5 +18,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         Logging = 2,
 
         Logged = 3,
+
+        Waiting = 4,
     }
 }

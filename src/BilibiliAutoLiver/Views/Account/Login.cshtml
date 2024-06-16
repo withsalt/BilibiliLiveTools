@@ -8,7 +8,7 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
 <html class="no-js">
- <!--<![endif]-->
+<!--<![endif]-->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -42,8 +42,8 @@
                         <img src="" alt="登录二维码" width="300" height="300" id="loginImg" style="display: none;">
                         <p style="font-size:18px" id="info">加载中，请稍后...</p>
                     </div>
-                    <div class="form-group">
-                        <p style="margin-left:10px"><a href="javascript:loginByQrCode()">二维码登录？</a></p>
+                    <div class="form-group" id="qrCodeLoginBtn">
+                        <p style="margin-left:10px">拿出你的手机/Pad，打开哔哩哔哩APP，扫码登录。<a href="javascript:loginByQrCode()">二维码登录？</a></p>
                     </div>
                 </div>
             </div>
@@ -110,11 +110,16 @@
                                 $("#loginImg").show();
                             }
                             if (data.qrCodeStatus.isScaned) {
-                                $("#info").html("【<span style=\"color:green;\">已扫码</span>】<br />二维码剩余有效期" + data.qrCodeStatus.qrCodeEffectiveTime + "秒");
+                                $("#info").html("【<span style=\"color:green;\">已扫码</span>】<br />二维码剩余有效期<span style=\"color:green;\">" + data.qrCodeStatus.qrCodeEffectiveTime + "</span>秒");
                             }
                             else {
-                                $("#info").html("【<span style=\"color:red;\">未扫码</span>】<br />二维码剩余有效期" + data.qrCodeStatus.qrCodeEffectiveTime + "秒");
+                                $("#info").html("【<span style=\"color:red;\">未扫码</span>】<br />二维码剩余有效期<span style=\"color:green;\">" + data.qrCodeStatus.qrCodeEffectiveTime + "</span>秒");
                             }
+                            return;
+                        }
+                        if (data.status == 4) {
+                            //后台正在尝试登录
+                            $("#info").html("加载中，请稍后...");
                             return;
                         }
                         else {

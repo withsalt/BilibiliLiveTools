@@ -43,7 +43,6 @@ namespace BilibiliLiverTests
             builder.Services.AddSingleton<IAdvancePushStreamService, AdvancePushStreamService>();
             builder.Services.AddSingleton<IPushStreamProxyService, PushStreamProxyService>();
 
-
             //Db
             builder.Services.AddDatabase();
             builder.Services.AddRepository();
