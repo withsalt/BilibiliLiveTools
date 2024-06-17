@@ -27,14 +27,14 @@ namespace BilibiliAutoLiver.Services.PushService
             _normalPush = normalPush ?? throw new ArgumentNullException(nameof(normalPush));
         }
 
-        private IPushStreamService GetPushStreamService()
+        private IPushStreamService GetService()
         {
             PushSetting pushSetting = null;
             using (var scope = _serviceProvider.CreateScope())
             {
                 pushSetting = scope.ServiceProvider.GetRequiredService<IPushSettingRepository>().Where(p => !p.IsDeleted).First();
             }
-            if (pushSetting == null || pushSetting.Model == ConfigModel.Easy)
+            if (pushSetting == null || pushSetting.Model == ConfigModel.Normal)
                 return _normalPush;
             else if (pushSetting.Model == ConfigModel.Advance)
                 return _advancePush;
@@ -43,42 +43,49 @@ namespace BilibiliAutoLiver.Services.PushService
 
         public async Task CheckFFmpegBinary()
         {
-            await GetPushStreamService().CheckFFmpegBinary();
+            await GetService().CheckFFmpegBinary();
         }
 
         public async Task CheckLiveRoom()
         {
-            await GetPushStreamService().CheckLiveRoom();
+            await GetService().CheckLiveRoom();
         }
 
         public async Task CheckLiveSetting()
         {
-            await GetPushStreamService().CheckLiveSetting();
+            await GetService().CheckLiveSetting();
         }
 
-        public async Task Start()
+        public async Task<bool> Start()
         {
             try
             {
-                await GetPushStreamService().CheckLiveSetting();
-                await GetPushStreamService().CheckLiveRoom();
-                await GetPushStreamService().CheckFFmpegBinary();
-                await GetPushStreamService().Start();
+                var service = GetService();
+                await service.CheckLiveSetting();
+                await service.CheckLiveRoom();
+                await service.CheckFFmpegBinary();
+                return await service.Start();
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, $"开启推流失败，{ex.Message}");
+                return false;
             }
         }
 
-        public async Task Stop()
+        public async Task<bool> Stop()
         {
-            await GetPushStreamService().Stop();
+            return await GetService().Stop();
+        }
+
+        public PushStatus GetStatus()
+        {
+            return GetService().GetStatus();
         }
 
         public void Dispose()
         {
-            GetPushStreamService().Dispose();
+            GetService().Dispose();
         }
     }
 }

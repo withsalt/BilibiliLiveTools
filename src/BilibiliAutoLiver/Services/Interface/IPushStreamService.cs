@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Models.Enums;
 
 namespace BilibiliAutoLiver.Services.Interface
 {
@@ -9,13 +10,19 @@ namespace BilibiliAutoLiver.Services.Interface
         /// 开启推流
         /// </summary>
         /// <returns></returns>
-        Task Start();
+        Task<bool> Start();
 
         /// <summary>
         /// 结束推流
         /// </summary>
         /// <returns></returns>
-        Task Stop();
+        Task<bool> Stop();
+
+        /// <summary>
+        /// 获取当前推流状态
+        /// </summary>
+        /// <returns></returns>
+        PushStatus GetStatus();
 
         /// <summary>
         /// 测试ffmpeg

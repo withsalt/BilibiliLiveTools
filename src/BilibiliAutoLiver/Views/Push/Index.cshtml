@@ -10,10 +10,10 @@
             <div class="layui-card-header layui-card-header-custum">
                 简易模式
                 <div class="layui-form layui-form-custum">
-                    <input type="checkbox" name="easyModel" id="easyModel" lay-filter="easyModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Easy ? "checked" : "")>
+                    <input type="checkbox" name="easyModel" id="easyModel" lay-filter="easyModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Normal ? "checked" : "")>
                 </div>
             </div>
-            <div class="layui-card-body" id="easyModelBody" style="@(Model.PushSetting.Model == ConfigModel.Easy ? "" : "display:none")">
+            <div class="layui-card-body" id="easyModelBody" style="@(Model.PushSetting.Model == ConfigModel.Normal ? "" : "display:none")">
                 <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
                     <ul class="layui-tab-title">
                         <li class="layui-this">基础设置</li>
@@ -140,10 +140,10 @@
             <div class="layui-card-header layui-card-header-custum">
                 高级模式
                 <div class="layui-form layui-form-custum">
-                    <input type="checkbox" name="advanceModel" id="advanceModel" lay-filter="advanceModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Easy ? "" : "checked")>
+                    <input type="checkbox" name="advanceModel" id="advanceModel" lay-filter="advanceModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Normal ? "" : "checked")>
                 </div>
             </div>
-            <div class="layui-card-body" id="advanceModelBody" style="@(Model.PushSetting.Model == ConfigModel.Easy ? "display:none" : "")">
+            <div class="layui-card-body" id="advanceModelBody" style="@(Model.PushSetting.Model == ConfigModel.Normal ? "display:none" : "")">
                 <div class="layui-collapse" lay-accordion>
                     <div class="layui-colla-item">
                         <div class="layui-colla-title">填写说明</div>
@@ -193,8 +193,8 @@
     <div class="layui-form" lay-filter="">
         <div class="layui-input-block" style="margin-left:30px;margin-top:8px">
             <button type="button" class="layui-btn" lay-filter="submit_live_setting" lay-submit>保存设置</button>
-            <button type="button" class="layui-btn layui-bg-orange" lay-filter="submit_start_live">开始直播</button>
-            <button type="button" class="layui-btn layui-bg-red" lay-filter="submit_stop_live">停止直播</button>
+            <button type="button" class="layui-btn layui-bg-orange" lay-filter="submit_start_live" id="submit_start_live" style="display:none">开始直播</button>
+            <button type="button" class="layui-btn layui-bg-red" lay-filter="submit_stop_live" id="submit_stop_live" style="display:none">停止直播</button>
         </div>
     </div>
 </div>
@@ -338,5 +338,34 @@
                 return false;
             });
         });
+
+        function update() {
+            $.ajax({
+                type: "get",
+                url: "@Url.Action("Status", "Push")",
+                cache: false,
+                dataType: 'json', // 返回对象
+                success: function (data) {
+                    if (!data) {
+                        console.log("返回参数为空！");
+                    }
+                    if (data.data.status != 2) {
+                        //显示停止按钮
+                        $('#submit_start_live').hide();
+                        $('#submit_stop_live').show();
+                    }
+                    else {
+                        //显示按钮
+                        $('#submit_start_live').show();
+                        $('#submit_stop_live').hide();
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        }
+
+        setInterval(update, 500);
     </script>
 }

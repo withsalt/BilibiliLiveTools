@@ -4,7 +4,7 @@
     {
         None = 0,
 
-        Easy = 1,
+        Normal = 1,
 
         Advance = 2,
     }

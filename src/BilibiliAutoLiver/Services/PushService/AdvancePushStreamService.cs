@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.Interface;
@@ -45,11 +46,14 @@ namespace BilibiliAutoLiver.Services.PushService
         /// <param name="setting"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        public override async Task Start()
+        public override async Task<bool> Start()
         {
             if (_mainTask != null)
             {
-                await Stop();
+                if (!await Stop())
+                {
+                    throw new Exception("停止推流失败！");
+                }
             }
             if (_tokenSource != null)
             {
@@ -57,50 +61,60 @@ namespace BilibiliAutoLiver.Services.PushService
                 _tokenSource.Dispose();
                 _tokenSource = null;
             }
+            Status = PushStatus.Starting;
             _tokenSource = new CancellationTokenSource();
             _mainTask = Task.Run(PushStream);
+            return true;
         }
 
         /// <summary>
         /// 停止推流
         /// </summary>
         /// <returns></returns>
-        public override Task Stop()
+        public override Task<bool> Stop()
         {
-            if (_mainTask == null)
+            try
             {
-                return Task.CompletedTask;
-            }
-            if (_tokenSource == null || _tokenSource.IsCancellationRequested)
-            {
-                return Task.CompletedTask;
-            }
-            lock (_locker)
-            {
-                _logger.LogWarning("结束推流中...");
-                _tokenSource.Cancel();
-                Stopwatch sw = Stopwatch.StartNew();
-                //3s等待下线
-                while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+                if (_mainTask == null)
                 {
-                    Thread.Sleep(0);
+                    return Task.FromResult(true);
                 }
-                sw.Stop();
+                if (_tokenSource == null || _tokenSource.IsCancellationRequested)
+                {
+                    return Task.FromResult(true);
+                }
+                lock (_locker)
+                {
+                    _logger.LogWarning("结束推流中...");
+                    _tokenSource.Cancel();
+                    Stopwatch sw = Stopwatch.StartNew();
+                    //3s等待下线
+                    while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+                    {
+                        Thread.Sleep(0);
+                    }
+                    sw.Stop();
+                    _logger.LogWarning("推流已停止。");
+                }
+                return Task.FromResult(true);
+            }
+            finally
+            {
                 //Dispose
                 _mainTask.Dispose();
                 _tokenSource.Dispose();
                 _mainTask = null;
                 _tokenSource = null;
-                _logger.LogWarning("推流已停止。");
+
+                Status = PushStatus.Stopped;
             }
-            return Task.CompletedTask;
         }
 
         /// <summary>
         /// 初始化推流
         /// </summary>
         /// <returns></returns>
-        private async Task<ProcessStartInfo> InitLiveProcessStartInfo()
+        private async Task<ProcessStartInfo> BuildProcessStartInfo()
         {
             SettingDto setting = await GetSetting();
             //检查Cookie是否有效
@@ -124,7 +138,7 @@ namespace BilibiliAutoLiver.Services.PushService
             }
             _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
 
-            if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, out string message, out string cmd))
+            if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, true, out string message, out string cmd))
             {
                 throw new Exception(message);
             }
@@ -169,6 +183,7 @@ namespace BilibiliAutoLiver.Services.PushService
         {
             while (!_tokenSource.IsCancellationRequested)
             {
+                Status = PushStatus.Starting;
                 SettingDto setting = await GetSetting();
                 try
                 {
@@ -179,7 +194,7 @@ namespace BilibiliAutoLiver.Services.PushService
                         await Task.Delay(10000, _tokenSource.Token);
                     }
                     //start live
-                    ProcessStartInfo psi = await InitLiveProcessStartInfo();
+                    ProcessStartInfo psi = await BuildProcessStartInfo();
                     _logger.LogInformation($"ffmpeg推流命令：{psi.FileName} {psi.Arguments}");
                     _logger.LogInformation("推流参数初始化完成，开始推流...");
                     //启动
@@ -189,6 +204,7 @@ namespace BilibiliAutoLiver.Services.PushService
                         {
                             throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
                         }
+                        Status = PushStatus.Running;
                         await proc.WaitForExitAsync(_tokenSource.Token);
                         proc.Kill();
                         //delay 100ms的原因是ffmpeg本身也会接收ctrl-c，但是C#的控制台要比ffmpeg慢一点。
@@ -202,6 +218,7 @@ namespace BilibiliAutoLiver.Services.PushService
                     //如果开启了自动重试
                     if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
                     {
+                        Status = PushStatus.Waiting;
                         await Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
                 }
@@ -220,6 +237,5 @@ namespace BilibiliAutoLiver.Services.PushService
                 }
             }
         }
-
     }
 }

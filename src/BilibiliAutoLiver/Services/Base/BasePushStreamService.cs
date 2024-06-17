@@ -21,6 +21,8 @@ namespace BilibiliAutoLiver.Services.Base
         private readonly IFFMpegService _ffmpeg;
         private readonly IServiceProvider _serviceProvider;
 
+        protected PushStatus Status { get; set; } = PushStatus.Stopped;
+
         public BasePushStreamService(ILogger logger
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
@@ -34,9 +36,14 @@ namespace BilibiliAutoLiver.Services.Base
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        public abstract Task Start();
+        public abstract Task<bool> Start();
 
-        public abstract Task Stop();
+        public abstract Task<bool> Stop();
+
+        public virtual PushStatus GetStatus()
+        {
+            return this.Status;
+        }
 
         /// <summary>
         /// 获取推送设置
@@ -106,12 +113,12 @@ namespace BilibiliAutoLiver.Services.Base
             }
             if (setting.PushSetting.Model == ConfigModel.Advance)
             {
-                if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, out string message, out _))
+                if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, true, out string message, out _))
                 {
                     _logger.ThrowLogError(message);
                 }
             }
-            if (setting.PushSetting.Model == ConfigModel.Easy)
+            if (setting.PushSetting.Model == ConfigModel.Normal)
             {
                 _logger.ThrowLogError("暂不支持简易模式");
             }

@@ -2,6 +2,9 @@
 {
     public class CacheKeyConstant
     {
+        /// <summary>
+        /// 用于打开页面时，此时正在通过Cookie登录，显示加载中
+        /// </summary>
         public const string LOGING_STATUS_CACHE_KEY = "LOGIN_STATUS_CACHE_KEY";
 
         public const string LAST_REFRESH_COOKIE_TIME_CACHE_KEY = "LAST_REFRESH_COOKIE_TIME_CACHE_KEY";
