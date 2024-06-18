@@ -89,11 +89,15 @@ namespace BilibiliAutoLiver.Services.PushService
                     _tokenSource.Cancel();
                     Stopwatch sw = Stopwatch.StartNew();
                     //3s等待下线
-                    while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+                    while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation || _mainTask.Status == TaskStatus.WaitingToRun))
                     {
                         Thread.Sleep(0);
                     }
                     sw.Stop();
+                    if (_mainTask.Status != TaskStatus.RanToCompletion)
+                    {
+                        return Task.FromResult(false);
+                    }
                     _logger.LogWarning("推流已停止。");
                 }
                 return Task.FromResult(true);
@@ -101,8 +105,8 @@ namespace BilibiliAutoLiver.Services.PushService
             finally
             {
                 //Dispose
-                _mainTask.Dispose();
-                _tokenSource.Dispose();
+                _mainTask?.Dispose();
+                _tokenSource?.Dispose();
                 _mainTask = null;
                 _tokenSource = null;
 
@@ -184,6 +188,7 @@ namespace BilibiliAutoLiver.Services.PushService
             while (!_tokenSource.IsCancellationRequested)
             {
                 Status = PushStatus.Starting;
+                Process proc = null;
                 SettingDto setting = await GetSetting();
                 try
                 {
@@ -198,23 +203,22 @@ namespace BilibiliAutoLiver.Services.PushService
                     _logger.LogInformation($"ffmpeg推流命令：{psi.FileName} {psi.Arguments}");
                     _logger.LogInformation("推流参数初始化完成，开始推流...");
                     //启动
-                    using (var proc = Process.Start(psi))
+                    proc = Process.Start(psi);
+                    if (proc == null || proc.Id <= 0)
                     {
-                        if (proc == null || proc.Id <= 0)
-                        {
-                            throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
-                        }
-                        Status = PushStatus.Running;
-                        await proc.WaitForExitAsync(_tokenSource.Token);
-                        proc.Kill();
-                        //delay 100ms的原因是ffmpeg本身也会接收ctrl-c，但是C#的控制台要比ffmpeg慢一点。
-                        //就导致ffmpeg退出要早一点
-                        await Task.Delay(100);
-                        if (!_tokenSource.IsCancellationRequested)
-                        {
-                            _logger.LogWarning($"FFmpeg异常退出。");
-                        }
+                        throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
                     }
+                    Status = PushStatus.Running;
+                    await proc.WaitForExitAsync(_tokenSource.Token);
+                    proc.Kill();
+                    //delay 100ms的原因是ffmpeg本身也会接收ctrl-c，但是C#的控制台要比ffmpeg慢一点。
+                    //就导致ffmpeg退出要早一点
+                    await Task.Delay(100);
+                    if (!_tokenSource.IsCancellationRequested)
+                    {
+                        _logger.LogWarning($"FFmpeg异常退出。");
+                    }
+
                     //如果开启了自动重试
                     if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
                     {
@@ -224,6 +228,14 @@ namespace BilibiliAutoLiver.Services.PushService
                 }
                 catch (OperationCanceledException)
                 {
+                    try
+                    {
+                        if (proc != null && !proc.HasExited)
+                        {
+                            proc.Kill();
+                        }
+                    }
+                    catch { }
                     return;
                 }
                 catch (Exception ex)
@@ -234,6 +246,10 @@ namespace BilibiliAutoLiver.Services.PushService
                     {
                         await Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
+                }
+                finally
+                {
+                    proc?.Dispose();
                 }
             }
         }

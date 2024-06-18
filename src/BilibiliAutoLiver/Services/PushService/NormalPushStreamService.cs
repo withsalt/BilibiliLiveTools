@@ -62,8 +62,8 @@ namespace BilibiliAutoLiver.Services.PushService
             }
             if (_tokenSource != null)
             {
-                _tokenSource?.Cancel();
-                _tokenSource?.Dispose();
+                _tokenSource.Cancel();
+                _tokenSource.Dispose();
                 _tokenSource = null;
             }
             Status = PushStatus.Starting;
@@ -95,11 +95,15 @@ namespace BilibiliAutoLiver.Services.PushService
                     _cancel?.Invoke();
                     Stopwatch sw = Stopwatch.StartNew();
                     //3s等待下线
-                    while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation))
+                    while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation || _mainTask.Status == TaskStatus.WaitingToRun))
                     {
                         Thread.Sleep(0);
                     }
                     sw.Stop();
+                    if (_mainTask.Status != TaskStatus.RanToCompletion)
+                    {
+                        return Task.FromResult(false);
+                    }
                     _logger.LogWarning("推流已停止。");
                 }
                 return Task.FromResult(true);

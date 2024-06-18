@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Utils;
@@ -8,6 +9,35 @@ namespace BilibiliAutoLiver.Models.Settings
     public class AppSettings
     {
         public static string Position { get { return "AppSettings"; } }
+
+        private string _dataDirectory = null;
+
+        public string DataDirectory
+        {
+            get
+            {
+                return _dataDirectory;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException(nameof(DataDirectory), "Data directory can not null");
+                }
+
+                string dic = value;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    dic = dic.Replace('/', Path.DirectorySeparatorChar);
+                else
+                    dic = dic.Replace('\\', Path.DirectorySeparatorChar);
+
+                if (CommonHelper.TryParseLocalPathString(dic, "{BaseDirectory}", AppContext.BaseDirectory, out string connTemp))
+                {
+                    dic = connTemp;
+                }
+                _dataDirectory = dic;
+            }
+        }
 
         private string _connectionString = null;
 
@@ -44,5 +74,10 @@ namespace BilibiliAutoLiver.Models.Settings
         /// 高级模式命令解析采用严格模式
         /// </summary>
         public bool AdvanceStrictMode { get; set; }
+
+        /// <summary>
+        /// 允许上传文件类型
+        /// </summary>
+        public List<AllowExtension> AllowExtensions { get; set; }
     }
 }

@@ -193,8 +193,8 @@
     <div class="layui-form" lay-filter="">
         <div class="layui-input-block" style="margin-left:30px;margin-top:8px">
             <button type="button" class="layui-btn" lay-filter="submit_live_setting" lay-submit>保存设置</button>
-            <button type="button" class="layui-btn layui-bg-orange" lay-filter="submit_start_live" id="submit_start_live" style="display:none">开始直播</button>
-            <button type="button" class="layui-btn layui-bg-red" lay-filter="submit_stop_live" id="submit_stop_live" style="display:none">停止直播</button>
+            <button type="button" class="layui-btn layui-bg-orange" lay-filter="submit_start_live" lay-submit id="submit_start_live" style="display:none">开始直播</button>
+            <button type="button" class="layui-btn layui-bg-red" lay-filter="submit_stop_live" lay-submit id="submit_stop_live" style="display:none">停止直播</button>
         </div>
     </div>
 </div>
@@ -241,6 +241,15 @@
             $ = layui.jquery;
             var layer = layui.layer,
                 form = layui.form;
+
+            // 执行渲染
+            var codeInst = layui.code({
+                elem: '#ffmpegCommand',
+                title: '命令编辑器',
+                height: '300px',
+                ln: false,
+                header: true,
+            });
 
             function getFFMpegCommandCode() {
                 let doc = new DOMParser().parseFromString($("#ffmpegCommand").html(), 'text/html');
@@ -291,15 +300,6 @@
                 form.render();
             });
 
-            // 执行渲染
-            var codeInst = layui.code({
-                elem: '#ffmpegCommand',
-                title: '命令编辑器',
-                height: '300px',
-                ln: false,
-                header: true,
-            });
-
             form.on('submit(submit_live_setting)', function (data) {
                 var obj = {
                     isAutoRetry: $('input[name="isAutoRetry"]:checked').val() == 1,
@@ -323,8 +323,45 @@
                             layer.msg("保存失败，返回参数为空", { icon: 5 });
                             return;
                         }
-                        if (data.code != 0) {
+                        if (data.code < 0) {
                             layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        if (data.code == 1) {
+                            layer.confirm('保存成功。当前正在直播中，是否重新推流？', {
+                                btn: ['是', '否'] 
+                            }, function () {
+                                var loadIndex = layer.load(2, {
+                                    timeout: 300000
+                                });
+                                $.ajax({
+                                    type: "post",
+                                    url: "@Url.Action("ReStart", "Push")",
+                                    cache: false,
+                                    data: null,
+                                    contentType: 'application/json',
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        layer.close(loadIndex);
+                                        if (!data) {
+                                            layer.msg("重新推流失败，返回参数为空", { icon: 5 });
+                                            return;
+                                        }
+                                        if (data.code != 0) {
+                                            layer.msg(data.message, { icon: 5 });
+                                            return;
+                                        }
+                                        layer.msg('重新推流成功', { icon: 1 });
+                                    },
+                                    error: function (data) {
+                                        layer.close(loadIndex);
+                                        layer.msg("重新推流失败，未知错误", { icon: 5 });
+                                        console.log(data);
+                                    }
+                                });
+                            }, function () {
+                                layer.closeAll();
+                            });
                             return;
                         }
                         layer.msg('保存成功', { icon: 1 });
@@ -332,6 +369,73 @@
                     error: function (data) {
                         layer.close(loadIndex);
                         layer.msg("保存失败，未知错误", { icon: 5 });
+                        console.log(data);
+                    }
+                });
+                return false;
+            });
+
+            form.on('submit(submit_start_live)', function (data) {
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                $.ajax({
+                    type: "post",
+                    url: "@Url.Action("Start", "Push")",
+                    cache: false,
+                    data: null,
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function (data) {
+                        layer.close(loadIndex);
+                        if (!data) {
+                            layer.msg("开启推流失败，返回参数为空", { icon: 5 });
+                            return;
+                        }
+                        if (data.code != 0) {
+                            layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        layer.msg('开启推流成功', { icon: 1 });
+                    },
+                    error: function (data) {
+                        layer.close(loadIndex);
+                        layer.msg("开启推流失败，未知错误", { icon: 5 });
+                        console.log(data);
+                    }
+                });
+                return false;
+            });
+
+            form.on('submit(submit_stop_live)', function (data) {
+
+                console.log("111");
+
+                var loadIndex = layer.load(2, {
+                    timeout: 300000
+                });
+                $.ajax({
+                    type: "post",
+                    url: "@Url.Action("Stop", "Push")",
+                    cache: false,
+                    data: null,
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function (data) {
+                        layer.close(loadIndex);
+                        if (!data) {
+                            layer.msg("停止推流失败，返回参数为空", { icon: 5 });
+                            return;
+                        }
+                        if (data.code != 0) {
+                            layer.msg(data.message, { icon: 5 });
+                            return;
+                        }
+                        layer.msg('停止推流成功', { icon: 1 });
+                    },
+                    error: function (data) {
+                        layer.close(loadIndex);
+                        layer.msg("停止推流失败，未知错误", { icon: 5 });
                         console.log(data);
                     }
                 });

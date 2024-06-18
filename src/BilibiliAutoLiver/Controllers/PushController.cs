@@ -58,6 +58,7 @@ namespace BilibiliAutoLiver.Controllers
             return View(vm);
         }
 
+        [HttpPost]
         public async Task<ResultModel<string>> Update([FromBody] PushSettingUpdateRequest request)
         {
             PushSetting setting = await _pushSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
@@ -93,6 +94,10 @@ namespace BilibiliAutoLiver.Controllers
             {
                 throw new Exception("保存配置信息失败！");
             }
+            if (_proxyService.GetStatus() != PushStatus.Stopped)
+            {
+                return new ResultModel<string>(1);
+            }
             return new ResultModel<string>(0);
         }
 
@@ -124,10 +129,93 @@ namespace BilibiliAutoLiver.Controllers
             return new ResultModel<string>(0);
         }
 
+        [HttpPost]
+        public async Task<ResultModel<string>> Stop()
+        {
+            try
+            {
+                if (_proxyService.GetStatus() == PushStatus.Stopped)
+                {
+                    return new ResultModel<string>(0);
+                }
+                bool result = await _proxyService.Stop();
+                if (!result)
+                {
+                    return new ResultModel<string>(-1, "停止推流失败");
+                }
+                else
+                {
+                    return new ResultModel<string>(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "停止推流失败");
+                return new ResultModel<string>(-1, $"停止推流失败，{ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<ResultModel<string>> Start()
+        {
+            try
+            {
+                if (_proxyService.GetStatus() != PushStatus.Stopped)
+                {
+                    return new ResultModel<string>(0);
+                }
+                bool result = await _proxyService.Start();
+                if (!result)
+                {
+                    return new ResultModel<string>(-1, "开启推流失败");
+                }
+                else
+                {
+                    return new ResultModel<string>(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "开启推流失败");
+                return new ResultModel<string>(-1, $"开启推流失败，{ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<ResultModel<string>> ReStart()
+        {
+            try
+            {
+                if (_proxyService.GetStatus() != PushStatus.Stopped)
+                {
+                    bool stoprResult = await _proxyService.Stop();
+                    if (!stoprResult)
+                    {
+                        return new ResultModel<string>(-1, "重新推流失败，停止当前正在进行中的推流失败。");
+                    }
+                }
+                bool result = await _proxyService.Start();
+                if (!result)
+                {
+                    return new ResultModel<string>(-1, "重新推流失败，开启推流失败");
+                }
+                else
+                {
+                    return new ResultModel<string>(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "重新推流失败");
+                return new ResultModel<string>(-1, $"重新推流失败，{ex.Message}");
+            }
+        }
+
         /// <summary>
         /// 获取当前推流状态
         /// </summary>
         /// <returns></returns>
+        [HttpGet]
         public ResultModel<PushStatusResponse> Status()
         {
             var status = _proxyService.GetStatus();

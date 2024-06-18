@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Text.Json.Serialization;
 
 namespace Bilibili.AspNetCore.Apis.Models.Base
 {
@@ -43,6 +44,7 @@ namespace Bilibili.AspNetCore.Apis.Models.Base
         /// <summary>
         /// Cookies
         /// </summary>
+        [JsonIgnore]
         public IEnumerable<CookieHeaderValue> Cookies { get; set; }
     }
 }

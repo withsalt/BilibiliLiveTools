@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Bilibili.AspNetCore.Apis.Providers;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
@@ -11,6 +12,7 @@ using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Repository;
 using BilibiliAutoLiver.Repository.Base;
 using BilibiliAutoLiver.Repository.Interface;
+using BilibiliAutoLiver.Services;
 using FreeSql;
 using FreeSql.DataAnnotations;
 using Microsoft.AspNetCore.Builder;
@@ -69,6 +71,9 @@ namespace BilibiliAutoLiver.DependencyInjection
             services.AddScoped<ILiveSettingRepository, LiveSettingRepository>();
             services.AddScoped<IMonitorSettingRepository, MonitorSettingRepository>();
             services.AddScoped<ICookieSettingRepository, CookieSettingRepository>();
+
+            //Cookie仓储提供器
+            services.AddSingleton<IBilibiliCookieRepositoryProvider, BilibiliCookieDbRepositoryProvider>();
             return services;
         }
 
