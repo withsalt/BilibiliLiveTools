@@ -70,6 +70,7 @@ namespace BilibiliAutoLiver.DependencyInjection
             services.AddScoped<IPushSettingRepository, PushSettingRepository>();
             services.AddScoped<ILiveSettingRepository, LiveSettingRepository>();
             services.AddScoped<IMonitorSettingRepository, MonitorSettingRepository>();
+            services.AddScoped<IMaterialRepository, MaterialRepository>();
             services.AddScoped<ICookieSettingRepository, CookieSettingRepository>();
 
             //Cookie仓储提供器

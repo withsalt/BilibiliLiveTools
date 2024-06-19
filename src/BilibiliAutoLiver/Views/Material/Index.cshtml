@@ -1,4 +1,4 @@
-﻿@model RoomInfoIndexPageViewModel;
+﻿@model MaterialIndexPageViewModel
 @{
     Layout = "_Layout";
     ViewData["Title"] = "素材管理";
@@ -10,21 +10,23 @@
             <div class="layui-inline">
                 <label class="layui-form-label">文件名</label>
                 <div class="layui-input-block">
-                    <input type="text" name="loginname" placeholder="请输入" autocomplete="off" class="layui-input">
+                    <input type="text" name="fileName" placeholder="请输入" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">类型</label>
                 <div class="layui-input-block">
-                    <select name="role">
+                    <select name="fileType">
                         <option value=""></option>
-                        <option value="1">视频</option>
-                        <option value="2">音频</option>
+                        @foreach (var fileTypeItem in Model.FileTypes)
+                        {
+                            <option value="@fileTypeItem.Key">@fileTypeItem.Value</option>
+                        }
                     </select>
                 </div>
             </div>
             <div class="layui-inline">
-                <button class="layui-btn layuiadmin-btn-admin" lay-submit lay-filter="LAY-user-back-search">
+                <button class="layui-btn layuiadmin-btn-admin" lay-submit lay-filter="material-table-list-search">
                     <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
                 </button>
             </div>
@@ -37,21 +39,10 @@
             <button class="layui-btn layuiadmin-btn-admin" data-type="add">上传素材</button>
         </div>
 
-        <table id="LAY-user-back-manage" lay-filter="LAY-user-back-manage"></table>
-        <script type="text/html" id="buttonTpl">
-            {{#  if(d.check == true){ }}
-              <button class="layui-btn layui-btn-xs">已审核</button>
-            {{#  } else { }}
-              <button class="layui-btn layui-btn-primary layui-btn-xs">未审核</button>
-            {{#  } }}
-        </script>
-        <script type="text/html" id="table-useradmin-admin">
+        <table id="material-table-list" lay-filter="material-table-list"></table>
+        <script type="text/html" id="table-content-op">
             <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
-            {{#  if(d.role == '超级管理员'){ }}
-              <a class="layui-btn layui-btn-disabled layui-btn-xs"><i class="layui-icon layui-icon-delete"></i>删除</a>
-            {{#  } else { }}
-              <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
-            {{#  } }}
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
         </script>
     </div>
 </div>
@@ -61,7 +52,8 @@
     <div class="layui-card-body">
         <div class="layui-upload">
             <button type="button" class="layui-btn layui-btn-normal" id="test-upload-testList">选择文件</button>
-            <button type="button" class="layui-btn" id="test-upload-testListAction">开始上传</button>
+            <button type="button" class="layui-btn" id="test-upload-testListAction" style="margin-left:5px">开始上传</button>
+            <button type="button" class="layui-btn layui-bg-orange" id="test-upload-cleanListAction" style="margin-left:5px">清空列表</button>
             <div class="layui-upload-list">
                 <table class="layui-table">
                     <colgroup>
@@ -103,7 +95,7 @@
                 table = layui.table
                 , upload = layui.upload
                 , element = layui.element;
-
+            var files = {};
             //多文件列表示例
             var uploadListIns = upload.render({
                 elem: '#test-upload-testList'
@@ -111,12 +103,12 @@
                 , url: '@Url.Action("Upload", "Material")'
                 , accept: 'file'
                 , multiple: true
-                , number: 3
+                , number: 30
                 , auto: false
                 , bindAction: '#test-upload-testListAction'
                 , choose: function (obj) {
                     var that = this;
-                    var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+                    files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
                     //读取本地文件
                     obj.preview(function (index, file, result) {
                         var tr = $(['<tr id="upload-' + index + '">'
@@ -152,7 +144,6 @@
                         return;
                     }
                     var that = this;
-                    //if(res.code == 0){ //上传成功
                     var tr = that.elemList.find('tr#upload-' + index)
                         , tds = tr.children();
                     tds.eq(3).html(''); //清空操作
@@ -177,12 +168,96 @@
                 }
             });
 
+            $("#test-upload-cleanListAction").click(function () {
+                $("#test-upload-demoList tr").each(function () {
+                    var trId = $(this).attr("id");
+                    if (trId) {
+                        trId = trId.replace("upload-", "");
+                        if (files) {
+                            delete files[trId];
+                        }
+                    }
+                    $(this).remove();
+                });
+                uploadListIns.config.elem.next()[0].value = '';
+            });
+
+            table.render({
+                elem: '#material-table-list'
+                , url: '@Url.Action("GetList", "Material")'
+                , method: 'get'
+                , parseData: function (res) { //res 即为原始返回的数据
+                    if (res.code != 0) {
+                        layer.msg('加载数据失败。', { icon: 5 });
+                        return {
+                            "code": res.code,
+                            "msg": res.message,
+                            "count": 0,
+                            "data": null
+                        }
+                    }
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.message, //解析提示文本
+                        "data": res.data.data, //解析数据列表
+                        "count": res.data.dataCount
+                    };
+                }
+                , cellMinWidth: 100
+                //, height: 'full-100'
+                , initSort: {
+                    field: 'id'
+                    , type: 'desc'
+                }
+                , cols: [[
+                    { type: 'checkbox', fixed: 'left' }
+                    , { field: 'id', title: '编号', width: 60, sort: true, }
+                    , { field: 'name', title: '文件名', sort: true, }
+                    , { field: 'size', title: '大小', sort: true, }
+                    , { field: 'fileType', title: '类型', sort: true }
+                    , { field: 'path', title: '路径', sort: true, }
+                    , { field: 'createdTime', title: '创建时间', sort: true, }
+                    , { title: '操作', width: 220, align: 'center', fixed: 'right', toolbar: '#table-content-op' }
+                ]]
+                , page: true
+                , limit: 15
+                , limits: [10, 15, 30, 40, 50, 60, 70, 80, 90]
+                , autoSort: false
+                , title: '全部文件'
+                , done: function (res, curr, count) {
+                    
+                }
+            });
+
             //事件-搜索
-            form.on('submit(LAY-user-back-search)', function (data) {
+            form.on('submit(material-table-list-search)', function (data) {
                 var field = data.field;
 
                 //执行重载
-                table.reload('LAY-user-back-manage', {
+                table.reload('material-table-list', {
+                    where: field
+                });
+            });
+
+            //监听排序事件
+            table.on('sort(material-table-list)', function (obj) { //注：sort 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                //尽管我们的 table 自带排序功能，但并没有请求服务端。
+                //有些时候，你可能需要根据当前排序的字段，重新向服务端发送请求，从而实现服务端排序，如：
+                table.reload('material-table-list', {
+                    initSort: obj   //记录初始排序，如果不设的话，将无法标记表头的排序状态。
+                    , where: {         //请求参数（注意：这里面的参数可任意定义，并非下面固定的格式）
+                        field: obj.field //排序字段
+                        , order: obj.type //排序方式
+                    }
+                });
+            });
+
+            //监听搜索
+            form.on('submit(material-table-list)', function (data) {
+                var field = data.field;
+
+                //执行重载
+                table.reload('material-table-list', {
                     where: field
                 });
             });
@@ -190,7 +265,7 @@
             //事件
             var active = {
                 batchdel: function () {
-                    var checkStatus = table.checkStatus('LAY-user-back-manage')
+                    var checkStatus = table.checkStatus('material-table-list')
                         , checkData = checkStatus.data; //得到选中的数据
 
                     if (checkData.length === 0) {
@@ -212,7 +287,7 @@
                               //,……
                             });
                             */
-                            table.reload('LAY-user-back-manage');
+                            table.reload('material-table-list');
                             layer.msg('已删除');
                         });
                     });

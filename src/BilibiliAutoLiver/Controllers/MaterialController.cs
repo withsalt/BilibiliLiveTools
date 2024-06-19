@@ -1,14 +1,20 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
 using BilibiliAutoLiver.Config;
+using BilibiliAutoLiver.Extensions;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Dtos.FileUpload;
+using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
+using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
+using DJT.Data.Model.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +32,7 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookieService;
         private readonly IBilibiliLiveApiService _liveApiService;
-        private readonly ILiveSettingRepository _repository;
+        private readonly IMaterialRepository _repository;
         private readonly AppSettings _appSettings;
 
         public MaterialController(ILogger<MaterialController> logger
@@ -34,7 +40,7 @@ namespace BilibiliAutoLiver.Controllers
             , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService
             , IBilibiliLiveApiService liveApiService
-            , ILiveSettingRepository repository
+            , IMaterialRepository repository
             , IOptions<AppSettings> settingOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -49,7 +55,27 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            MaterialIndexPageViewModel model = new MaterialIndexPageViewModel()
+            {
+                FileTypes = EnumExtensions.GetEnumDescriptions<FileType>(0),
+            };
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetList(MaterialListPageRequest request)
+        {
+            QuaryPageModel<MaterialDto> materials = await _repository.GetPageAsync(request);
+            if (materials == null)
+            {
+                return Json(new ResultModel<QuaryPageModel<MaterialDto>>(-1, "加载数据失败。"));
+            }
+            return Json(new ResultModel<QuaryPageModel<MaterialDto>>()
+            {
+                Code = 0,
+                Message = "Success",
+                Data = materials
+            });
         }
 
         [HttpPost]
@@ -66,6 +92,7 @@ namespace BilibiliAutoLiver.Controllers
             {
                 uploadParams.uploadFiles.Add(item);
             }
+            List<Material> materials = new List<Material>();
             foreach (var item in uploadParams.uploadFiles)
             {
                 string fileName = item.FileName;
@@ -102,8 +129,19 @@ namespace BilibiliAutoLiver.Controllers
                 {
                     return Json(new ResultModel<string>(-1, "保存文件失败"));
                 }
-            }
 
+                Material material = new Material()
+                {
+                    Name = fileName,
+                    Path = fileSaveResult.Item1,
+                    FileType = fileType,
+                    Size = new FileInfo(fileSaveResult.Item2).Length / 1024,
+                    CreatedTime = DateTime.UtcNow,
+                    CreatedUserId = GlobalConfigConstant.SYS_USERID
+                };
+                materials.Add(material);
+            }
+            await _repository.InsertAsync(materials);
             //上传成功
             return Json(new ResultModel<string>(0));
         }
