@@ -38,7 +38,8 @@ namespace BilibiliAutoLiver.Models.Entities
                 Id = Id,
                 Name = Name,
                 Size = ConvertFileSize(Size),
-                Path = fullPath,
+                Path = $"~/{this.Path}",
+                FullPath = fullPath,
                 FileType = EnumExtensions.GetEnumDescription(FileType),
                 CreatedTime = CreatedTime.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
             };

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
+using System.Linq;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -18,9 +18,11 @@ using DJT.Data.Model.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace BilibiliAutoLiver.Controllers
 {
@@ -76,6 +78,101 @@ namespace BilibiliAutoLiver.Controllers
                 Message = "Success",
                 Data = materials
             });
+        }
+
+        /// <summary>
+        /// 删除文件
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> Delete(List<long> ids)
+        {
+            try
+            {
+                if (ids?.Any() != true)
+                {
+                    throw new Exception("文件ID不能为空。");
+                }
+                var items = await _repository.Where(p => ids.Contains(p.Id)).ToListAsync();
+                if (items?.Any() != true)
+                {
+                    throw new Exception("查找文件信息失败。");
+                }
+                int result = await _repository.DeleteAsync(p => ids.Contains(p.Id));
+                if (result <= 0)
+                {
+                    throw new Exception("删除文件失败。");
+                }
+                foreach (var item in items)
+                {
+                    string filePath = Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory, item.Path);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+                return Json(new ResultModel<string>(0));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Delete file by id({JsonConvert.SerializeObject(ids)}) failed. {ex.Message}");
+                return Json(new ResultModel<string>(-1, ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// 通过id下载文件
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> Download(long id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return new ContentResult()
+                    {
+                        StatusCode = 404,
+                        Content = "文件ID不能为空。"
+                    };
+                }
+                var material = await _repository.FindAsync(id);
+                if (material == null)
+                {
+                    return new ContentResult()
+                    {
+                        StatusCode = 404,
+                        Content = "获取文件信息失败。"
+                    };
+                }
+                string path = Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory, material.Path);
+                if (!System.IO.File.Exists(path))
+                {
+                    return new ContentResult()
+                    {
+                        StatusCode = 404,
+                        Content = "当前文件不存在。"
+                    };
+                }
+                string fileName = Path.GetFileName(path);
+                if (!new FileExtensionContentTypeProvider().TryGetContentType(fileName, out string contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+                return PhysicalFile(Path.GetFullPath(path), contentType, material.Name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Download file failed. {ex.Message}");
+                return new ContentResult()
+                {
+                    StatusCode = 404,
+                    Content = $"获取文件失败，错误：{ex.Message}"
+                };
+            }
         }
 
         [HttpPost]

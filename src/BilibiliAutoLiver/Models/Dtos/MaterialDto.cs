@@ -17,6 +17,11 @@ namespace BilibiliAutoLiver.Models.Dtos
         public string Path { get; set; }
 
         /// <summary>
+        /// 完整路径
+        /// </summary>
+        public string FullPath { get; set; }
+
+        /// <summary>
         /// 文件大小（KB）
         /// </summary>
         public string Size { get; set; }

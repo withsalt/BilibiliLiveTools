@@ -41,7 +41,8 @@
 
         <table id="material-table-list" lay-filter="material-table-list"></table>
         <script type="text/html" id="table-content-op">
-            <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+            <a class="layui-btn layui-btn layui-btn-xs" lay-event="copy"><i class="layui-icon layui-icon-file-b"></i>复制</a>
+            <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="download"><i class="layui-icon layui-icon-download-circle"></i>下载</a>
             <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
         </script>
     </div>
@@ -88,11 +89,11 @@
     <script>
         layui.config({
             base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
-        }).use(['form', 'layer', 'jquery', 'index', 'useradmin', 'table', 'upload', 'element'], function () {
+        }).use(['form', 'layer', 'jquery', 'table', 'upload', 'element'], function () {
             $ = layui.jquery;
-            var layer = layui.layer,
-                form = layui.form,
-                table = layui.table
+            var layer = layui.layer
+                , form = layui.form
+                , table = layui.table
                 , upload = layui.upload
                 , element = layui.element;
             var files = {};
@@ -215,7 +216,7 @@
                     , { field: 'name', title: '文件名', sort: true, }
                     , { field: 'size', title: '大小', sort: true, }
                     , { field: 'fileType', title: '类型', sort: true }
-                    , { field: 'path', title: '路径', sort: true, }
+                    , { field: 'path', title: '相对路径', sort: true, }
                     , { field: 'createdTime', title: '创建时间', sort: true, }
                     , { title: '操作', width: 220, align: 'center', fixed: 'right', toolbar: '#table-content-op' }
                 ]]
@@ -225,7 +226,77 @@
                 , autoSort: false
                 , title: '全部文件'
                 , done: function (res, curr, count) {
-                    
+
+                }
+            });
+
+            const copyText = async (val) => {
+                if (navigator.clipboard && navigator.permissions) {
+                    await navigator.clipboard.writeText(val)
+                } else {
+                    const textArea = document.createElement('textArea')
+                    textArea.value = val
+                    textArea.style.width = 0
+                    textArea.style.position = 'fixed'
+                    textArea.style.left = '-999px'
+                    textArea.style.top = '10px'
+                    textArea.setAttribute('readonly', 'readonly')
+                    document.body.appendChild(textArea)
+
+                    textArea.select()
+                    document.execCommand('copy')
+                    document.body.removeChild(textArea)
+                }
+            }
+
+            //操作按钮
+            table.on('tool(material-table-list)', function (obj) {
+                var data = obj.data;
+                var name = obj.data.name;
+                var id = obj.data.id;
+                var path = obj.data.path;
+
+                if (name == null || name == "" || id == null || id == "") {
+                    layer.msg('啊？这条数据走丢了。', { icon: 5 });
+                    return;
+                }
+
+                switch (obj.event) {
+                    case "del":
+                        layer.confirm('确认删除素材【' + name + '】么？', function (index) {
+                            var indexLoad = layer.msg('删除中...', {
+                                icon: 16,
+                                shade: 0.01,
+                                time: 300000
+                            });
+
+                            $.post('@Url.Action("Delete", "Material")', {
+                                ids: [id]
+                            }, function (data) {
+                                layer.closeAll();
+                                if (data.code == 0) {
+                                    layer.msg('删除成功', { icon: 6 });
+                                    //执行重载
+                                    table.reload('material-table-list');
+                                } else {
+                                    layer.alert('删除失败。错误：' + data.message, { icon: 5 });
+                                }
+                            });
+                        });
+                        break;
+                    case "copy":
+                        copyText(path);
+                        layer.msg('已将所选文件相对路径复制到剪切板', { icon: 6 });
+                        break;
+                    case "download":
+                        var url = '@Url.Action("Download", "Material")?id=' + id;
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.style.display = 'none'
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                        break;
                 }
             });
 
@@ -269,26 +340,31 @@
                         , checkData = checkStatus.data; //得到选中的数据
 
                     if (checkData.length === 0) {
-                        return layer.msg('请选择数据');
+                        layer.msg('请选择要删除的素材');
+                        return;
                     }
+                    var arr = [];
+                    for (var i in checkData) {
+                        arr.push(checkData[i].id);
+                    }
+                    layer.confirm('确认删除所选素材么？', function (index) {
+                        var indexLoad = layer.msg('删除中...', {
+                            icon: 16,
+                            shade: 0.01,
+                            time: 300000
+                        });
 
-                    layer.prompt({
-                        formType: 1
-                        , title: '敏感操作，请验证口令'
-                    }, function (value, index) {
-                        layer.close(index);
-
-                        layer.confirm('确定删除吗？', function (index) {
-
-                            //执行 Ajax 后重载
-                            /*
-                            admin.req({
-                              url: 'xxx'
-                              //,……
-                            });
-                            */
-                            table.reload('material-table-list');
-                            layer.msg('已删除');
+                        $.post('@Url.Action("Delete", "Material")', {
+                            ids: arr
+                        }, function (data) {
+                            layer.closeAll();
+                            if (data.code == 0) {
+                                layer.msg('删除成功', { icon: 6 });
+                                //执行重载
+                                table.reload('material-table-list');
+                            } else {
+                                layer.alert('删除失败。错误：' + data.message, { icon: 5 });
+                            }
                         });
                     });
                 }
@@ -299,6 +375,7 @@
                         content: $('#upload-page'),
                         end: function () {
                             $('#upload-page').hide();
+                            table.reload('material-table-list');
                         }
                     });
                 }
