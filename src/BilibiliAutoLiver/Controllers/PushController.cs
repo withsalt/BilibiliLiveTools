@@ -70,7 +70,11 @@ namespace BilibiliAutoLiver.Controllers
             PushSetting setting = await _pushSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
             if (setting == null)
             {
-                throw new Exception("获取推流配置失败！");
+                return new ResultModel<string>(-1, "获取推流配置失败");
+            }
+            if (request.Model == ConfigModel.Normal)
+            {
+                return new ResultModel<string>(-1, "暂不支持简易模式，正在开发，不好写啊！");
             }
             ResultModel<string> modelUpdateResult = null;
             switch (request.Model)
@@ -82,7 +86,7 @@ namespace BilibiliAutoLiver.Controllers
                     modelUpdateResult = UpdateAdvanceModel(request, setting);
                     break;
                 default:
-                    throw new NotSupportedException("参数错误，未知的设置类型");
+                    return new ResultModel<string>(-1, "参数错误，未知的设置类型");
             }
             if (modelUpdateResult.Code != 0)
             {
@@ -98,7 +102,7 @@ namespace BilibiliAutoLiver.Controllers
             int updateResult = await _pushSettingRepository.UpdateAsync(setting);
             if (updateResult <= 0)
             {
-                throw new Exception("保存配置信息失败！");
+                return new ResultModel<string>(-1, "保存配置信息失败");
             }
             if (_proxyService.GetStatus() != PushStatus.Stopped)
             {
