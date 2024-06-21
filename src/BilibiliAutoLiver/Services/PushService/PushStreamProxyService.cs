@@ -16,6 +16,9 @@ namespace BilibiliAutoLiver.Services.PushService
         private readonly INormalPushStreamService _normalPush;
         private readonly IServiceProvider _serviceProvider;
 
+        private ConfigModel _pushModel;
+        private static readonly object _lock = new object();
+
         public PushStreamProxyService(ILogger<PushStreamProxyService> logger
             , IServiceProvider serviceProvider
             , IAdvancePushStreamService advancePush
@@ -27,18 +30,34 @@ namespace BilibiliAutoLiver.Services.PushService
             _normalPush = normalPush ?? throw new ArgumentNullException(nameof(normalPush));
         }
 
-        private IPushStreamService GetService()
+        private PushSetting GetPushSetting()
         {
             PushSetting pushSetting = null;
             using (var scope = _serviceProvider.CreateScope())
             {
                 pushSetting = scope.ServiceProvider.GetRequiredService<IPushSettingRepository>().Where(p => !p.IsDeleted).First();
             }
-            if (pushSetting == null || pushSetting.Model == ConfigModel.Normal)
+            return pushSetting;
+        }
+
+        private IPushStreamService GetService()
+        {
+            if (_pushModel == ConfigModel.None)
+            {
+                lock (_lock)
+                {
+                    PushSetting pushSetting = GetPushSetting();
+                    if (pushSetting != null)
+                    {
+                        _pushModel = pushSetting.Model;
+                    }
+                }
+            }
+            if (_pushModel == ConfigModel.Normal)
                 return _normalPush;
-            else if (pushSetting.Model == ConfigModel.Advance)
+            else if (_pushModel == ConfigModel.Advance)
                 return _advancePush;
-            throw new NotSupportedException($"未知的推流方式：{pushSetting.Model}");
+            throw new NotSupportedException($"未知的推流方式：{_pushModel}");
         }
 
         public async Task CheckFFmpegBinary()
@@ -75,17 +94,32 @@ namespace BilibiliAutoLiver.Services.PushService
 
         public async Task<bool> Stop()
         {
-            return await GetService().Stop();
+            bool isStop = await GetService().Stop();
+            if (isStop)
+            {
+                //停止的时候，清空模式
+                //这样只有重启推流的时候，才会更新推流模式，因为更新配置文件之后，不一定会重新推流
+                lock (_lock)
+                {
+                    _pushModel = ConfigModel.None;
+                }
+            }
+            return isStop;
         }
 
         public PushStatus GetStatus()
         {
+            if (_pushModel == ConfigModel.None)
+            {
+                return PushStatus.Stopped;
+            }
             return GetService().GetStatus();
         }
 
         public void Dispose()
         {
-            GetService().Dispose();
+            _advancePush.Dispose();
+            _normalPush.Dispose();
         }
     }
 }
