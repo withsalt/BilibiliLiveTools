@@ -1,4 +1,5 @@
-﻿@{
+﻿@model ConsolePageViewModel
+@{
     Layout = "";
 }
 <!DOCTYPE html>
@@ -22,7 +23,7 @@
                         直播状态
                     </div>
                     <div class="layui-card-body layuiadmin-card-list">
-                        <p class="layuiadmin-big-font">暂停</p>
+                        <p class="layuiadmin-big-font">@Model.Status</p>
                     </div>
                 </div>
             </div>
@@ -39,11 +40,10 @@
             <div class="layui-col-sm6 layui-col-md6">
                 <div class="layui-card">
                     <div class="layui-card-header">
-                        直播时长（B站统计）
-                        <span class="layui-badge layui-bg-blue layuiadmin-badge">分钟</span>
+                        FFMPEG版本
                     </div>
                     <div class="layui-card-body layuiadmin-card-list">
-                        <p class="layuiadmin-big-font">9999</p>
+                        <p class="layuiadmin-big-font">@Model.Version</p>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@
             <div class="layui-col-sm12">
                 <div class="layui-card">
                     <div class="layui-card-header">
-                        日推流时长
+                        日推流时长（还没做，莫看）
                     </div>
                     <div class="layui-card-body">
                         <div class="layui-row">

@@ -1,7 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
+using BilibiliAutoLiver.Extensions;
+using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.ViewModels;
+using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +22,17 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliCookieService _cookieService;
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly IPushStreamProxyService _proxyService;
+        private readonly IFFMpegService _ffmpeg;
+        private readonly ILiveSettingRepository _liveSettingRepository;
 
         public HomeController(ILogger<HomeController> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService
             , IBilibiliLiveApiService liveApiService
-            , IPushStreamProxyService proxyService)
+            , IPushStreamProxyService proxyService
+            , IFFMpegService ffmpeg
+            , ILiveSettingRepository liveSettingRepository)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -33,6 +40,8 @@ namespace BilibiliAutoLiver.Controllers
             _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
             _proxyService = proxyService ?? throw new ArgumentNullException(nameof(proxyService));
+            _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
+            _liveSettingRepository = liveSettingRepository ?? throw new ArgumentNullException(nameof(liveSettingRepository));
         }
 
         public async Task<IActionResult> Index()
@@ -48,9 +57,40 @@ namespace BilibiliAutoLiver.Controllers
             });
         }
 
-        public IActionResult Console()
+        public async Task<IActionResult> Console()
         {
-            return View();
+            string version = null;
+            try
+            {
+                version = (await _ffmpeg.GetVersion()).Version;
+                if (version.Length > 10)
+                {
+                    version = version.Substring(0, 10) + "...";
+                }
+            }
+            catch
+            {
+                version = "δ֪";
+            }
+
+            string name = "";
+            var setting = await _liveSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
+            if (setting == null)
+            {
+                var roomInfo = await _liveApiService.GetMyLiveRoomInfo();
+                name = roomInfo.title;
+            }
+            else
+            {
+                name = setting.RoomName;
+            }
+
+            ConsolePageViewModel vm = new ConsolePageViewModel()
+            {
+                Status = EnumExtensions.GetEnumDescription(_proxyService.GetStatus()),
+                Version = version,
+            };
+            return View(vm);
         }
     }
 }
