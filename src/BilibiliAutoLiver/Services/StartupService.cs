@@ -68,6 +68,7 @@ namespace BilibiliAutoLiver.Services
                 }
                 if (userInfo == null)
                 {
+                    _logger.LogWarning("用户未登录，启动进程将挂起。再用户登录成功之后，将继续执行");
                     //通过Cookie和二维码登录都未成功，那么挂起，直到完成用户登录
                     while (!_accountService.IsLogged())
                     {
