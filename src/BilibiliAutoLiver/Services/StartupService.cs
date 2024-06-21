@@ -43,14 +43,13 @@ namespace BilibiliAutoLiver.Services
                     return;
                 }
                 //登录成功之后，启动定时任务
-                await _jobScheduler.StartAsync(token);
+                await _jobScheduler.Start(token);
                 //开始推流
                 await _pushProxyService.Start();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "初始化失败！");
-                Environment.Exit(-1);
             }
         }
 
@@ -60,7 +59,7 @@ namespace BilibiliAutoLiver.Services
             {
                 _cache.Set(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, true, TimeSpan.FromMinutes(10));
                 //通过保存的Cookie登录
-                var userInfo = await _accountService.LoginByCookie();
+                UserInfo userInfo = await _accountService.LoginByCookie();
                 _cache.Remove(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
                 if (userInfo == null)
                 {
@@ -70,13 +69,22 @@ namespace BilibiliAutoLiver.Services
                 if (userInfo == null)
                 {
                     //通过Cookie和二维码登录都未成功，那么挂起，直到完成用户登录
-                    while (_accountService.IsLogged())
+                    while (!_accountService.IsLogged())
                     {
                         await Task.Delay(1000);
                     }
+                    userInfo = await _accountService.LoginByCookie();
                 }
-                _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
+                if (userInfo != null)
+                {
+                    _logger.LogInformation($"用户{userInfo.Uname}({userInfo.Mid})登录成功！");
+                }
                 return userInfo;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"用户登录失败");
+                return null;
             }
             finally
             {

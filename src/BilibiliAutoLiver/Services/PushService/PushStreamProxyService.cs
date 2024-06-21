@@ -68,7 +68,7 @@ namespace BilibiliAutoLiver.Services.PushService
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"开启推流失败，{ex.Message}");
+                _logger.LogError(ex, $"开启推流失败，{ex.Message}");
                 return false;
             }
         }

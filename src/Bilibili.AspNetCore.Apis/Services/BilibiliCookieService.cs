@@ -96,7 +96,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex.Message);
+                _logger.LogWarning(ex.Message);
                 return false;
             }
         }
@@ -146,7 +146,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 string cookieStr = _cookieRepository.Read()
                     .ConfigureAwait(false).GetAwaiter().GetResult();
-                
+
                 if (!AES.TryDecrypt(cookieStr, _key, _vector, out cookieStr))
                 {
                     return null;

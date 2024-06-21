@@ -152,7 +152,7 @@
                             1. 命令必须以ffmpeg开头，以{URL}结尾。其中{URL}会自动替换为获取到的直播间推流地址；<br />
                             2. 可以使用“//”进行行注释；<br />
                             3. 素材库中的素材，可以直接粘贴到命令中，程序会自动解析。<br />
-                            4. Windows下列出所有可用设备命令（在控制台执行，不要填写到下面）：ffmpeg -list_devices true -f dshow -i dummy<br />
+                            4. Windows下列出所有可用设备命令（在控制台执行，不要填写到下面）：@Model.ListDeviceFFmpegCmd<br />
                             示例：
                             <br />
                             <code>ffmpeg -f dshow -video_size 1280x720 -i video="HD Pro Webcam C920" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}</code>
@@ -330,7 +330,7 @@
                         }
                         if (data.code == 1) {
                             layer.confirm('保存成功。当前正在直播中，是否重新推流？', {
-                                btn: ['是', '否'] 
+                                btn: ['是', '否']
                             }, function () {
                                 var loadIndex = layer.load(2, {
                                     timeout: 300000

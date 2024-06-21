@@ -5,5 +5,7 @@ namespace BilibiliAutoLiver.Models.ViewModels
     public class PushIndexPageViewModel
     {
         public PushSetting PushSetting { get; set; }
+
+        public string ListDeviceFFmpegCmd {  get; set; }
     }
 }

@@ -5,8 +5,8 @@ namespace BilibiliAutoLiver.Jobs.Scheduler
 {
     public interface IJobSchedulerService
     {
-        Task StartAsync(CancellationToken cancellationToken);
+        Task Start(CancellationToken cancellationToken);
 
-        Task StopAsync(CancellationToken cancellationToken);
+        Task Stop(CancellationToken cancellationToken);
     }
 }

@@ -31,6 +31,7 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IPushSettingRepository _pushSettingRepository;
         private readonly IPushStreamProxyService _proxyService;
         private readonly AppSettings _appSettings;
+        private readonly IFFMpegService _ffmpeg;
 
         public PushController(ILogger<PushController> logger
             , IMemoryCache cache
@@ -40,7 +41,8 @@ namespace BilibiliAutoLiver.Controllers
             , ILiveSettingRepository liveSettingRepos
             , IPushSettingRepository pushSettingRepository
             , IPushStreamProxyService proxyService
-            , IOptions<AppSettings> settingOptions)
+            , IOptions<AppSettings> settingOptions
+            , IFFMpegService ffmpeg)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -50,6 +52,7 @@ namespace BilibiliAutoLiver.Controllers
             _pushSettingRepository = pushSettingRepository ?? throw new ArgumentNullException(nameof(pushSettingRepository));
             _proxyService = proxyService ?? throw new ArgumentNullException(nameof(proxyService));
             _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
+            _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
         }
 
         [HttpGet]
@@ -61,6 +64,7 @@ namespace BilibiliAutoLiver.Controllers
             {
                 throw new Exception("获取推流配置失败！");
             }
+            vm.ListDeviceFFmpegCmd = _ffmpeg.GetBinaryPath() + " -list_devices true -f dshow -i dummy";
             return View(vm);
         }
 

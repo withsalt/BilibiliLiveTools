@@ -28,7 +28,7 @@ namespace BilibiliAutoLiver.Jobs.Scheduler
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             await _provider.GetRequiredService<IJobSchedulerService>()
-                .StopAsync(cancellationToken);
+                .Stop(cancellationToken);
         }
     }
 }

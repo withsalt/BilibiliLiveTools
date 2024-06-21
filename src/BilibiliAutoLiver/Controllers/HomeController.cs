@@ -38,7 +38,10 @@ namespace BilibiliAutoLiver.Controllers
         public async Task<IActionResult> Index()
         {
             var userInfo = await _accountService.GetUserInfo();
-
+            if (userInfo == null)
+            {
+                return RedirectToAction("Logout", "Account");
+            }
             return View(new HomeIndexPageViewModel()
             {
                 UserInfo = userInfo,

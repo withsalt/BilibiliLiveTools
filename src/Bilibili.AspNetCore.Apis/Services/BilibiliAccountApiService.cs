@@ -258,7 +258,7 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task HeartBeat()
         {
-            if (!_cookie.HasCookie())
+            if (!IsLogged())
             {
                 _logger.LogWarning($"心跳请求失败，未登录");
                 return;

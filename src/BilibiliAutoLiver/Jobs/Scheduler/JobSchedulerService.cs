@@ -36,7 +36,7 @@ namespace BilibiliAutoLiver.Jobs.Scheduler
             _monitorClientJob = monitorClientJob ?? throw new ArgumentNullException(nameof(monitorClientJob));
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public async Task Start(CancellationToken cancellationToken)
         {
             await _scheduler.ScheduleJob(_sendHeartBeatJob.JobDetail, _sendHeartBeatJob.CreateTrigger(), cancellationToken);
             await _scheduler.ScheduleJob(_refreshCookieJob.JobDetail, _refreshCookieJob.CreateTrigger(), cancellationToken);
@@ -44,7 +44,7 @@ namespace BilibiliAutoLiver.Jobs.Scheduler
             await _scheduler.Start(cancellationToken);
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public async Task Stop(CancellationToken cancellationToken)
         {
             await _scheduler.Shutdown(cancellationToken);
         }
