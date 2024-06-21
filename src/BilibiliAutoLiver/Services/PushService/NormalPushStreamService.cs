@@ -6,6 +6,7 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.SourceReaders;
@@ -14,6 +15,7 @@ using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace BilibiliAutoLiver.Services.PushService
 {
@@ -24,6 +26,7 @@ namespace BilibiliAutoLiver.Services.PushService
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
         private readonly IPipeContainer _pipeContainer;
+        private readonly AppSettings _appSettings;
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
@@ -36,13 +39,15 @@ namespace BilibiliAutoLiver.Services.PushService
             , IFFMpegService ffmpeg
             , IPipeContainer pipeContainer
             , IMemoryCache cache
-            , IServiceProvider serviceProvider) : base(logger, account, api, serviceProvider, ffmpeg)
+            , IServiceProvider serviceProvider
+            , IOptions<AppSettings> settingOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
             _pipeContainer = pipeContainer ?? throw new ArgumentNullException(nameof(pipeContainer));
+            _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
         }
 
         /// <summary>

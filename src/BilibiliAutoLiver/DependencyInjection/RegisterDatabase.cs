@@ -107,8 +107,8 @@ namespace BilibiliAutoLiver.DependencyInjection
             {
                 var pushSetting = new PushSetting()
                 {
-                    Model = ConfigModel.Normal,
-                    FFmpegCommand = "//在Windows环境下调用ffmpeg的命令，使用USB摄像头，设备为HD Pro Webcam C920。\r\n//Windows:\r\nffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv [[URL]]\r\n\r\n//Linux:\r\n//ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Content/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv [[URL]]\r\n",
+                    Model = ConfigModel.Advance,
+                    FFmpegCommand = "//在Windows环境下调用ffmpeg的命令，使用USB摄像头，设备为HD Pro Webcam C920。\r\n//Windows:\r\nffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}\r\n\r\n//Linux:\r\n//ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Content/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv {URL}\r\n",
                     IsAutoRetry = true,
                     RetryInterval = 30,
                     CreatedTime = DateTime.UtcNow,

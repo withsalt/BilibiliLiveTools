@@ -1,10 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
+using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
@@ -20,6 +23,7 @@ namespace BilibiliAutoLiver.Services.Base
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
         private readonly IServiceProvider _serviceProvider;
+        private readonly AppSettings _appSettings;
 
         protected PushStatus Status { get; set; } = PushStatus.Stopped;
 
@@ -27,13 +31,15 @@ namespace BilibiliAutoLiver.Services.Base
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IServiceProvider serviceProvider
-            , IFFMpegService ffmpeg)
+            , IFFMpegService ffmpeg
+            , AppSettings appSettings)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
 
         public abstract Task<bool> Start();
@@ -113,7 +119,7 @@ namespace BilibiliAutoLiver.Services.Base
             }
             if (setting.PushSetting.Model == ConfigModel.Advance)
             {
-                if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, true, out string message, out _))
+                if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, _appSettings.AdvanceStrictMode, Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory), "", out string message, out _, out _, out _))
                 {
                     _logger.ThrowLogError(message);
                 }

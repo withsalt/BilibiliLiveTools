@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -6,6 +7,7 @@ using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
@@ -14,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace BilibiliAutoLiver.Controllers
 {
@@ -27,6 +30,7 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly IPushSettingRepository _pushSettingRepository;
         private readonly IPushStreamProxyService _proxyService;
+        private readonly AppSettings _appSettings;
 
         public PushController(ILogger<PushController> logger
             , IMemoryCache cache
@@ -35,7 +39,8 @@ namespace BilibiliAutoLiver.Controllers
             , IBilibiliLiveApiService liveApiService
             , ILiveSettingRepository liveSettingRepos
             , IPushSettingRepository pushSettingRepository
-            , IPushStreamProxyService proxyService)
+            , IPushStreamProxyService proxyService
+            , IOptions<AppSettings> settingOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -44,6 +49,7 @@ namespace BilibiliAutoLiver.Controllers
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
             _pushSettingRepository = pushSettingRepository ?? throw new ArgumentNullException(nameof(pushSettingRepository));
             _proxyService = proxyService ?? throw new ArgumentNullException(nameof(proxyService));
+            _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
         }
 
         [HttpGet]
@@ -112,7 +118,7 @@ namespace BilibiliAutoLiver.Controllers
                 return new ResultModel<string>(-1, "推流命令不能为空");
             }
             //解析推流命令 
-            if (!CmdAnalyzer.TryParse(request.FFmpegCommand, true, out string message, out _))
+            if (!CmdAnalyzer.TryParse(request.FFmpegCommand, _appSettings.AdvanceStrictMode, Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory), "", out string message, out _, out _, out _))
             {
                 return new ResultModel<string>(-1, message);
             }

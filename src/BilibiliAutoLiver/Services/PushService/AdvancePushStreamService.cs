@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
+using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
@@ -22,6 +25,7 @@ namespace BilibiliAutoLiver.Services.PushService
         private readonly IBilibiliAccountApiService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
+        private readonly AppSettings _appSettings;
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
@@ -32,12 +36,14 @@ namespace BilibiliAutoLiver.Services.PushService
             , IBilibiliLiveApiService api
             , IOptions<LiveSettings> liveSettingOptions
             , IFFMpegService ffmpeg
-            , IServiceProvider serviceProvider) : base(logger, account, api, serviceProvider, ffmpeg)
+            , IServiceProvider serviceProvider
+            , IOptions<AppSettings> settingOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
+            _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
         }
 
         /// <summary>
@@ -142,28 +148,11 @@ namespace BilibiliAutoLiver.Services.PushService
             }
             _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
 
-            if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, true, out string message, out string cmd))
+            if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, _appSettings.AdvanceStrictMode, Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory), url, out string message, out string newCmd, out string cmdName, out string cmdArgs))
             {
                 throw new Exception(message);
             }
-
-            string newCmd = cmd.Replace("[[URL]]", $"\"{url}\"");
-            int firstNullChar = newCmd.IndexOf((char)32);
-            if (firstNullChar < 0)
-            {
-                throw new Exception("无法获取命令执行名称，比如在命令ffmpeg -version中，无法获取ffmpeg。");
-            }
-            string cmdName = newCmd.Substring(0, firstNullChar);
-            if (string.IsNullOrEmpty(cmdName))
-            {
-                throw new Exception("命令名称不能为空！");
-            }
-            string cmdArgs = newCmd.Substring(firstNullChar);
-            if (string.IsNullOrEmpty(cmdArgs))
-            {
-                throw new Exception("命令参数不能为空！");
-            }
-            if (cmdName.EndsWith("ffmpeg", StringComparison.OrdinalIgnoreCase) || cmdName.EndsWith("ffmpeg.exe", StringComparison.OrdinalIgnoreCase))
+            if (cmdName.Equals("ffmpeg", StringComparison.OrdinalIgnoreCase) || cmdName.Equals("ffmpeg.exe", StringComparison.OrdinalIgnoreCase))
             {
                 cmdName = _ffmpeg.GetBinaryPath();
             }
