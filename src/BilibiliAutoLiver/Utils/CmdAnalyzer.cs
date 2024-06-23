@@ -63,8 +63,8 @@ namespace BilibiliAutoLiver.Utils
                 {
                     throw new Exception($"代码不规范，程序两行泪（命令执行名称{cmdName}不能包含非法字符）");
                 }
-                cmdArgs = cmdLine.Substring(firstNullChar);
-                if (string.IsNullOrEmpty(cmdArgs.Trim(' ')))
+                cmdArgs = cmdLine.Substring(firstNullChar)?.Trim(' ');
+                if (string.IsNullOrEmpty(cmdArgs))
                 {
                     throw new Exception("代码不规范，程序两行泪（参数不能为空)");
                 }

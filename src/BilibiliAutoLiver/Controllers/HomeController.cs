@@ -79,7 +79,7 @@ namespace BilibiliAutoLiver.Controllers
 
             ConsolePageViewModel vm = new ConsolePageViewModel()
             {
-                Status = EnumExtensions.GetEnumDescription(_proxyService.GetStatus()),
+                Status = GetStatusDescription(),
                 Version = version,
                 RoomName = roomInfo.RoomName,
                 Time = "未开启"
@@ -104,12 +104,27 @@ namespace BilibiliAutoLiver.Controllers
 
             ConsolePageViewModel vm = new ConsolePageViewModel()
             {
-                Status = EnumExtensions.GetEnumDescription(_proxyService.GetStatus()),
+                Status = GetStatusDescription(),
                 Version = version,
                 RoomName = roomInfo.RoomName,
-                Time= time,
+                Time = time,
             };
             return vm;
+        }
+
+        private string GetStatusDescription()
+        {
+            PushStatus status = _proxyService.GetStatus();
+            string statusDesc = EnumExtensions.GetEnumDescription(_proxyService.GetStatus());
+            switch (status)
+            {
+                case PushStatus.Stopped:
+                    return $"<span style=\"color:Red;\">{statusDesc}</span>";
+                case PushStatus.Running:
+                    return $"<span style=\"color:Chartreuse;\">{statusDesc}</span>";
+                default:
+                    return $"<span style=\"color:Orange;\">{statusDesc}</span>";
+            }
         }
 
         private async Task<string> TryGetFFMPEGVersion()
@@ -118,9 +133,17 @@ namespace BilibiliAutoLiver.Controllers
             try
             {
                 version = (await _ffmpeg.GetVersion()).Version;
-                if (version.Length > 10)
+                if (version.Contains("-"))
                 {
-                    version = version.Substring(0, 10) + "...";
+                    var param = version.Split('-');
+                    if (param.Length > 1)
+                    {
+                        version = param[0];
+                    }
+                    if (version.Length > 10)
+                    {
+                        version = version.Substring(0, 10) + "...";
+                    }
                 }
             }
             catch
