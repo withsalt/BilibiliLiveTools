@@ -23,18 +23,21 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliAccountApiService _accountService;
         private readonly IBilibiliCookieService _cookie;
         private readonly IPushStreamProxyService _pushStreamProxyService;
+        private readonly ILocalLockService _lockService;
 
         public AccountController(ILogger<AccountController> logger
             , IMemoryCache cache
             , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookie
-            , IPushStreamProxyService pushStreamProxyService)
+            , IPushStreamProxyService pushStreamProxyService
+            , ILocalLockService lockService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
             _pushStreamProxyService = pushStreamProxyService ?? throw new ArgumentNullException(nameof(pushStreamProxyService));
+            _lockService = lockService ?? throw new ArgumentNullException(nameof(lockService));
         }
 
         [HttpGet]
@@ -90,7 +93,7 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public Task<string> LoginByQrCode()
         {
-            if (_cache.Get<bool>(CacheKeyConstant.LOGING_STATUS_CACHE_KEY) == true)
+            if (!_lockService.TryLock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY))
             {
                 return Task.FromResult("别着急，再等等...");
             }
@@ -98,7 +101,21 @@ namespace BilibiliAutoLiver.Controllers
             {
                 return Task.FromResult("正在通过扫描二维码登录");
             }
-            _ = _accountService.LoginByQrCode();
+            if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, 300))
+            {
+                try
+                {
+                    _ = _accountService.LoginByQrCode();
+                }
+                finally
+                {
+                    _lockService.UnLock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY);
+                }
+            }
+            else
+            {
+                return Task.FromResult("正在通过扫描二维码登录");
+            }
             return Task.FromResult("Ok");
         }
 

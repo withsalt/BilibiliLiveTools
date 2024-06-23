@@ -20,7 +20,7 @@
             <div class="layui-col-sm6 layui-col-md6">
                 <div class="layui-card">
                     <div class="layui-card-header">
-                        直播状态
+                        推流状态
                     </div>
                     <div class="layui-card-body layuiadmin-card-list">
                         <p class="layuiadmin-big-font">@Model.Status</p>
@@ -33,7 +33,7 @@
                         直播间名称
                     </div>
                     <div class="layui-card-body layuiadmin-card-list">
-                        <p class="layuiadmin-big-font">哈哈哈哈</p>
+                        <p class="layuiadmin-big-font">@Model.RoomName</p>
                     </div>
                 </div>
             </div>
@@ -50,11 +50,10 @@
             <div class="layui-col-sm6 layui-col-md6">
                 <div class="layui-card">
                     <div class="layui-card-header">
-                        直播时长（本地统计）
-                        <span class="layui-badge layui-bg-blue layuiadmin-badge">分钟</span>
+                        直播时长（B站统计）
                     </div>
                     <div class="layui-card-body layuiadmin-card-list">
-                        <p class="layuiadmin-big-font">2333</p>
+                        <p class="layuiadmin-big-font">@Model.Time</p>
                     </div>
                 </div>
             </div>

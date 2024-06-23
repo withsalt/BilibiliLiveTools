@@ -7,6 +7,8 @@
         /// </summary>
         public const string LOGING_STATUS_CACHE_KEY = "LOGIN_STATUS_CACHE_KEY";
 
+        public const string QRCODE_LOGIN_STATUS_CACHE_KEY = "QRCODE_LOGIN_STATUS_CACHE_KEY";
+
         public const string LAST_REFRESH_COOKIE_TIME_CACHE_KEY = "LAST_REFRESH_COOKIE_TIME_CACHE_KEY";
 
         public const string IS_ENABLED_MONITOR_CACHE_KEY = "IS_ENABLED_MONITOR_CACHE_KEY";

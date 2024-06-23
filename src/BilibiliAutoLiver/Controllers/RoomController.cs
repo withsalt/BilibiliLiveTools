@@ -57,6 +57,7 @@ namespace BilibiliAutoLiver.Controllers
                     AreaId = myLiveRoomInfo.area_v2_id,
                     RoomName = myLiveRoomInfo.audit_info.audit_title,
                     Content = myLiveRoomInfo.announce.content,
+                    RoomId = myLiveRoomInfo.room_id,
                     CreatedTime = DateTime.UtcNow,
                     CreatedUserId = GlobalConfigConstant.SYS_USERID,
                     UpdatedTime = DateTime.UtcNow,
@@ -119,6 +120,7 @@ namespace BilibiliAutoLiver.Controllers
 
                 liveSetting.AreaId = request.AreaId;
                 liveSetting.RoomName = request.RoomName;
+                liveSetting.RoomId = request.RoomId;
                 liveSetting.UpdatedTime = DateTime.UtcNow;
                 liveSetting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
 

@@ -37,7 +37,8 @@ namespace BilibiliAutoLiver
             //Db
             builder.Services.AddDatabase();
             builder.Services.AddRepository();
-
+            //锁
+            builder.Services.AddSingleton<ILocalLockService, LocalLockService>();
             //缓存
             builder.Services.AddMemoryCache();
             //添加Bilibili相关的服务

@@ -16,6 +16,11 @@ namespace BilibiliAutoLiver.Models.Entities
         public string RoomName { get; set; }
 
         /// <summary>
+        /// 直播间Id
+        /// </summary>
+        public long RoomId { get; set; }
+
+        /// <summary>
         /// 直播间公告
         /// </summary>
         [Column(StringLength = 300, IsNullable = true)]

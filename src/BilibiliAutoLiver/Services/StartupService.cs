@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
@@ -18,18 +19,21 @@ namespace BilibiliAutoLiver.Services
         private readonly IJobSchedulerService _jobScheduler;
         private readonly IPushStreamProxyService _pushProxyService;
         private readonly IMemoryCache _cache;
+        private readonly ILocalLockService _lockService;
 
         public StartupService(ILogger<StartupService> logger
             , IBilibiliAccountApiService accountService
             , IJobSchedulerService jobScheduler
             , IPushStreamProxyService pushProxyService
-            , IMemoryCache cache)
+            , IMemoryCache cache
+            , ILocalLockService lockService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
             _jobScheduler = jobScheduler ?? throw new ArgumentNullException(nameof(jobScheduler));
             _pushProxyService = pushProxyService ?? throw new ArgumentNullException(nameof(pushProxyService));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _lockService = lockService ?? throw new ArgumentNullException(nameof(lockService));
         }
 
         public async Task Start(CancellationToken token)
@@ -57,14 +61,28 @@ namespace BilibiliAutoLiver.Services
         {
             try
             {
-                _cache.Set(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, true, TimeSpan.FromMinutes(10));
+                _lockService.Lock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, 300);
                 //通过保存的Cookie登录
                 UserInfo userInfo = await _accountService.LoginByCookie();
-                _cache.Remove(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
+                _lockService.UnLock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
                 if (userInfo == null)
                 {
-                    //通过扫描二维码登录
-                    userInfo = await _accountService.LoginByQrCode();
+                    if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, 300))
+                    {
+                        try
+                        {
+                            //通过扫描二维码登录
+                            userInfo = await _accountService.LoginByQrCode();
+                        }
+                        finally
+                        {
+                            _lockService.UnLock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("正在扫描二维码登录中...");
+                    }
                 }
                 if (userInfo == null)
                 {

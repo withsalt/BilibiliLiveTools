@@ -1,8 +1,11 @@
 using System;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Entities;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
@@ -59,6 +62,58 @@ namespace BilibiliAutoLiver.Controllers
 
         public async Task<IActionResult> Console()
         {
+            if (_proxyService.GetStatus() != PushStatus.Stopped)
+            {
+                return View(await BuildStartedViewModel());
+            }
+            else
+            {
+                return View(await BuildStoppedViewModel());
+            }
+        }
+
+        private async Task<ConsolePageViewModel> BuildStoppedViewModel()
+        {
+            string version = await TryGetFFMPEGVersion();
+            LiveSetting roomInfo = await GetRoomInfo();
+
+            ConsolePageViewModel vm = new ConsolePageViewModel()
+            {
+                Status = EnumExtensions.GetEnumDescription(_proxyService.GetStatus()),
+                Version = version,
+                RoomName = roomInfo.RoomName,
+                Time = "未开启"
+            };
+            return vm;
+        }
+
+        private async Task<ConsolePageViewModel> BuildStartedViewModel()
+        {
+            string version = await TryGetFFMPEGVersion();
+            LiveSetting roomInfo = await GetRoomInfo();
+            LiveRoomInfo infoRt = await _liveApiService.GetLiveRoomInfo(roomInfo.RoomId);
+            string time = "未知";
+            if (infoRt.is_living && DateTime.TryParse(infoRt.live_time, out DateTime liveTime))
+            {
+                time = FormatMinutes((int)((DateTime.Now - liveTime).TotalMinutes));
+            }
+            else if (infoRt.is_living)
+            {
+                time = "未开启";
+            }
+
+            ConsolePageViewModel vm = new ConsolePageViewModel()
+            {
+                Status = EnumExtensions.GetEnumDescription(_proxyService.GetStatus()),
+                Version = version,
+                RoomName = roomInfo.RoomName,
+                Time= time,
+            };
+            return vm;
+        }
+
+        private async Task<string> TryGetFFMPEGVersion()
+        {
             string version = null;
             try
             {
@@ -70,27 +125,41 @@ namespace BilibiliAutoLiver.Controllers
             }
             catch
             {
-                version = "δ֪";
+                version = "";
             }
+            return version;
+        }
 
-            string name = "";
-            var setting = await _liveSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
+        private async Task<LiveSetting> GetRoomInfo()
+        {
+            LiveSetting setting = await _liveSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
             if (setting == null)
             {
                 var roomInfo = await _liveApiService.GetMyLiveRoomInfo();
-                name = roomInfo.title;
+                return new LiveSetting()
+                {
+                    RoomName = roomInfo.title,
+                    RoomId = roomInfo.room_id,
+                };
             }
-            else
-            {
-                name = setting.RoomName;
-            }
+            return setting;
+        }
 
-            ConsolePageViewModel vm = new ConsolePageViewModel()
-            {
-                Status = EnumExtensions.GetEnumDescription(_proxyService.GetStatus()),
-                Version = version,
-            };
-            return View(vm);
+        private string FormatMinutes(int totalMinutes)
+        {
+            int days = totalMinutes / (24 * 60);
+            int hours = (totalMinutes % (24 * 60)) / 60;
+            int minutes = totalMinutes % 60;
+
+            string result = "";
+            if (days > 0)
+                result += $"{days}天";
+            if (hours > 0)
+                result += $"{hours}小时";
+            if (minutes > 0)
+                result += $"{minutes}分钟";
+
+            return string.IsNullOrEmpty(result) ? "0分钟" : result;
         }
     }
 }
