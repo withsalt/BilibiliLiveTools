@@ -30,73 +30,68 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
 
 #### 开始推流
 1. 获取程序  
-树莓派 64位操作系统：    
-```shell
-wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Linux_ARM64.zip --no-check-certificate
-```
+   树莓派 64位操作系统：  
+   ```shell
+   wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Linux_ARM64.zip --no-check-certificate
+   ```
 
-Windows：  
-点击链接下载：[https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip](https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip "https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip")
+   Windows：  
+   点击链接下载：[https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip](https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip "https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip")
 
-2. 解压并授权  
-```shell
-unzip BilibiliAutoLiver_Linux_ARM64.zip && chmod -R 755 BilibiliAutoLiver_Linux_ARM64 && chmod +x BilibiliAutoLiver_Linux_ARM64/BilibiliAutoLiver
-```
+3. 解压并授权  
+   ```shell
+   unzip BilibiliAutoLiver_Linux_ARM64.zip && chmod -R 755 BilibiliAutoLiver_Linux_ARM64 && chmod +x BilibiliAutoLiver_Linux_ARM64/BilibiliAutoLiver
+   ```
 
-3. 编辑直播设置  
-默认情况下，是没有推流配置的。只有配置推流信息之后，才能进行推流。扫码登录之后，进入**直播设置->推流设置**，安装说明，填写推流命令（目前仅支持高级模式）。**建议填写之前先测试推流命令能否正确执行。**  
-![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/push_setting.jpg)  
-比如默认的推流命令设配树莓派官方系统，并且使用USB摄像头，设备Id为`/dev/video0`。其它系统可能不适用，需要自己修改。  
-推流命令（FFmpegCmd）中的“{URL}”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “{URL}”（URL大写） ，否则无法保存。  
-这里提供常见的两条推流命令：  
-a. 树莓派，Linux操作系统：  
-推流名称为`/dev/video0`的摄像头的画面。  
-```shell
-ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Content/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv {URL}
-```
-b. Winodws操作系统  
-推流名称为`HD Pro Webcam C920`的摄像头的画面。  
-```shell
-ffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}
-```
-命令参数具体含义我就不解释了，建议直接问ChatGPT，或者直接让ChatGPT帮忙写推流命令。  
-![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/ffmpeg_chatgpt_desc.jpg)
+4. 运行  
+   在Linux上面运行：  
+   ```shell
+   ./BilibiliAutoLiver --urls="http://*:18686"  
+   ```
+   这行命令的意思是运行程序，并监听18686端口。  
 
-5. 安装FFmpeg（可选）  
-  为什么是可选？因为已经默认内置了ffmpeg，不用自行安装。但是对于一些其他的linux发行版。可能没有内置ffmpeg，所以需要用户自行安装ffmpeg。  
-  Linux（基于debian的发行版）：
- 
-  ```shell
-  # 安装，就这一行命令
-  sudo apt install ffmpeg
-  # 测试是否安装，有输出表示安装完成
-  ffmpeg -version
-  ```
+3. 使用哔哩哔哩APP扫码登录  
+   程序开始运行后，找到命令行中输出的地址信息，如下图所示：  
+   ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/use_qrcode_login.jpg)
+   在任意浏览器中打开上述任意一个地址，将会出现二维码界面  
+   ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/demo_qrcode_login.jpg)
+   使用哔哩哔哩APP进行扫码登录。扫码登录成功后，只要Cookie不过期（Cookie会自动维护和刷新），账号不主动退出，就不用再进行扫码登录啦。  
 
-6. 跑起来  
-```shell
-./BilibiliAutoLiver --urls="http://*:18686"
-```
-第一次运行需要登录。如何登录查看下一小节。  
+5. 编辑直播设置  
+   默认情况下，是没有推流配置的。只有配置推流信息之后，才能进行推流。  
+   扫码登录之后，进入**直播设置->推流设置**，安装说明，填写推流命令（目前仅支持高级模式）。**建议填写之前先测试推流命令能否正确执行。**  
+   ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/push_setting.jpg)
+   高级模式推流命令中的“{URL}”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “{URL}”（URL大写） ，否则无法保存。  
+   这里提供常见的两条推流命令：  
+   
+   a. 树莓派，Linux操作系统：  
+   推流名称为`/dev/video0`的摄像头的画面。  
+   ```shell
+   ffmpeg -thread_queue_size 1024 -f v4l2 -s 1280*720 -input_format mjpeg -i \"/dev/video0\" -stream_loop -1 -i \"Content/demo_music.m4a\" -vcodec h264_omx -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 10M -bufsize 10M -acodec aac -ac 2 -ar 44100 -ab 128k -f flv {URL}
+   ```
+   b. Winodws操作系统  
+   推流名称为`HD Pro Webcam C920`的摄像头的画面。  
+   ```shell
+   ffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}
+   ```
+   命令参数具体含义我就不解释了，建议直接问ChatGPT，或者直接让ChatGPT帮忙写推流命令。  
+   ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/ffmpeg_chatgpt_desc.jpg)
 
-7. 停止推流  
-进入**直播设置->推流设置**，点击停止直播。
+7. 安装FFmpeg（可选）  
+   为什么是可选？因为已经默认内置了ffmpeg，不用自行安装。但是对于一些其他的linux发行版。可能没有内置ffmpeg，所以需要用户自行安装ffmpeg。  
+   Linux（基于debian的发行版）：  
+   ```shell
+   # 安装，就这一行命令
+   sudo apt install ffmpeg
+   # 测试是否安装，有输出表示安装完成
+   ffmpeg -version
+   ```
 
-8. 配置开机自启等  
+8. 停止推流  
+进入**直播设置->推流设置**，点击停止直播。  
+
+9. 配置开机自启等  
 Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733  
-
-### 如何登录
-目前已经支持扫码登录和自动维护Cookie。第一次运行程序时，会要求使用Bilibili移动端扫码登录。  
-运行程序：  
-```shell
-./BilibiliAutoLiver --urls="http://*:18686"
-```
-程序开始运行后，找到命令行中输出的地址信息，如下图所示：  
-![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/use_qrcode_login.jpg)
-在任意浏览器中打开上述任意一个地址，将会出现二维码界面  
-![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/demo_qrcode_login.jpg)
-
-使用APP进行扫码登录。扫码登录成功后，只要Cookie不过期（Cookie每隔6小时会检查并自动刷新），就不用再进行扫码登录啦。  
 
 ### 常见问题
 
