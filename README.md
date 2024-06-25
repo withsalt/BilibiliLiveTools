@@ -55,11 +55,11 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
    ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/use_qrcode_login.jpg)
    在任意浏览器中打开上述任意一个地址，将会出现二维码界面  
    ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/demo_qrcode_login.jpg)
-   使用哔哩哔哩APP进行扫码登录。扫码登录成功后，只要Cookie不过期（Cookie会自动维护和刷新），账号不主动退出，就不用再进行扫码登录啦。  
+   使用哔哩哔哩APP进行扫码登录。扫码登录成功后，只要账号不主动退出，就不用再进行扫码登录啦。  
 
 5. 编辑直播设置  
    默认情况下，是没有推流配置的。只有配置推流信息之后，才能进行推流。  
-   扫码登录之后，进入**直播设置->推流设置**，安装说明，填写推流命令（目前仅支持高级模式）。**建议填写之前先测试推流命令能否正确执行。**  
+   扫码登录之后，进入**直播设置->推流设置**，按照说明填写推流命令（目前仅支持高级模式）。**建议填写之前先测试推流命令能否正确执行。**  
    ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/push_setting.jpg)
    高级模式推流命令中的“{URL}”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “{URL}”（URL大写） ，否则无法保存。  
    这里提供常见的两条推流命令：  
