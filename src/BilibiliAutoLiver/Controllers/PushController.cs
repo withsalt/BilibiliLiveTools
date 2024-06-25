@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -30,6 +31,7 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly IPushSettingRepository _pushSettingRepository;
         private readonly IPushStreamProxyService _proxyService;
+        private readonly IMaterialRepository _materialRepository;
         private readonly AppSettings _appSettings;
         private readonly IFFMpegService _ffmpeg;
 
@@ -41,6 +43,7 @@ namespace BilibiliAutoLiver.Controllers
             , ILiveSettingRepository liveSettingRepos
             , IPushSettingRepository pushSettingRepository
             , IPushStreamProxyService proxyService
+            , IMaterialRepository materialRepository
             , IOptions<AppSettings> settingOptions
             , IFFMpegService ffmpeg)
         {
@@ -51,6 +54,7 @@ namespace BilibiliAutoLiver.Controllers
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
             _pushSettingRepository = pushSettingRepository ?? throw new ArgumentNullException(nameof(pushSettingRepository));
             _proxyService = proxyService ?? throw new ArgumentNullException(nameof(proxyService));
+            _materialRepository = materialRepository ?? throw new ArgumentNullException(nameof(materialRepository));
             _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
         }
@@ -64,7 +68,17 @@ namespace BilibiliAutoLiver.Controllers
             {
                 throw new Exception("获取推流配置失败！");
             }
+            //列出支持设备的命令
             vm.ListDeviceFFmpegCmd = _ffmpeg.GetBinaryPath() + " -list_devices true -f dshow -i dummy";
+            //素材
+            var allMaterials = await _materialRepository.Where(p => !p.IsDeleted).ToListAsync();
+            if (allMaterials?.Any() == true)
+            {
+                var videos = allMaterials.Where(p => p.FileType == FileType.Video);
+                var audios = allMaterials.Where(p => p.FileType == FileType.Music);
+                vm.Videos = videos.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
+                vm.Audios = audios.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
+            }
             return View(vm);
         }
 
@@ -75,10 +89,6 @@ namespace BilibiliAutoLiver.Controllers
             if (setting == null)
             {
                 return new ResultModel<string>(-1, "获取推流配置失败");
-            }
-            if (request.Model == ConfigModel.Normal)
-            {
-                return new ResultModel<string>(-1, "暂不支持简易模式，正在开发，不好写啊！");
             }
             ResultModel<string> modelUpdateResult = null;
             switch (request.Model)

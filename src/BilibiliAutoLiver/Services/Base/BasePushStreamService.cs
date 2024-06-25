@@ -124,10 +124,6 @@ namespace BilibiliAutoLiver.Services.Base
                     _logger.ThrowLogError(message);
                 }
             }
-            if (setting.PushSetting.Model == ConfigModel.Normal)
-            {
-                _logger.ThrowLogError("暂不支持简易模式");
-            }
         }
 
 

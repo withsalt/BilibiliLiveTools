@@ -8,9 +8,9 @@
     <div class="layui-col-md12">
         <div class="layui-card">
             <div class="layui-card-header layui-card-header-custum">
-                简易模式（暂不支持）
+                简易模式
                 <div class="layui-form layui-form-custum">
-                    <input disabled type="checkbox" name="easyModel" id="easyModel" lay-filter="easyModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Normal ? "checked" : "")>
+                    <input type="checkbox" name="easyModel" id="easyModel" lay-filter="easyModel" lay-skin="switch" lay-text="开启|关闭" @(Model.PushSetting.Model == ConfigModel.Normal ? "checked" : "")>
                 </div>
             </div>
             <div class="layui-card-body" id="easyModelBody" style="@(Model.PushSetting.Model == ConfigModel.Normal ? "" : "display:none")">
@@ -20,28 +20,28 @@
                     </ul>
                     <div class="layui-tab-content">
                         <div class="layui-tab-item layui-show">
-                            <div class="layui-form" lay-filter="">
+                            <div class="layui-form" lay-filter="base_output_params_form">
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">推流分辨率</label>
                                     <div class="layui-input-inline">
-                                        <select name="pushVideo" lay-verify="required" lay-search>
-                                            <option value="480×320">480×320</option>
-                                            <option value="640×480">640×480</option>
-                                            <option value="800×600">800×600</option>
-                                            <option value="1280×720">1280×720</option>
-                                            <option value="1366×768">1366×768</option>
-                                            <option value="1440×900">1440×900</option>
-                                            <option value="1920×1080">1920×1080</option>
-                                            <option value="2560×1440">2560×1440</option>
-                                            <option value="3840×2160">3840×2160</option>
-                                            <option value="7680×4320">7680×4320</option>
+                                        <select id="outputResolution" name="outputResolution" lay-verify="required" lay-search>
+                                            <option value="480x320">480×320</option>
+                                            <option value="640x480">640×480</option>
+                                            <option value="800x600">800×600</option>
+                                            <option value="1280x720">1280×720</option>
+                                            <option value="1366x768">1366×768</option>
+                                            <option value="1440x900">1440×900</option>
+                                            <option value="1920x1080">1920×1080</option>
+                                            <option value="2560x1440">2560×1440</option>
+                                            <option value="3840x2160">3840×2160</option>
+                                            <option value="7680x4320">7680×4320</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">自定义输出参数</label>
                                     <div class="layui-input-inline">
-                                        <textarea name="other" placeholder="自定义的ffmpeg输出参数" class="layui-textarea"></textarea>
+                                        <textarea id="custumOutputParams" name="custumOutputParams" placeholder="自定义的ffmpeg输出参数。可为空，但是不能与下面配置项参数相同。最长不能超过512字符。" class="layui-textarea"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
+                <div class="layui-tab layui-tab-brief" lay-filter="input_type_tab">
                     <ul class="layui-tab-title">
                         <li class="layui-this">推流视频</li>
                         <li>推流桌面</li>
@@ -57,75 +57,43 @@
                         <li>推流摄像头（高级）</li>
                     </ul>
                     <div class="layui-tab-content">
-                        <div class="layui-tab-item layui-show">
+                        <div class="layui-tab-item layui-show" lay-id="1">
                             <div class="layui-form" lay-filter="">
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">推流视频</label>
                                     <div class="layui-input-inline">
-                                        <select name="pushVideo" lay-verify="required" lay-search>
-                                            <option value="">带搜索的选择框</option>
-                                            <option value="1">layer</option>
-                                            <option value="2">form</option>
-                                            <option value="3">layim</option>
-                                            <option value="4">element</option>
-                                            <option value="5">laytpl</option>
-                                            <option value="6">upload</option>
-                                            <option value="7">laydate</option>
-                                            <option value="8">laypage</option>
-                                            <option value="9">flow</option>
-                                            <option value="10">util</option>
-                                            <option value="11">code</option>
-                                            <option value="12">tree</option>
-                                            <option value="13">layedit</option>
-                                            <option value="14">nav</option>
-                                            <option value="15">tab</option>
-                                            <option value="16">table</option>
-                                            <option value="17">select</option>
-                                            <option value="18">checkbox</option>
-                                            <option value="19">switch</option>
-                                            <option value="20">radio</option>
+                                        <select id="videoId" name="videoId" lay-verify="required" lay-search>
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.Videos)
+                                            {
+                                                <option value="@item.Key">@item.Value</option>
+                                            }
                                         </select>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">视频是否静音</label>
                                     <div class="layui-input-inline">
-                                        <input type="checkbox" name="yyy" lay-skin="switch" lay-text="是|否">
+                                        <input id="isMute" name="isMute" type="checkbox" lay-skin="switch" lay-text="是|否">
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">推流音频</label>
                                     <div class="layui-input-inline">
-                                        <select name="pushVideo" lay-verify="required" lay-search>
-                                            <option value="">带搜索的选择框</option>
-                                            <option value="1">layer</option>
-                                            <option value="2">form</option>
-                                            <option value="3">layim</option>
-                                            <option value="4">element</option>
-                                            <option value="5">laytpl</option>
-                                            <option value="6">upload</option>
-                                            <option value="7">laydate</option>
-                                            <option value="8">laypage</option>
-                                            <option value="9">flow</option>
-                                            <option value="10">util</option>
-                                            <option value="11">code</option>
-                                            <option value="12">tree</option>
-                                            <option value="13">layedit</option>
-                                            <option value="14">nav</option>
-                                            <option value="15">tab</option>
-                                            <option value="16">table</option>
-                                            <option value="17">select</option>
-                                            <option value="18">checkbox</option>
-                                            <option value="19">switch</option>
-                                            <option value="20">radio</option>
+                                        <select id="audioId" name="audioId" lay-search>
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.Audios)
+                                            {
+                                                <option value="@item.Key">@item.Value</option>
+                                            }
                                         </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="layui-tab-item">内容2</div>
-                        <div class="layui-tab-item">内容3</div>
-                        <div class="layui-tab-item">内容4</div>
+                        <div class="layui-tab-item" lay-id="2">内容2</div>
+                        <div class="layui-tab-item" lay-id="3">内容3</div>
+                        <div class="layui-tab-item" lay-id="4">内容4</div>
                     </div>
                 </div>
 
@@ -301,13 +269,7 @@
                 form.render();
             });
 
-            form.on('submit(submit_live_setting)', function (data) {
-                var obj = {
-                    isAutoRetry: $('input[name="isAutoRetry"]:checked').val() == 1,
-                    retryInterval: $('input[name="retryInterval"]').val(),
-                    model: $("#easyModel").prop("checked") ? 1 : ($("#advanceModel").prop("checked") ? 2 : 0),
-                    ffmpegCommand: getFFMpegCommandCode(),
-                };
+            function save(obj) {
                 var loadIndex = layer.load(2, {
                     timeout: 300000
                 });
@@ -373,6 +335,25 @@
                         console.log(data);
                     }
                 });
+            }
+
+            form.on('submit(submit_live_setting)', function (data) {
+                var model = $("#easyModel").prop("checked") ? 1 : ($("#advanceModel").prop("checked") ? 2 : 0)
+                if (model == 1) {
+
+                }
+                else if (model == 2) {
+                    var obj = {
+                        isAutoRetry: $('input[name="isAutoRetry"]:checked').val() == 1,
+                        retryInterval: $('input[name="retryInterval"]').val(),
+                        model: model,
+                        ffmpegCommand: getFFMpegCommandCode(),
+                    };
+                    save(obj);
+                }
+                else {
+                    layer.msg("未知的配置类型", { icon: 5 });
+                }
                 return false;
             });
 

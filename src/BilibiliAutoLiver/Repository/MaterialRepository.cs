@@ -60,7 +60,7 @@ namespace BilibiliAutoLiver.Repository
                 #region 排序
 
                 if (string.IsNullOrEmpty(param.Order))
-                    param.Order = "asc";
+                    param.Order = "desc";
                 if (string.IsNullOrEmpty(param.Field))
                     param.Field = "id";
                 if (param.Order.Equals("asc", StringComparison.CurrentCultureIgnoreCase))
@@ -111,6 +111,5 @@ namespace BilibiliAutoLiver.Repository
                 return null;
             }
         }
-
     }
 }
