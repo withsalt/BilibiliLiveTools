@@ -108,14 +108,13 @@ Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733
 未安装ffmpeg。
 
 ### 题外话
-项目中所用的API都是各处扒拉来的野生API，非官方提供的API。因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。还有种情况是，我本人也不用了。也就不更新了.....  
+项目中所用的API都是各处扒拉来的野生API，非官方提供的API。因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。  
+还有种情况是，我本人也不用了。也就不更新了.....  
 
 ### Todo
 1、添加日志功能，能清晰的看到是为何开启推流失败  
 2、不再直接使用ffmpeg推流命令进行推流，将改为内置的推流方式。将有更高的可玩性，比如提供一个图像处理管道，通过机器视觉对图像进行二次处理。  
 3、弹幕获取功能（有这个计划，但是我感觉没啥用，不一定会搞）  
-
-[查看直播分区](https://github.com/withsalt/BilibiliLiveTools/blob/master/%E7%9B%B4%E6%92%AD%E5%88%86%E5%8C%BA.md "查看直播分区")
 
  ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/withsalt/BilibiliLiveTools.svg)](https://starchart.cc/withsalt/BilibiliLiveTools)
