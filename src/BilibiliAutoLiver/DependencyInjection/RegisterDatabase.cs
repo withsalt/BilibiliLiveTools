@@ -99,7 +99,7 @@ namespace BilibiliAutoLiver.DependencyInjection
             {
                 throw new Exception($"Can not get database sqlite from IdleBus.");
             }
-            logger.LogInformation($"For sqlite, automatic sync database structure is turned on, start seeding database...");
+            logger.LogInformation($"Automatic sync database structure is turned on, start seeding database...");
             //同步表结构
             SyncStructure(db);
             //写入种子数据
