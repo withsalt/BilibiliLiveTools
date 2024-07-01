@@ -27,10 +27,10 @@ namespace BilibiliLiverTests
 
             foreach (string cmd in cmds)
             {
-                if (CmdAnalyzer.TryParse(cmd, false, "D:\\data\\", out _, out var cmdResult))
+                if (CmdAnalyzer.TryParse(cmd, false, "D:\\data\\", null, out var message, out var ffmpegCmd, out string cmdName, out string cmdArg))
                 {
                     Console.WriteLine(cmd);
-                    Console.WriteLine(cmdResult);
+                    Console.WriteLine(ffmpegCmd);
                     Console.WriteLine();
                 }
             }

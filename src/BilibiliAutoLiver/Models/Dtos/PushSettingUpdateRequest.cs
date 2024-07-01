@@ -1,4 +1,5 @@
-﻿using BilibiliAutoLiver.Models.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using BilibiliAutoLiver.Models.Enums;
 
 namespace BilibiliAutoLiver.Models.Dtos
 {
@@ -14,11 +15,14 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// <summary>
         /// 是否开启自动重试
         /// </summary>
+        [Required(ErrorMessage = "参数是否开启不间断直播不能为空")]
         public bool IsAutoRetry { get; set; }
 
         /// <summary>
         /// 重试间隔时间
         /// </summary>
+        [Required(ErrorMessage = "参数重试间隔时间不能为空")]
+        [Range(30, int.MaxValue, ErrorMessage = "重试间隔时间不能小于30秒")]
         public int RetryInterval { get; set; }
 
         #region 简易模式

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -90,6 +92,12 @@ namespace BilibiliAutoLiver.Controllers
             {
                 return new ResultModel<string>(-1, "获取推流配置失败");
             }
+            if (!ModelState.IsValid)
+            {
+                List<string> errors = ModelState.SelectMany(p => p.Value.Errors.Select(p => p.ErrorMessage)).ToList();
+                return new ResultModel<string>(-1, string.Join(';', errors));
+            }
+
             ResultModel<string> modelUpdateResult = null;
             switch (request.Model)
             {

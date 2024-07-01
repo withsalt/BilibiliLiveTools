@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="layui-tab layui-tab-brief" lay-filter="input_type_tab">
+                <div class="layui-tab layui-tab-brief" lay-filter="input_type_tab" id="input_type_tab">
                     <ul class="layui-tab-title">
                         <li class="layui-this">推流视频</li>
                         <li>推流桌面</li>
@@ -58,7 +58,7 @@
                     </ul>
                     <div class="layui-tab-content">
                         <div class="layui-tab-item layui-show" lay-id="1">
-                            <div class="layui-form" lay-filter="">
+                            <div class="layui-form" lay-filter="input_type_1">
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">推流视频</label>
                                     <div class="layui-input-inline">
@@ -206,9 +206,11 @@
     <script>
         layui.config({
             base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
-        }).use(['form', 'code', 'layer', 'jquery'], function () {
+        }).use(['form', 'code', 'layer', 'jquery', 'element'], function () {
             $ = layui.jquery;
             var layer = layui.layer,
+                element = layui.element,
+                layer = layui.layer,
                 form = layui.form;
 
             // 执行渲染
@@ -337,15 +339,53 @@
                 });
             }
 
+            function safeParseInt(numStr) {
+                let num = parseInt(numStr, 10);
+                if (!Number.isNaN(num) && Number.isSafeInteger(num)) {
+                    return num;
+                } else {
+                    return 0;
+                }
+            }
+
             form.on('submit(submit_live_setting)', function (data) {
                 var model = $("#easyModel").prop("checked") ? 1 : ($("#advanceModel").prop("checked") ? 2 : 0)
+                var isAutoRetry = $('input[name="isAutoRetry"]:checked').val() == 1;
+                var retryInterval = safeParseInt($('input[name="retryInterval"]').val());
                 if (model == 1) {
+                    var tabIndex = $('#input_type_tab .layui-tab-item.layui-show').attr('lay-id');
+                    if (!tabIndex) {
+                        layer.msg("未知的推流类型", { icon: 5 });
+                        return false;
+                    }
+                    tabIndex = safeParseInt(tabIndex);
+                    if (tabIndex <= 0) {
+                        layer.msg("未知的推流类型", { icon: 5 });
+                        return false;
+                    }
+                    var inputTypeParams = { inputType: tabIndex };
+                    var baseOutputParams = form.val('base_output_params_form');
+                    var obj = null;
 
+                    switch (tabIndex) {
+                        case 1:
+                            var inputType1Params = form.val('input_type_1');
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
+                            obj.isMute = obj.isMute == "on" ? true : false;
+                            obj.videoId = safeParseInt(obj.videoId);
+                            obj.audioId = safeParseInt(obj.audioId);
+                            break;
+                    }
+
+                    obj.isAutoRetry = isAutoRetry;
+                    obj.retryInterval = retryInterval;
+                    obj.model = model;
+                    save(obj);
                 }
                 else if (model == 2) {
                     var obj = {
-                        isAutoRetry: $('input[name="isAutoRetry"]:checked').val() == 1,
-                        retryInterval: $('input[name="retryInterval"]').val(),
+                        isAutoRetry: isAutoRetry,
+                        retryInterval: retryInterval,
                         model: model,
                         ffmpegCommand: getFFMpegCommandCode(),
                     };
@@ -390,9 +430,6 @@
             });
 
             form.on('submit(submit_stop_live)', function (data) {
-
-                console.log("111");
-
                 var loadIndex = layer.load(2, {
                     timeout: 300000
                 });

@@ -212,7 +212,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"扫码登录失败，{ex.Message}");
+                _logger.LogError(ex, $"扫码登录失败，{ex.Message}");
             }
             finally
             {
