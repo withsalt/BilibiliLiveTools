@@ -5,7 +5,7 @@ namespace BilibiliAutoLiver.Models.Settings
 {
     public class InputVideoSource
     {
-        public InputSourceType Type { get; set; }
+        public InputType Type { get; set; }
 
         public string Path { get; set; }
 
@@ -19,7 +19,7 @@ namespace BilibiliAutoLiver.Models.Settings
         {
             get
             {
-                if (this.Type != InputSourceType.Camera)
+                if (this.Type != InputType.Camera)
                 {
                     return 0;
                 }
@@ -31,7 +31,7 @@ namespace BilibiliAutoLiver.Models.Settings
         {
             get
             {
-                if (this.Type != InputSourceType.Camera)
+                if (this.Type != InputType.Camera)
                 {
                     return 0;
                 }

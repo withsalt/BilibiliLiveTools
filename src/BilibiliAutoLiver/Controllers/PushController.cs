@@ -8,6 +8,7 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.Dtos.EasyModel;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
@@ -98,6 +99,14 @@ namespace BilibiliAutoLiver.Controllers
                 return new ResultModel<string>(-1, string.Join(';', errors));
             }
 
+            //更新配置
+            setting.Model = request.Model;
+            setting.IsAutoRetry = request.IsAutoRetry;
+            setting.RetryInterval = request.RetryInterval;
+            setting.UpdatedTime = DateTime.UtcNow;
+            setting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
+            setting.IsUpdate = true;
+
             ResultModel<string> modelUpdateResult = null;
             switch (request.Model)
             {
@@ -114,12 +123,6 @@ namespace BilibiliAutoLiver.Controllers
             {
                 return modelUpdateResult;
             }
-            //更新重试配置
-            setting.IsAutoRetry = request.IsAutoRetry;
-            setting.RetryInterval = request.RetryInterval;
-            setting.UpdatedTime = DateTime.UtcNow;
-            setting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
-            setting.IsUpdate = true;
 
             int updateResult = await _pushSettingRepository.UpdateAsync(setting);
             if (updateResult <= 0)
@@ -135,10 +138,6 @@ namespace BilibiliAutoLiver.Controllers
 
         private ResultModel<string> UpdateAdvanceModel(PushSettingUpdateRequest request, PushSetting setting)
         {
-            if (setting.Model == ConfigModel.Normal)
-            {
-                setting.Model = ConfigModel.Advance;
-            }
             if (string.IsNullOrWhiteSpace(setting.FFmpegCommand))
             {
                 return new ResultModel<string>(-1, "推流命令不能为空");
@@ -154,9 +153,17 @@ namespace BilibiliAutoLiver.Controllers
 
         private ResultModel<string> UpdateEasyModel(PushSettingUpdateRequest request, PushSetting setting)
         {
-            if (setting.Model == ConfigModel.Advance)
+            if (!Enum.IsDefined(typeof(InputType), (int)request.InputType))
             {
-                setting.Model = ConfigModel.Normal;
+                return new ResultModel<string>(-1, "未知的推流类型");
+            }
+            try
+            {
+                EasyModelConvertFactory.ToEntity(request, setting);
+            }
+            catch (Exception ex)
+            {
+                return new ResultModel<string>(-1, ex.Message);
             }
             return new ResultModel<string>(0);
         }

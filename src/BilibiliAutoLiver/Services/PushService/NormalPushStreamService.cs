@@ -202,21 +202,20 @@ namespace BilibiliAutoLiver.Services.PushService
 
         private async Task<ISourceReader> GetSourceReader(string rtmpAddr)
         {
-            //SettingDto setting = await GetSetting();
-            //switch (_liveSetting.V2.Input.VideoSource.Type)
-            //{
-            //    case InputSourceType.File:
-            //        return new VideoSourceReader(_liveSetting, rtmpAddr, _logger);
-            //    case InputSourceType.Desktop:
-            //        return new DesktopSourceReader(_liveSetting, rtmpAddr, _logger);
-            //    case InputSourceType.Camera:
-            //        return new CameraSourceReader(_liveSetting, rtmpAddr, _logger);
-            //    case InputSourceType.CameraPlus:
-            //        return new CameraPlusSourceReader(_liveSetting, rtmpAddr, _logger, _pipeContainer);
-            //    default:
-            //        throw new NotImplementedException($"不支持的输入类型：{_liveSetting.V2.Input.VideoSource.Type}");
-            //}
-            return null;
+            SettingDto setting = await GetSetting();
+            switch (setting.PushSetting.InputType)
+            {
+                case InputType.Video:
+                    return new VideoSourceReader(setting, rtmpAddr, _logger);
+                case InputType.Desktop:
+                    return new DesktopSourceReader(setting, rtmpAddr, _logger);
+                case InputType.Camera:
+                    return new CameraSourceReader(setting, rtmpAddr, _logger);
+                case InputType.CameraPlus:
+                    return new CameraPlusSourceReader(setting, rtmpAddr, _logger, _pipeContainer);
+                default:
+                    throw new NotImplementedException($"不支持的输入类型：{setting.PushSetting.InputType}");
+            }
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
 using FFMpegCore.Enums;
@@ -11,7 +12,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
     {
         protected readonly ILogger _logger;
 
-        protected LiveSettings Settings { get; set; }
+        protected SettingDto Settings { get; set; }
         protected FFMpegArguments FFMpegArguments { get; set; }
 
         protected FFMpegArgumentProcessor Processor { get; set; }
@@ -21,9 +22,9 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         protected string videoMuteMapOpt = null;
         protected string audioMuteMapOpt = null;
 
-        public BaseSourceReader(LiveSettings settings, string rtmpAddr, ILogger logger)
+        public BaseSourceReader(SettingDto setting, string rtmpAddr, ILogger logger)
         {
-            this.Settings = settings;
+            this.Settings = setting;
             this.RtmpAddr = !rtmpAddr.StartsWith('\"') ? $"\"{rtmpAddr}\"" : rtmpAddr;
             _logger = logger;
         }

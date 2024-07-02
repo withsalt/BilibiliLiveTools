@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
     public class CameraSourceReader : BaseSourceReader
     {
-        public CameraSourceReader(LiveSettings settings, string rtmpAddr, ILogger logger) : base(settings, rtmpAddr, logger)
+        public CameraSourceReader(SettingDto setting, string rtmpAddr, ILogger logger) : base(setting, rtmpAddr, logger)
         {
 
         }

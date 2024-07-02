@@ -4,7 +4,7 @@ namespace BilibiliAutoLiver.Models.Settings
 {
     public class InputAudioSource
     {
-        public InputSourceType Type { get; set; }
+        public InputType Type { get; set; }
 
         public int Index { get; set; } = -1;
 

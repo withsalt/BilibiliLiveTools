@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
@@ -22,7 +23,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         private Queue<BufferFrame> frameQueue = new Queue<BufferFrame>();
         private readonly int _frameRate = 30;
 
-        public CameraPlusSourceReader(LiveSettings settings, string rtmpAddr, ILogger logger, IPipeContainer pipeContainer) : base(settings, rtmpAddr, logger)
+        public CameraPlusSourceReader(SettingDto setting, string rtmpAddr, ILogger logger, IPipeContainer pipeContainer) : base(setting, rtmpAddr, logger)
         {
             this.PipeContainer = pipeContainer;
             this.DeviceProvider = new CameraDeviceProvider(settings.V2.Input.VideoSource, OnFrameArrived);
