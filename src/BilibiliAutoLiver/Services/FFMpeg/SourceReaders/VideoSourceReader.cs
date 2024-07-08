@@ -33,17 +33,15 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         private void GetVideoInputArg()
         {
-            InputVideoSource videoSource = Settings.V2.Input.VideoSource;
-            if (string.IsNullOrEmpty(videoSource.Path))
+            if (string.IsNullOrEmpty(this.Settings.PushSettingDto.VideoPath))
             {
                 throw new ArgumentNullException("视频输入源Path不能为空");
             }
-            if (!File.Exists(videoSource.Path))
+            if (!File.Exists(this.Settings.PushSettingDto.VideoPath))
             {
-                throw new FileNotFoundException($"视频输入源{videoSource.Path}文件不存在", videoSource.Path);
+                throw new FileNotFoundException($"视频输入源{this.Settings.PushSettingDto.VideoPath}文件不存在", this.Settings.PushSettingDto.VideoPath);
             }
-            var fullPath = Path.GetFullPath(videoSource.Path);
-            FFMpegArguments = FFMpegArguments.FromFileInput(fullPath, true, opt =>
+            FFMpegArguments = FFMpegArguments.FromFileInput(this.Settings.PushSettingDto.VideoPath, true, opt =>
             {
                 opt.WithCustomArgument("-re");
                 opt.WithCustomArgument("-stream_loop -1");

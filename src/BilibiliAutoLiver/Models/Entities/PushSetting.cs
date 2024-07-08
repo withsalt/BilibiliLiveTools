@@ -21,6 +21,11 @@ namespace BilibiliAutoLiver.Models.Entities
         /// </summary>
         public ConfigModel Model { get; set; }
 
+        /// <summary>
+        /// 输出质量
+        /// </summary>
+        public OutputQualityEnum Quality { get; set; }
+
         #region 高级模式
 
         /// <summary>
@@ -66,6 +71,30 @@ namespace BilibiliAutoLiver.Models.Entities
         /// 推流音频Id
         /// </summary>
         public long? AudioId {  get; set; }
+
+        /// <summary>
+        /// 设备名称
+        /// </summary>
+        public string DeviceName { get; set; }
+
+        /// <summary>
+        /// 输入分辨率
+        /// </summary>
+        [MaxLength(64)]
+        [Column(IsNullable = true)]
+        public string InputResolution { get; set; }
+
+        /// <summary>
+        /// 帧数
+        /// </summary>
+        public double InputFramerate { get; set; }
+
+        /// <summary>
+        /// 输入屏幕参数
+        /// </summary>
+        [MaxLength(64)]
+        [Column(IsNullable = true)]
+        public string InputScreen { get; set; }
 
         #endregion
 

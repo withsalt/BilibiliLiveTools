@@ -30,6 +30,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting.VideoId = request.VideoId;
             this.Setting.AudioId = request.AudioId.HasValue && request.AudioId.Value > 0 ? request.AudioId.Value : null;
             this.Setting.IsMute = request.IsMute;
+            this.Setting.InputType = request.InputType;
         }
     }
 }

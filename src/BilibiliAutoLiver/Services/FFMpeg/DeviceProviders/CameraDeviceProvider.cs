@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Settings;
 using FlashCap;
 using SkiaSharp;
@@ -25,7 +26,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
         private static readonly object stopLocker = new object();
         private bool _isStopped = false;
 
-        public CameraDeviceProvider(InputVideoSource sourceItem, Action<BufferFrame> onBuffer)
+        public CameraDeviceProvider(PushSettingDto pushSetting, Action<BufferFrame> onBuffer)
         {
             if (onBuffer == null) throw new ArgumentException("On buffer action can not null");
             _onBuffer = onBuffer;
@@ -35,29 +36,29 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
             {
                 throw new Exception($"找不到视频输入设备！");
             }
-            if (!string.IsNullOrEmpty(sourceItem.Path))
+            if (!string.IsNullOrEmpty(pushSetting.DeviceName))
             {
-                _captureDeviceDescriptor = devices.Where(p => p.Name == sourceItem.Path).FirstOrDefault();
+                _captureDeviceDescriptor = devices.Where(p => p.Name == pushSetting.DeviceName).FirstOrDefault();
             }
-            if (int.TryParse(sourceItem.Path, out int index)
+            if (int.TryParse(pushSetting.DeviceName, out int index)
                 && index >= 0
                 && _captureDeviceDescriptor == null
                 && index < devices.Count)
             {
                 _captureDeviceDescriptor = devices[index];
             }
-            if (_captureDeviceDescriptor == null && !string.IsNullOrEmpty(sourceItem.Path))
+            if (_captureDeviceDescriptor == null && !string.IsNullOrEmpty(pushSetting.DeviceName))
             {
-                throw new Exception($"找不到名称为{sourceItem.Path}的视频输入设备！");
+                throw new Exception($"找不到名称为{pushSetting.DeviceName}的视频输入设备！");
             }
-            if (string.IsNullOrEmpty(sourceItem.Resolution) || sourceItem.Width == 0 || sourceItem.Height == 0)
+            if (pushSetting.InputWidth == 0 || pushSetting.InputHeight == 0)
             {
                 throw new Exception($"当视频输入类型为设备时，分辨率不能为空！");
             }
-            IEnumerable<VideoCharacteristics> targetCharacteristics = _captureDeviceDescriptor.Characteristics?.Where(p => p.Width == sourceItem.Width && p.Height == sourceItem.Height && p.PixelFormat != PixelFormats.Unknown);
+            IEnumerable<VideoCharacteristics> targetCharacteristics = _captureDeviceDescriptor.Characteristics?.Where(p => p.Width == pushSetting.InputWidth && p.Height == pushSetting.InputHeight && p.PixelFormat != PixelFormats.Unknown);
             if (targetCharacteristics?.Any() != true)
             {
-                throw new Exception($"视频输入设备{_captureDeviceDescriptor.Name}不支持分辨率{sourceItem.Resolution}");
+                throw new Exception($"视频输入设备{_captureDeviceDescriptor.Name}不支持分辨率{pushSetting.InputWidth}x{pushSetting.InputHeight}");
             }
             _characteristics = targetCharacteristics.First();
             this.Size = new Size(_characteristics.Width, _characteristics.Height);

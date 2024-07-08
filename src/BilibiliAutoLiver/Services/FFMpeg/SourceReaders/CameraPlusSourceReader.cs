@@ -26,7 +26,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         public CameraPlusSourceReader(SettingDto setting, string rtmpAddr, ILogger logger, IPipeContainer pipeContainer) : base(setting, rtmpAddr, logger)
         {
             this.PipeContainer = pipeContainer;
-            this.DeviceProvider = new CameraDeviceProvider(settings.V2.Input.VideoSource, OnFrameArrived);
+            this.DeviceProvider = new CameraDeviceProvider(this.Settings.PushSettingDto, OnFrameArrived);
             this.DeviceProvider.Start();
             this.PipeSource = new CameraFramePipeSource(frameQueue);
         }
