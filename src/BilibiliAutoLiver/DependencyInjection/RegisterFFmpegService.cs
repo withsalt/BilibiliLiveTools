@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using BilibiliAutoLiver.Services.FFMpeg;
+using BilibiliAutoLiver.Services.FFMpeg.Services;
 using BilibiliAutoLiver.Services.Interface;
 using FFMpegCore;
 using Microsoft.Extensions.DependencyInjection;

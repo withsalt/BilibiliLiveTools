@@ -10,7 +10,7 @@ using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
 
-namespace BilibiliAutoLiver.Services.FFMpeg
+namespace BilibiliAutoLiver.Services.FFMpeg.Services
 {
     public class FFMpegService : BaseFFPlayService, IFFMpegService
     {
