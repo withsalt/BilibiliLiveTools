@@ -35,7 +35,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         private void GetVideoInputArg()
         {
-            InputVideoSource videoSource = Settings.V2.Input.VideoSource;
             Rectangle? rectangle = AnalyzeRectangle();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -88,11 +87,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         private Rectangle? AnalyzeRectangle()
         {
-            if (string.IsNullOrWhiteSpace(Settings.V2.Input.VideoSource.Path))
+            if (string.IsNullOrWhiteSpace(Settings.PushSettingDto.InputScreen))
             {
                 return null;
             }
-            string[] param = Settings.V2.Input.VideoSource.Path.Split(',');
+            string[] param = Settings.PushSettingDto.InputScreen.Split(',');
             if (param == null || param.Length != 4)
             {
                 _logger.LogInformation("Path参数不正确，示例：0,0,800,800（x, y, width, height）");

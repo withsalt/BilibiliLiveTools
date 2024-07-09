@@ -33,24 +33,24 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         private void GetVideoInputArg()
         {
-            InputVideoSource videoSource = Settings.V2.Input.VideoSource;
+            PushSettingDto pushSetting = this.Settings.PushSettingDto;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                FFMpegArguments = FFMpegArguments.FromFileInput($"video={Settings.V2.Input.VideoSource.Path}", false, opt =>
+                FFMpegArguments = FFMpegArguments.FromFileInput($"video={pushSetting.DeviceName}", false, opt =>
                 {
                     opt.ForceFormat("dshow");
-                    opt.WithFramerate(Settings.V2.Input.VideoSource.Framerate);
-                    opt.WithCustomArgument($"-video_size {Settings.V2.Input.VideoSource.Width}x{Settings.V2.Input.VideoSource.Height}");
+                    opt.WithFramerate(pushSetting.InputFramerate);
+                    opt.WithCustomArgument($"-video_size {pushSetting.InputWidth}x{pushSetting.InputHeight}");
                     WithMuteArgument(opt);
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                FFMpegArguments = FFMpegArguments.FromFileInput($"video={Settings.V2.Input.VideoSource.Path}", false, opt =>
+                FFMpegArguments = FFMpegArguments.FromFileInput($"video={pushSetting.DeviceName}", false, opt =>
                 {
                     opt.ForceFormat("v4l2");
-                    opt.WithFramerate(Settings.V2.Input.VideoSource.Framerate);
-                    opt.WithCustomArgument($"-video_size {Settings.V2.Input.VideoSource.Width}x{Settings.V2.Input.VideoSource.Height}");
+                    opt.WithFramerate(pushSetting.InputFramerate);
+                    opt.WithCustomArgument($"-video_size {pushSetting.InputWidth}x{pushSetting.InputHeight}");
                     WithMuteArgument(opt);
                 });
             }

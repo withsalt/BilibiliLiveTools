@@ -34,7 +34,6 @@ namespace BilibiliAutoLiver.Services.PushService
         public AdvancePushStreamService(ILogger<AdvancePushStreamService> logger
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
-            , IOptions<LiveSettings> liveSettingOptions
             , IFFMpegService ffmpeg
             , IServiceProvider serviceProvider
             , IOptions<AppSettings> settingOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)

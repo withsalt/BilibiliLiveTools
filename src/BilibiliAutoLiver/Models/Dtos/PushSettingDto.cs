@@ -38,5 +38,30 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// 是否静音
         /// </summary>
         public bool IsMute { get; set; }
+
+        /// <summary>
+        /// 输入屏幕参数
+        /// </summary>
+        public string InputScreen {  get; set; }
+
+        /// <summary>
+        /// 设备名称
+        /// </summary>
+        public string DeviceName {  get; set; }
+
+        /// <summary>
+        /// 帧数
+        /// </summary>
+        public double InputFramerate {  get; set; }
+
+        /// <summary>
+        /// 输出分辨率（宽）
+        /// </summary>
+        public int InputWidth { get; set; }
+
+        /// <summary>
+        /// 输出分辨率（高）
+        /// </summary>
+        public int InputHeight { get; set; }
     }
 }

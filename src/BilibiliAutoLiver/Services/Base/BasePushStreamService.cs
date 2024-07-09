@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Repository.Interface;
@@ -59,14 +62,58 @@ namespace BilibiliAutoLiver.Services.Base
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var pushSetting = await scope.ServiceProvider.GetRequiredService<IPushSettingRepository>().Where(p => !p.IsDeleted).FirstAsync();
-                var liveSetting = await scope.ServiceProvider.GetRequiredService<ILiveSettingRepository>().Where(p => !p.IsDeleted).FirstAsync();
+                var provider = scope.ServiceProvider;
+                PushSetting pushSetting = await provider.GetRequiredService<IPushSettingRepository>().Where(p => !p.IsDeleted).FirstAsync();
+                LiveSetting liveSetting = await provider.GetRequiredService<ILiveSettingRepository>().Where(p => !p.IsDeleted).FirstAsync();
                 return new SettingDto()
                 {
                     PushSetting = pushSetting,
-                    LiveSetting = liveSetting
+                    LiveSetting = liveSetting,
+                    PushSettingDto = await ConvertPushSettingToDto(scope.ServiceProvider, pushSetting),
                 };
             }
+        }
+
+        private async Task<PushSettingDto> ConvertPushSettingToDto(IServiceProvider provider, PushSetting pushSetting)
+        {
+            if (pushSetting == null)
+                throw new ArgumentNullException(nameof(pushSetting), "推流设置获取失败");
+
+            if (!pushSetting.IsUpdate)
+                return null;
+
+            if (!ResolutionHelper.TryParse(pushSetting.OutputResolution, out int width, out int height))
+                throw new ArgumentException(pushSetting.OutputResolution, $"输出分辨率格式不正确，{pushSetting.OutputResolution}");
+
+            var materialRepository = provider.GetRequiredService<IMaterialRepository>();
+
+            List<long> materialIds = new List<long>(2);
+            if (pushSetting.VideoId > 0)
+            {
+                materialIds.Add(pushSetting.VideoId);
+            }
+            if (pushSetting.AudioId.HasValue && pushSetting.AudioId > 0)
+            {
+                materialIds.Add(pushSetting.AudioId.Value);
+            }
+            List<Material> materials = await provider.GetRequiredService<IMaterialRepository>().Where(p => materialIds.Contains(p.Id)).ToListAsync();
+            Material videoMaterial = materials.Where(p => p.FileType == FileType.Video).FirstOrDefault();
+            if (videoMaterial == null)
+            {
+                throw new FileNotFoundException($"Id为{pushSetting.VideoId}视频素材不存在！");
+            }
+            Material audioMaterial = materials.Where(p => p.FileType == FileType.Music).FirstOrDefault();
+            PushSettingDto pushSettingDto = new PushSettingDto()
+            {
+                InputType = pushSetting.InputType,
+                OutputWidth = width,
+                OutputHeight = height,
+                CustumOutputParams = pushSetting.CustumOutputParams,
+                VideoPath = MaterialPath.GetAbsolutePath(videoMaterial, _appSettings.DataDirectory),
+                AudioPath = string.IsNullOrWhiteSpace(audioMaterial?.Path) ? string.Empty : MaterialPath.GetAbsolutePath(audioMaterial, _appSettings.DataDirectory),
+                IsMute = pushSetting.IsMute,
+            };
+            return pushSettingDto;
         }
 
         /// <summary>

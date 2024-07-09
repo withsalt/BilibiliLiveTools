@@ -7,5 +7,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         public PushSetting PushSetting { get; set; }
 
         public LiveSetting LiveSetting { get; set; }
+
+        public PushSettingDto PushSettingDto {  get; set; }
     }
 }
