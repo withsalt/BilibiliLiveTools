@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Entities;
 
 namespace BilibiliAutoLiver.Models.ViewModels

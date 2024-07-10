@@ -91,7 +91,35 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="layui-tab-item" lay-id="2">内容2</div>
+                        <div class="layui-tab-item" lay-id="2">
+                             <div class="layui-form" lay-filter="input_type_2">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">屏幕范围</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" id="inputScreen" name="inputScreen" value="@Model.PushSetting.InputScreen" autocomplete="off" placeholder="推流屏幕范围" class="layui-input">
+                                        <div class="layui-form-mid layui-text-em">格式：0,0,800,800（x, y, width, height）<br />含义：从屏幕左上角0,0坐标开始，推流800*800范围内的屏幕</div>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">推流电脑声音</label>
+                                    <div class="layui-input-inline">
+                                        <input id="isDesktopMute" name="isDesktopMute" type="checkbox" lay-skin="switch" lay-text="是|否">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">推流音频</label>
+                                    <div class="layui-input-inline">
+                                        <select id="audioId" name="audioId" lay-search>
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.Audios)
+                                            {
+                                                <option value="@item.Key">@item.Value</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="layui-tab-item" lay-id="3">内容3</div>
                         <div class="layui-tab-item" lay-id="4">内容4</div>
                     </div>
@@ -142,15 +170,15 @@
                         <div class="layui-input-inline">
                             <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="1" title="是" @(Model.PushSetting.IsAutoRetry ? "checked" : "")>
                             <input type="radio" name="isAutoRetry" lay-filter="isAutoRetry" value="0" title="否" @(Model.PushSetting.IsAutoRetry ? "" : "checked")>
+                            <div class="layui-form-mid layui-word-aux">当直播推流异常终止后，是否自动重新开启推流。</div>
                         </div>
-                        <div class="layui-form-mid layui-word-aux">当直播推流异常终止后，是否自动重新开启推流。</div>
                     </div>
                     <div class="layui-form-item" id="retrySet" style="@(Model.PushSetting.IsAutoRetry ? "" : "display:none")">
                         <label class="layui-form-label">重试间隔时间</label>
                         <div class="layui-input-inline">
                             <input type="number" name="retryInterval" lay-affix="number" placeholder="单位：秒" value="@Model.PushSetting.RetryInterval" step="10" min="30" max="300" class="layui-input">
+                            <div class="layui-form-mid layui-word-aux">单位：秒，不能小于30秒。</div>
                         </div>
-                        <div class="layui-form-mid layui-word-aux">单位：秒，不能小于30秒。</div>
                     </div>
                 </div>
             </div>
@@ -199,6 +227,10 @@
             height: 55px;
             background-color: rgba(90, 90, 90, 0.2);
         }
+
+        .layui-form-item .layui-input-inline {
+            width: 250px;
+        }
     </style>
 }
 
@@ -221,6 +253,32 @@
                 ln: false,
                 header: true,
             });
+
+            function init() {
+                var resolution = "@Model.PushSetting.OutputResolution";
+                if (resolution) {
+                    $("#outputResolution").val(resolution);
+                }
+                var custumOutputParams = "@Model.PushSetting.CustumOutputParams";
+                if(custumOutputParams)
+                {
+                    $('#custumOutputParams').val(custumOutputParams);
+                }
+                var videoId = "@(Model.PushSetting.VideoId > 0 ? Model.PushSetting.VideoId : "")";
+                if(videoId){
+                    $('#videoId').val(videoId);
+                }
+                var audioId = "@(Model.PushSetting.AudioId > 0 ? Model.PushSetting.AudioId : "")";
+                if(audioId){
+                    $('#audioId').val(audioId);
+                }
+                var isMute = "@Model.PushSetting.IsMute.ToString().ToLower()";
+                if(isMute == "true"){
+                    $("input[name='isMute']").attr("checked", true);
+                }
+                element.tabChange('input_type_tab', "@((int)Model.PushSetting.InputType)");
+                form.render();
+            }
 
             function getFFMpegCommandCode() {
                 let doc = new DOMParser().parseFromString($("#ffmpegCommand").html(), 'text/html');
@@ -375,6 +433,13 @@
                             obj.videoId = safeParseInt(obj.videoId);
                             obj.audioId = safeParseInt(obj.audioId);
                             break;
+                        case 2:
+                            var inputType1Params = form.val('input_type_2');
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
+                            obj.isDesktopMute = obj.isDesktopMute == "on" ? true : false;
+                            break;
+                        default:
+                            break;
                     }
 
                     obj.isAutoRetry = isAutoRetry;
@@ -460,6 +525,8 @@
                 });
                 return false;
             });
+
+            init();
         });
 
         function update() {
