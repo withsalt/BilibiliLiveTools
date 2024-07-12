@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Base;
+using BilibiliAutoLiver.Services.FFMpeg.Services.Util;
 using BilibiliAutoLiver.Services.Interface;
 using CliWrap;
 using CliWrap.Buffered;
@@ -55,6 +57,19 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
                 throw new FileNotFoundException("FFMpeg not found, please download or install ffmpeg at firist.", path);
             }
             return path;
+        }
+
+        public async Task<List<string>> GetVideoDevices()
+        {
+            IFFMpegDeviceList deviceList = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                deviceList = new FFMpegWindowsDeviceList(GetBinaryPath(), GetBinaryFolder());
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                deviceList = new FFMpegLinuxDeviceList(GetBinaryPath(), GetBinaryFolder());
+            else
+                throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
+
+            return await deviceList.GetVideoDevices();
         }
 
         public async Task<LibVersion> GetVersion()
