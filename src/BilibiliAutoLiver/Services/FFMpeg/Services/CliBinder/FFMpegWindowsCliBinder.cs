@@ -1,33 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.Buffered;
 
-namespace BilibiliAutoLiver.Services.FFMpeg.Services.Util
+namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 {
-    public class FFMpegLinuxDeviceList : IFFMpegDeviceList
+    public class FFMpegWindowsCliBinder : BaseFFMpegCliBinder
     {
-        public string FFMpegPath { get; }
-
-        public string WorkingDirectory { get; }
-
         private string _excuteResult = null;
 
-        public FFMpegLinuxDeviceList(string ffmpegPath, string workingDirectory)
+        public FFMpegWindowsCliBinder(string ffmpegPath, string workingDirectory) : base(ffmpegPath, workingDirectory)
         {
-            this.FFMpegPath = ffmpegPath;
-            this.WorkingDirectory = workingDirectory;
+
         }
 
-        public async Task<List<string>> GetVideoDevices()
+        public override async Task<List<string>> GetVideoDevices()
         {
-            List<string> devices = new List<string>();
+            string output = await GetExcuteResult();
+            List<string> devices = ExtractDevices(output, "video");
             return devices;
         }
 
-        public async Task<List<string>> GetAudioDevices()
+        public override async Task<List<string>> GetAudioDevices()
         {
-            List<string> devices = new List<string>();
+            string output = await GetExcuteResult();
+            List<string> devices = ExtractDevices(output, "audio");
             return devices;
         }
 
@@ -41,8 +40,17 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.Util
                 .WithArguments("-list_devices true -f dshow -i dummy")
                 .WithWorkingDirectory(this.WorkingDirectory)
                 .WithValidation(CommandResultValidation.None)
-                .ExecuteBufferedAsync();
-            _excuteResult = result.StandardOutput;
+                .ExecuteBufferedAsync(Encoding.UTF8);
+            if (!string.IsNullOrWhiteSpace(result.StandardOutput))
+            {
+                _excuteResult = result.StandardOutput;
+                return _excuteResult;
+            }
+            if (!string.IsNullOrWhiteSpace(result.StandardError))
+            {
+                _excuteResult = result.StandardError;
+                return _excuteResult;
+            }
             return _excuteResult;
         }
 
@@ -55,30 +63,21 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.Util
         private List<string> ExtractDevices(string ffmpegOutput, string type)
         {
             string[] lines = ffmpegOutput.Split('\n');
-            bool audioSection = false;
-
             List<string> devices = new List<string>();
 
             foreach (var line in lines)
             {
-                if (line.Contains($"({type})") && line.Contains("\""))
+                if (line.Contains($"Could not enumerate {type}"))
+                {
+                    return devices;
+                }
+                if (line.Contains("dshow") && line.Contains($"({type})") && line.Contains("\""))
                 {
                     int firstQuote = line.IndexOf("\"");
                     int lastQuote = line.LastIndexOf("\"");
                     if (firstQuote != lastQuote)
                     {
                         string deviceName = line.Substring(firstQuote + 1, lastQuote - firstQuote - 1);
-                        devices.Add(deviceName);
-                    }
-                }
-                else if (audioSection)
-                {
-                    // 提取设备名称，假设它总是跟在 '(audio)' 后面
-                    int start = line.IndexOf(" \"") + 2;
-                    int end = line.IndexOf("\" (audio)");
-                    if (start >= 0 && end > start)
-                    {
-                        string deviceName = line.Substring(start, end - start);
                         devices.Add(deviceName);
                     }
                 }

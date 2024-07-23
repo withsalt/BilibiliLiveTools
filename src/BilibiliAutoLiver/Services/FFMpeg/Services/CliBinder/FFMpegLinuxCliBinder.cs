@@ -3,33 +3,26 @@ using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.Buffered;
 
-namespace BilibiliAutoLiver.Services.FFMpeg.Services.Util
+namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 {
-    public class FFMpegWindowsDeviceList : IFFMpegDeviceList
+    public class FFMpegLinuxCliBinder : BaseFFMpegCliBinder
     {
-        public string FFMpegPath { get; }
-
-        public string WorkingDirectory { get; }
-
         private string _excuteResult = null;
 
-        public FFMpegWindowsDeviceList(string ffmpegPath, string workingDirectory)
+        public FFMpegLinuxCliBinder(string ffmpegPath, string workingDirectory) : base(ffmpegPath, workingDirectory)
         {
-            this.FFMpegPath = ffmpegPath;
-            this.WorkingDirectory = workingDirectory;
+
         }
 
-        public async Task<List<string>> GetVideoDevices()
+        public override async Task<List<string>> GetVideoDevices()
         {
-            string output = await GetExcuteResult();
-            List<string> devices = ExtractDevices(output, "video");
+            List<string> devices = new List<string>();
             return devices;
         }
 
-        public async Task<List<string>> GetAudioDevices()
+        public override async Task<List<string>> GetAudioDevices()
         {
-            string output = await GetExcuteResult();
-            List<string> devices = ExtractDevices(output, "audio");
+            List<string> devices = new List<string>();
             return devices;
         }
 

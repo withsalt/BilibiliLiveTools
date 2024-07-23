@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Base;
-using BilibiliAutoLiver.Services.FFMpeg.Services.Util;
+using BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder;
 using BilibiliAutoLiver.Services.Interface;
 using CliWrap;
 using CliWrap.Buffered;
@@ -61,52 +61,29 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
 
         public async Task<List<string>> GetVideoDevices()
         {
-            IFFMpegDeviceList deviceList = null;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                deviceList = new FFMpegWindowsDeviceList(GetBinaryPath(), GetBinaryFolder());
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                deviceList = new FFMpegLinuxDeviceList(GetBinaryPath(), GetBinaryFolder());
-            else
-                throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
+            return await GetCliBinder().GetVideoDevices();
+        }
 
-            return await deviceList.GetVideoDevices();
+        public async Task<List<string>> GetAudioDevices()
+        {
+            return await GetCliBinder().GetAudioDevices();
         }
 
         public async Task<LibVersion> GetVersion()
         {
-            LibVersion libVersion = new LibVersion();
-            var result = await Cli.Wrap(GetBinaryPath())
-                .WithArguments("-version")
-                .WithWorkingDirectory(GetBinaryFolder())
-                .WithValidation(CommandResultValidation.None)
-                .ExecuteBufferedAsync();
-            string output = result.StandardOutput;
-            if (result.ExitCode != 0)
-            {
-                if (result.StandardError?.StartsWith("ffmpeg version ", StringComparison.Ordinal) == true)
-                {
-                    output = result.StandardError;
-                }
-                else
-                {
-                    return libVersion;
-                }
-            }
+            return await GetCliBinder().GetVersion();
+        }
 
-            if (string.IsNullOrEmpty(output))
-            {
-                return libVersion;
-            }
-            if (output.StartsWith("ffmpeg version ", StringComparison.Ordinal))
-            {
-                int startIndex = "ffmpeg version ".Length;
-                var lastIndex = output.IndexOf(' ', startIndex);
-                if (lastIndex > startIndex + 1)
-                {
-                    libVersion.Version = output.Substring(startIndex, lastIndex - startIndex + 1);
-                }
-            }
-            return libVersion;
+        private IFFMpegCliBinder GetCliBinder()
+        {
+            IFFMpegCliBinder binder = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                binder = new FFMpegWindowsCliBinder(GetBinaryPath(), GetBinaryFolder());
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                binder = new FFMpegLinuxCliBinder(GetBinaryPath(), GetBinaryFolder());
+            else
+                throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
+            return binder;
         }
     }
 }

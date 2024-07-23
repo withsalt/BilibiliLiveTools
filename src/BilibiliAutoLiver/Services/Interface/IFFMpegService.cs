@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 
 namespace BilibiliAutoLiver.Services.Interface
@@ -10,5 +11,9 @@ namespace BilibiliAutoLiver.Services.Interface
         string GetBinaryPath();
 
         Task<LibVersion> GetVersion();
+
+        Task<List<string>> GetVideoDevices();
+
+        Task<List<string>> GetAudioDevices();
     }
 }

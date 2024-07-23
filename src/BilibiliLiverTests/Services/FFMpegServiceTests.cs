@@ -1,4 +1,5 @@
-﻿using BilibiliAutoLiver.Services.Interface;
+﻿using System.Threading.Tasks;
+using BilibiliAutoLiver.Services.Interface;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BilibiliLiverTests.Services
@@ -21,6 +22,24 @@ namespace BilibiliLiverTests.Services
         public void FFmpegTest()
         {
             _ffmpeg.GetBinaryPath();
+        }
+
+        [TestMethod()]
+        public async Task GetVersionTest()
+        {
+            var verviosn = await _ffmpeg.GetVersion();
+        }
+
+        [TestMethod()]
+        public async Task GetVideoDevicesTest()
+        {
+             await _ffmpeg.GetVideoDevices();
+        }
+
+        [TestMethod()]
+        public async Task GetAudioDevices()
+        {
+            await _ffmpeg.GetAudioDevices();
         }
     }
 }
