@@ -77,7 +77,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                     int lastQuote = line.LastIndexOf("\"");
                     if (firstQuote != lastQuote)
                     {
-                        string deviceName = line.Substring(firstQuote + 1, lastQuote - firstQuote - 1);
+                        string deviceName = line.Substring(firstQuote + 1, lastQuote - firstQuote - 1).Trim(' ');
                         devices.Add(deviceName);
                     }
                 }

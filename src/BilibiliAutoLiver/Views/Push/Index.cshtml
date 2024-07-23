@@ -51,13 +51,13 @@
 
                 <div class="layui-tab layui-tab-brief" lay-filter="input_type_tab" id="input_type_tab">
                     <ul class="layui-tab-title">
-                        <li class="layui-this">推流视频</li>
-                        <li>推流桌面</li>
-                        <li>推流摄像头</li>
-                        <li>推流摄像头（高级）</li>
+                        <li  class="layui-this" lay-id="1">推流视频</li>
+                        <li lay-id="2">推流桌面</li>
+                        <li lay-id="3">推流摄像头</li>
+                        <li lay-id="4">推流摄像头（高级）</li>
                     </ul>
                     <div class="layui-tab-content">
-                        <div class="layui-tab-item layui-show" lay-id="1">
+                        <div class="layui-tab-item layui-show">
                             <div class="layui-form" lay-filter="input_type_1">
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">推流视频<label style="color:red">*</label></label>
@@ -91,12 +91,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="layui-tab-item" lay-id="2">
+                        <div class="layui-tab-item">
                             <div class="layui-form" lay-filter="input_type_2">
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">屏幕范围<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
-                                        <input type="text" id="inputScreen" name="inputScreen" value="@Model.PushSetting.InputScreen" autocomplete="off" placeholder="推流屏幕范围" class="layui-input">
+                                        <input type="text" id="inputScreen" name="inputScreen" autocomplete="off" placeholder="推流屏幕范围" class="layui-input">
                                         <div class="layui-form-mid layui-text-em">格式：0,0,800,800（x, y, width, height）<br />含义：从屏幕左上角0,0坐标开始，推流800*800范围内的屏幕</div>
                                     </div>
                                 </div>
@@ -132,12 +132,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="layui-tab-item" lay-id="3">内容3</div>
-                        <div class="layui-tab-item" lay-id="4">内容4</div>
+                        <div class="layui-tab-item">内容3</div>
+                        <div class="layui-tab-item">内容4</div>
                     </div>
                 </div>
 
-                <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
+                <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;display:none">
                     解析结果：
                     <div class="layui-upload-list"></div>
                 </blockquote>
@@ -171,7 +171,7 @@
                             <br />
                             示例：
                             <br />
-                            <code>ffmpeg -f dshow -video_size 1280x720 -i video="HD Pro Webcam C920" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}</code>
+                            <code>ffmpeg -f dshow -video_size 1280x720 -i video="@(Model.VideoDevices?.Any() != true ? "你的摄像头名称" : Model.VideoDevices[0])" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}</code>
                             <br />
                             使用1280x720的分辨率，推流摄像头设备“HD Pro Webcam C920”到B站直播，编码方式为H264、帧数30。
                         </div>
@@ -283,19 +283,40 @@
                 if (custumOutputParams) {
                     $('#custumOutputParams').val(custumOutputParams);
                 }
-                var videoId = "@(Model.PushSetting.VideoId > 0 ? Model.PushSetting.VideoId : "")";
-                if (videoId) {
-                    $('#videoId').val(videoId);
+                var inputType = "@((int)Model.PushSetting.InputType)";
+                switch (inputType) {
+                    case "1": {
+                        var videoId = "@(Model.PushSetting.VideoId > 0 ? Model.PushSetting.VideoId : "")";
+                        if (videoId) {
+                            $('#videoId').val(videoId);
+                        }
+                        var audioId = "@(Model.PushSetting.AudioId > 0 ? Model.PushSetting.AudioId : "")";
+                        if (audioId) {
+                            $('#audioId').val(audioId);
+                        }
+                        var isMute = "@Model.PushSetting.IsMute.ToString().ToLower()";
+                        if (isMute == "true") {
+                            $("input[name='isMute']").attr("checked", true);
+                        }
+                    }
+                    case "2": {
+                        var inputScreen = "@Model.PushSetting.InputScreen";
+                        $("#inputScreen").val(inputScreen);
+                        var isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
+                        if (isFromFile == "true") {
+                            $('#desktopAudioDeviceIdItem').hide();
+                            $('#desktopAudioIdItem').show();
+                            $("#desktopAudioId").val("@Model.PushSetting.AudioId");
+                            $("input[name='desktopAudioFrom']").attr("checked", false);
+                        } else {
+                            $('#desktopAudioDeviceIdItem').show();
+                            $('#desktopAudioIdItem').hide();
+                            $('#desktopAudioDeviceId').val("@Html.Raw(Model.PushSetting.AudioDevice)");
+                            $("input[name='desktopAudioFrom']").attr("checked", true);
+                        }
+                    }
                 }
-                var audioId = "@(Model.PushSetting.AudioId > 0 ? Model.PushSetting.AudioId : "")";
-                if (audioId) {
-                    $('#audioId').val(audioId);
-                }
-                var isMute = "@Model.PushSetting.IsMute.ToString().ToLower()";
-                if (isMute == "true") {
-                    $("input[name='isMute']").attr("checked", true);
-                }
-                element.tabChange('input_type_tab', "@((int)Model.PushSetting.InputType)");
+                element.tabChange('input_type_tab', inputType);
                 form.render();
             }
 
@@ -444,7 +465,7 @@
                 var isAutoRetry = $('input[name="isAutoRetry"]:checked').val() == 1;
                 var retryInterval = safeParseInt($('input[name="retryInterval"]').val());
                 if (model == 1) {
-                    var tabIndex = $('#input_type_tab .layui-tab-item.layui-show').attr('lay-id');
+                    var tabIndex = $('#input_type_tab .layui-this').attr('lay-id');
                     if (!tabIndex) {
                         layer.msg("未知的推流类型", { icon: 5 });
                         return false;

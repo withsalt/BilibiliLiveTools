@@ -34,7 +34,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 
             this.Setting.InputScreen = request.InputScreen;
             this.Setting.InputAudioSource = request.DesktopAudioFrom ? InputAudioSource.Device : InputAudioSource.File;
-            this.Setting.AudioId = !request.DesktopAudioFrom && request.AudioId.HasValue && request.AudioId.Value > 0 ? request.AudioId.Value : null;
+            this.Setting.AudioId = !request.DesktopAudioFrom && request.DesktopAudioId.HasValue && request.DesktopAudioId.Value > 0 ? request.DesktopAudioId.Value : null;
             this.Setting.AudioDevice = request.DesktopAudioFrom ? request.DesktopAudioDeviceId : "";
         }
     }
