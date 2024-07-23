@@ -60,7 +60,7 @@
                         <div class="layui-tab-item layui-show" lay-id="1">
                             <div class="layui-form" lay-filter="input_type_1">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">推流视频</label>
+                                    <label class="layui-form-label">推流视频<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
                                         <select id="videoId" name="videoId" lay-verify="required" lay-search>
                                             <option value="">请选择</option>
@@ -92,24 +92,36 @@
                             </div>
                         </div>
                         <div class="layui-tab-item" lay-id="2">
-                             <div class="layui-form" lay-filter="input_type_2">
+                            <div class="layui-form" lay-filter="input_type_2">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">屏幕范围</label>
+                                    <label class="layui-form-label">屏幕范围<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
                                         <input type="text" id="inputScreen" name="inputScreen" value="@Model.PushSetting.InputScreen" autocomplete="off" placeholder="推流屏幕范围" class="layui-input">
                                         <div class="layui-form-mid layui-text-em">格式：0,0,800,800（x, y, width, height）<br />含义：从屏幕左上角0,0坐标开始，推流800*800范围内的屏幕</div>
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">推流电脑声音</label>
+                                    <label class="layui-form-label">推流音频（来自设备）</label>
                                     <div class="layui-input-inline">
-                                        <input id="isDesktopMute" name="isDesktopMute" type="checkbox" lay-skin="switch" lay-text="是|否">
+                                        <input id="desktopAudioFrom" name="desktopAudioFrom" lay-filter="desktopAudioFrom" type="checkbox" lay-skin="switch" lay-text="是|否">
                                     </div>
                                 </div>
-                                <div class="layui-form-item">
+                                <div class="layui-form-item" id="desktopAudioDeviceIdItem" style="display:none">
+                                    <label class="layui-form-label">音频设备</label>
+                                    <div class="layui-input-inline">
+                                        <select id="desktopAudioDeviceId" name="desktopAudioDeviceId">
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.AudioDevices)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item" id="desktopAudioIdItem">
                                     <label class="layui-form-label">推流音频</label>
                                     <div class="layui-input-inline">
-                                        <select id="audioId" name="audioId" lay-search>
+                                        <select id="desktopAudioId" name="desktopAudioId" lay-search>
                                             <option value="">请选择</option>
                                             @foreach (var item in Model.Audios)
                                             {
@@ -148,7 +160,15 @@
                             1. 命令必须以ffmpeg开头，以{URL}结尾。其中{URL}会自动替换为获取到的直播间推流地址；<br />
                             2. 可以使用“//”进行行注释；<br />
                             3. 素材库中的素材，可以直接粘贴到命令中，程序会自动解析。<br />
-                            4. Windows下列出所有可用设备命令（在控制台执行，不要填写到下面）：@Model.ListDeviceFFmpegCmd<br />
+                            4. 所有可用的输入视频设备：
+                            <code>
+                                @(Model.VideoDevices?.Any() != true ? "无" : string.Join("、", Model.VideoDevices))
+                            </code>
+                            ，音频设备：
+                            <code>
+                                @(Model.AudioDevices?.Any() != true ? "无" : string.Join("、", Model.AudioDevices))
+                            </code>
+                            <br />
                             示例：
                             <br />
                             <code>ffmpeg -f dshow -video_size 1280x720 -i video="HD Pro Webcam C920" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}</code>
@@ -260,20 +280,19 @@
                     $("#outputResolution").val(resolution);
                 }
                 var custumOutputParams = "@Model.PushSetting.CustumOutputParams";
-                if(custumOutputParams)
-                {
+                if (custumOutputParams) {
                     $('#custumOutputParams').val(custumOutputParams);
                 }
                 var videoId = "@(Model.PushSetting.VideoId > 0 ? Model.PushSetting.VideoId : "")";
-                if(videoId){
+                if (videoId) {
                     $('#videoId').val(videoId);
                 }
                 var audioId = "@(Model.PushSetting.AudioId > 0 ? Model.PushSetting.AudioId : "")";
-                if(audioId){
+                if (audioId) {
                     $('#audioId').val(audioId);
                 }
                 var isMute = "@Model.PushSetting.IsMute.ToString().ToLower()";
-                if(isMute == "true"){
+                if (isMute == "true") {
                     $("input[name='isMute']").attr("checked", true);
                 }
                 element.tabChange('input_type_tab', "@((int)Model.PushSetting.InputType)");
@@ -316,6 +335,7 @@
                 form.render();
             });
 
+
             form.on('switch(advanceModel)', function (data) {
                 if (this.checked) {
                     $('#easyModelBody').hide();
@@ -325,6 +345,19 @@
                     $('#easyModelBody').show();
                     $('#advanceModelBody').hide();
                     $("#easyModel").prop("checked", true);
+                }
+                form.render();
+            });
+
+            form.on('switch(desktopAudioFrom)', function (data) {
+                if (this.checked) {
+                    $('#desktopAudioDeviceIdItem').show();
+                    $('#desktopAudioIdItem').hide();
+                    $("#desktopAudioId").val("");
+                } else {
+                    $('#desktopAudioDeviceIdItem').hide();
+                    $('#desktopAudioIdItem').show();
+                    $('#desktopAudioDeviceId').val("");
                 }
                 form.render();
             });
@@ -436,7 +469,8 @@
                         case 2:
                             var inputType1Params = form.val('input_type_2');
                             obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
-                            obj.isDesktopMute = obj.isDesktopMute == "on" ? true : false;
+                            obj.desktopAudioFrom = obj.desktopAudioFrom == "on" ? true : false;
+                            obj.desktopAudioId = safeParseInt(obj.desktopAudioId);
                             break;
                         default:
                             break;

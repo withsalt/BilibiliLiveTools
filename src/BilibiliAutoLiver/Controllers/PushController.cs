@@ -72,7 +72,8 @@ namespace BilibiliAutoLiver.Controllers
                 throw new Exception("获取推流配置失败！");
             }
             //列出支持设备的命令
-            vm.ListDeviceFFmpegCmd = _ffmpeg.GetBinaryPath() + " -list_devices true -f dshow -i dummy";
+            vm.AudioDevices = await _ffmpeg.GetAudioDevices();
+            vm.VideoDevices = await _ffmpeg.GetVideoDevices();
             //素材
             var allMaterials = await _materialRepository.Where(p => !p.IsDeleted).ToListAsync();
             if (allMaterials?.Any() == true)

@@ -8,8 +8,6 @@ using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder;
 using BilibiliAutoLiver.Services.Interface;
-using CliWrap;
-using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.Services

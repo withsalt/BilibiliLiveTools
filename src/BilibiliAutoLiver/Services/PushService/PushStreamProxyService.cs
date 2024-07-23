@@ -79,6 +79,12 @@ namespace BilibiliAutoLiver.Services.PushService
         {
             try
             {
+#if DEBUG
+                _logger.LogWarning($"开发，不推流");
+                return true;
+
+#endif
+
                 var service = GetService();
                 await service.CheckLiveSetting();
                 await service.CheckLiveRoom();

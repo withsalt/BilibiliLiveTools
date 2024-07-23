@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Settings;
+using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using Microsoft.Extensions.Logging;
 
@@ -35,7 +36,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         private void GetVideoInputArg()
         {
-            Rectangle? rectangle = AnalyzeRectangle();
+            if (!ScreenParamsHelper.TryParse(this.Settings.PushSettingDto.InputScreen, out string message, out Rectangle? rectangle))
+            {
+                throw new Exception(message);
+            }
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 FFMpegArguments = FFMpegArguments.FromFileInput("desktop", false, opt =>
@@ -83,42 +88,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 throw new NotSupportedException("不支持的系统类型");
             }
-        }
-
-        private Rectangle? AnalyzeRectangle()
-        {
-            if (string.IsNullOrWhiteSpace(Settings.PushSettingDto.InputScreen))
-            {
-                return null;
-            }
-            string[] param = Settings.PushSettingDto.InputScreen.Split(',');
-            if (param == null || param.Length != 4)
-            {
-                _logger.LogInformation("Path参数不正确，示例：0,0,800,800（x, y, width, height）");
-                return null;
-            }
-            int[] paramVal = param.Select(p => int.TryParse(p, out int oVal) ? oVal : -1).ToArray();
-            if (paramVal[0] < 0)
-            {
-                _logger.LogInformation("x参数不正确，x坐标不能小于0，示例：0,0,800,800（x, y, width, height）");
-                return null;
-            }
-            if (paramVal[1] < 0)
-            {
-                _logger.LogInformation("y参数不正确，y坐标不能小于0，示例：0,0,800,800（x, y, width, height）");
-                return null;
-            }
-            if (paramVal[2] < 0)
-            {
-                _logger.LogInformation("width参数不正确，width坐标不能小于0，示例：0,0,800,800（x, y, width, height）");
-                return null;
-            }
-            if (paramVal[3] < 0)
-            {
-                _logger.LogInformation("height参数不正确，height坐标不能小于0，示例：0,0,800,800（x, y, width, height）");
-                return null;
-            }
-            return new Rectangle(paramVal[0], paramVal[1], paramVal[2], paramVal[3]);
         }
     }
 }

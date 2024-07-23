@@ -73,6 +73,11 @@ namespace BilibiliAutoLiver.Models.Entities
         public long? AudioId {  get; set; }
 
         /// <summary>
+        /// 音频设备
+        /// </summary>
+        public string AudioDevice {  get; set; }
+
+        /// <summary>
         /// 设备名称
         /// </summary>
         public string DeviceName { get; set; }
@@ -95,6 +100,11 @@ namespace BilibiliAutoLiver.Models.Entities
         [MaxLength(64)]
         [Column(IsNullable = true)]
         public string InputScreen { get; set; }
+
+        /// <summary>
+        /// 输入视频来源
+        /// </summary>
+        public InputAudioSource InputAudioSource { get; set; }
 
         #endregion
 

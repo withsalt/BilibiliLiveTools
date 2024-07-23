@@ -57,6 +57,26 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// </summary>
         public long? AudioId { get; set; }
 
+        /// <summary>
+        /// 推流桌面区域
+        /// </summary>
+        public string InputScreen { get; set; }
+
+        /// <summary>
+        /// 推流桌面时，音频id
+        /// </summary>
+        public long? DesktopAudioId { get; set; }
+
+        /// <summary>
+        /// 推流桌面时，来源音频设备
+        /// </summary>
+        public string DesktopAudioDeviceId{ get; set; }
+
+        /// <summary>
+        /// 推流音频来源
+        /// </summary>
+        public bool DesktopAudioFrom {  get; set; }
+
         #endregion
 
     }

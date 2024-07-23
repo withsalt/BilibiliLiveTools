@@ -8,7 +8,15 @@ namespace BilibiliAutoLiver.Models.ViewModels
     {
         public PushSetting PushSetting { get; set; }
 
-        public string ListDeviceFFmpegCmd { get; set; }
+        /// <summary>
+        /// 支持的视频设备
+        /// </summary>
+        public List<string> VideoDevices { get; set; }
+
+        /// <summary>
+        /// 支持的音频设备
+        /// </summary>
+        public List<string> AudioDevices { get; set; }
 
         /// <summary>
         /// 视频素材
