@@ -13,6 +13,7 @@ using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Models.ViewModels;
+using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
@@ -37,6 +38,7 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IMaterialRepository _materialRepository;
         private readonly AppSettings _appSettings;
         private readonly IFFMpegService _ffmpeg;
+        private readonly IPipeContainer _pipeContainer;
 
         public PushController(ILogger<PushController> logger
             , IMemoryCache cache
@@ -48,7 +50,8 @@ namespace BilibiliAutoLiver.Controllers
             , IPushStreamProxyService proxyService
             , IMaterialRepository materialRepository
             , IOptions<AppSettings> settingOptions
-            , IFFMpegService ffmpeg)
+            , IFFMpegService ffmpeg
+            , IPipeContainer pipeContainer)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -60,6 +63,7 @@ namespace BilibiliAutoLiver.Controllers
             _materialRepository = materialRepository ?? throw new ArgumentNullException(nameof(materialRepository));
             _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
+            _pipeContainer = pipeContainer ?? throw new ArgumentNullException(nameof(pipeContainer));
         }
 
         [HttpGet]
@@ -83,6 +87,8 @@ namespace BilibiliAutoLiver.Controllers
                 vm.Videos = videos.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
                 vm.Audios = audios.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
             }
+            vm.Plugins = _pipeContainer.Get()?.Select(p => p.Name).ToList() ?? new List<string>();
+
             return View(vm);
         }
 

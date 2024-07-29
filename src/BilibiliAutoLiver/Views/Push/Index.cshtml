@@ -132,8 +132,144 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="layui-tab-item">内容3</div>
-                        <div class="layui-tab-item">内容4</div>
+                        <div class="layui-tab-item">
+                            <div class="layui-form" lay-filter="input_type_3">
+                                <div class="layui-form-item" id="videoDeviceNameType3Item">
+                                    <label class="layui-form-label">视频设备<label style="color:red">*</label></label>
+                                    <div class="layui-input-inline">
+                                        <select id="videoDeviceNameType3" name="videoDeviceNameType3">
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.VideoDevices)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">分辨率<label style="color:red">*</label></label>
+                                    <div class="layui-input-inline">
+                                        <select id="inputResolutionType3" name="inputResolutionType3" lay-verify="required" lay-search>
+                                            <option value="480x320">480×320</option>
+                                            <option value="640x480">640×480</option>
+                                            <option value="800x600">800×600</option>
+                                            <option value="1280x720" selected>1280×720</option>
+                                            <option value="1366x768">1366×768</option>
+                                            <option value="1440x900">1440×900</option>
+                                            <option value="1920x1080">1920×1080</option>
+                                            <option value="2560x1440">2560×1440</option>
+                                            <option value="3840x2160">3840×2160</option>
+                                            <option value="7680x4320">7680×4320</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">推流音频（来自设备）</label>
+                                    <div class="layui-input-inline">
+                                        <input id="audioDeviceNameType3From" name="audioDeviceNameType3From" lay-filter="audioDeviceNameType3From" type="checkbox" lay-skin="switch" lay-text="是|否">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item" id="audioDeviceNameType3FromItem" style="display:none">
+                                    <label class="layui-form-label">音频设备</label>
+                                    <div class="layui-input-inline">
+                                        <select id="audioDeviceNameType3" name="audioDeviceNameType3">
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.AudioDevices)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item" id="audioDeviceIdType3Item">
+                                    <label class="layui-form-label">推流音频</label>
+                                    <div class="layui-input-inline">
+                                        <select id="audioDeviceIdType3" name="audioDeviceIdType3" lay-search>
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.Audios)
+                                            {
+                                                <option value="@item.Key">@item.Value</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-form" lay-filter="input_type_4">
+                                <div class="layui-form-item" id="videoDeviceNameType4Item">
+                                    <label class="layui-form-label">视频设备<label style="color:red">*</label></label>
+                                    <div class="layui-input-inline">
+                                        <select id="videoDeviceNameType4" name="videoDeviceNameType4">
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.VideoDevices)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">分辨率<label style="color:red">*</label></label>
+                                    <div class="layui-input-inline">
+                                        <select id="inputResolutionType4" name="inputResolutionType4" lay-verify="required" lay-search>
+                                            <option value="480x320">480×320</option>
+                                            <option value="640x480">640×480</option>
+                                            <option value="800x600">800×600</option>
+                                            <option value="1280x720" selected>1280×720</option>
+                                            <option value="1366x768">1366×768</option>
+                                            <option value="1440x900">1440×900</option>
+                                            <option value="1920x1080">1920×1080</option>
+                                            <option value="2560x1440">2560×1440</option>
+                                            <option value="3840x2160">3840×2160</option>
+                                            <option value="7680x4320">7680×4320</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">推流音频（来自设备）</label>
+                                    <div class="layui-input-inline">
+                                        <input id="audioDeviceNameType4From" name="audioDeviceNameType4From" lay-filter="audioDeviceNameType4From" type="checkbox" lay-skin="switch" lay-text="是|否">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item" id="audioDeviceNameType4FromItem" style="display:none">
+                                    <label class="layui-form-label">音频设备</label>
+                                    <div class="layui-input-inline">
+                                        <select id="audioDeviceNameType4" name="audioDeviceNameType4">
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.AudioDevices)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item" id="audioDeviceIdType4Item">
+                                    <label class="layui-form-label">推流音频</label>
+                                    <div class="layui-input-inline">
+                                        <select id="audioDeviceIdType4" name="audioDeviceIdType4" lay-search>
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.Audios)
+                                            {
+                                                <option value="@item.Key">@item.Value</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">加载插件</label>
+                                    <div class="layui-input-inline">
+                                        <select id="pluginType4" name="pluginType4" multiple lay-search>
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.Plugins)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -379,6 +515,32 @@
                     $('#desktopAudioDeviceIdItem').hide();
                     $('#desktopAudioIdItem').show();
                     $('#desktopAudioDeviceId').val("");
+                }
+                form.render();
+            });
+
+            form.on('switch(audioDeviceNameType3From)', function (data) {
+                if (this.checked) {
+                    $('#audioDeviceNameType3FromItem').show();
+                    $('#audioDeviceIdType3Item').hide();
+                    $("#audioDeviceIdType3").val("");
+                } else {
+                    $('#audioDeviceNameType3FromItem').hide();
+                    $('#audioDeviceIdType3Item').show();
+                    $('#audioDeviceNameType3').val("");
+                }
+                form.render();
+            });
+
+            form.on('switch(audioDeviceNameType4From)', function (data) {
+                if (this.checked) {
+                    $('#audioDeviceNameType4FromItem').show();
+                    $('#audioDeviceIdType4Item').hide();
+                    $("#audioDeviceIdType4").val("");
+                } else {
+                    $('#audioDeviceNameType4FromItem').hide();
+                    $('#audioDeviceIdType4Item').show();
+                    $('#audioDeviceNameType4').val("");
                 }
                 form.render();
             });
