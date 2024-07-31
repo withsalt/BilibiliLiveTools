@@ -51,7 +51,7 @@
 
                 <div class="layui-tab layui-tab-brief" lay-filter="input_type_tab" id="input_type_tab">
                     <ul class="layui-tab-title">
-                        <li  class="layui-this" lay-id="1">推流视频</li>
+                        <li class="layui-this" lay-id="1">推流视频</li>
                         <li lay-id="2">推流桌面</li>
                         <li lay-id="3">推流摄像头</li>
                         <li lay-id="4">推流摄像头（高级）</li>
@@ -106,10 +106,10 @@
                                         <input id="desktopAudioFrom" name="desktopAudioFrom" lay-filter="desktopAudioFrom" type="checkbox" lay-skin="switch" lay-text="是|否">
                                     </div>
                                 </div>
-                                <div class="layui-form-item" id="desktopAudioDeviceIdItem" style="display:none">
+                                <div class="layui-form-item" id="desktopAudioDeviceNameItem" style="display:none">
                                     <label class="layui-form-label">音频设备</label>
                                     <div class="layui-input-inline">
-                                        <select id="desktopAudioDeviceId" name="desktopAudioDeviceId">
+                                        <select id="desktopAudioDeviceName" name="desktopAudioDeviceName">
                                             <option value="">请选择</option>
                                             @foreach (var item in Model.AudioDevices)
                                             {
@@ -259,13 +259,7 @@
                                 <div class="layui-form-item">
                                     <label class="layui-form-label">加载插件</label>
                                     <div class="layui-input-inline">
-                                        <select id="pluginType4" name="pluginType4" multiple lay-search>
-                                            <option value="">请选择</option>
-                                            @foreach (var item in Model.Plugins)
-                                            {
-                                                <option value="@item">@item</option>
-                                            }
-                                        </select>
+                                        <div id="pluginType4"></div>
                                     </div>
                                 </div>
                             </div>
@@ -391,6 +385,7 @@
 }
 
 @section Scripts {
+    <script src="~/lib/xm-select-v1.2.4/dist/xm-select.js" type="text/javascript" charset="utf-8"></script>
     <script>
         layui.config({
             base: '@Url.Content("~/layuiadmin/")' // 静态资源所在路径
@@ -408,6 +403,11 @@
                 height: '300px',
                 ln: false,
                 header: true,
+            });
+
+            var pluginSelect = xmSelect.render({
+                el: '#pluginType4',
+                data: @Html.Raw(Model.PluginsToJsArray()),
             });
 
             function init() {
@@ -440,14 +440,14 @@
                         $("#inputScreen").val(inputScreen);
                         var isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
                         if (isFromFile == "true") {
-                            $('#desktopAudioDeviceIdItem').hide();
+                            $('#desktopAudioDeviceNameItem').hide();
                             $('#desktopAudioIdItem').show();
                             $("#desktopAudioId").val("@Model.PushSetting.AudioId");
                             $("input[name='desktopAudioFrom']").attr("checked", false);
                         } else {
-                            $('#desktopAudioDeviceIdItem').show();
+                            $('#desktopAudioDeviceNameItem').show();
                             $('#desktopAudioIdItem').hide();
-                            $('#desktopAudioDeviceId').val("@Html.Raw(Model.PushSetting.AudioDevice)");
+                            $('#desktopAudioDeviceName').val("@Html.Raw(Model.PushSetting.AudioDevice)");
                             $("input[name='desktopAudioFrom']").attr("checked", true);
                         }
                     }
@@ -508,13 +508,13 @@
 
             form.on('switch(desktopAudioFrom)', function (data) {
                 if (this.checked) {
-                    $('#desktopAudioDeviceIdItem').show();
+                    $('#desktopAudioDeviceNameItem').show();
                     $('#desktopAudioIdItem').hide();
                     $("#desktopAudioId").val("");
                 } else {
-                    $('#desktopAudioDeviceIdItem').hide();
+                    $('#desktopAudioDeviceNameItem').hide();
                     $('#desktopAudioIdItem').show();
-                    $('#desktopAudioDeviceId').val("");
+                    $('#desktopAudioDeviceName').val("");
                 }
                 form.render();
             });
@@ -651,6 +651,12 @@
                             break;
                         case 2:
                             var inputType1Params = form.val('input_type_2');
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
+                            obj.desktopAudioFrom = obj.desktopAudioFrom == "on" ? true : false;
+                            obj.desktopAudioId = safeParseInt(obj.desktopAudioId);
+                            break;
+                        case 3:
+                            var inputType1Params = form.val('input_type_3');
                             obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
                             obj.desktopAudioFrom = obj.desktopAudioFrom == "on" ? true : false;
                             obj.desktopAudioId = safeParseInt(obj.desktopAudioId);

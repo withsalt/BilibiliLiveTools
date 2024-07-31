@@ -70,12 +70,42 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// <summary>
         /// 推流桌面时，来源音频设备
         /// </summary>
-        public string DesktopAudioDeviceId{ get; set; }
+        public string DesktopAudioDeviceName { get; set; }
 
         /// <summary>
         /// 推流音频来源
         /// </summary>
-        public bool DesktopAudioFrom {  get; set; }
+        public bool DesktopAudioFrom { get; set; }
+
+        /// <summary>
+        /// 输入设备名称
+        /// </summary>
+        public string InputDeviceName { get; set; }
+
+        /// <summary>
+        /// 输入设备分辨率
+        /// </summary>
+        public string InputDeviceResolution { get; set; }
+
+        /// <summary>
+        /// 推流类型为设备时，输入的音频信息
+        /// </summary>
+        public bool InputDeviceAudioFrom { get; set; }
+
+        /// <summary>
+        /// 推流类型为设备时，输入的音频素材id
+        /// </summary>
+        public long? InputDeviceAudioId { get; set; }
+
+        /// <summary>
+        /// 推流类型为设备时，输入的音频设备名称
+        /// </summary>
+        public string InputDeviceAudioDeviceName { get; set; }
+
+        /// <summary>
+        /// 加载的插件
+        /// </summary>
+        public string InputDevicePlugins { get; set; }
 
         #endregion
 

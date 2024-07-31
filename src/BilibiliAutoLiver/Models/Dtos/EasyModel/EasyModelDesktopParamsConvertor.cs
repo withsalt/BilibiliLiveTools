@@ -23,7 +23,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception(message);
             }
-            if (request.DesktopAudioFrom && string.IsNullOrWhiteSpace(request.DesktopAudioDeviceId))
+            if (request.DesktopAudioFrom && string.IsNullOrWhiteSpace(request.DesktopAudioDeviceName))
             {
                 throw new Exception("当选择推流音频来源于设备时，音频设备不能为空");
             }
@@ -35,7 +35,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting.InputScreen = request.InputScreen;
             this.Setting.InputAudioSource = request.DesktopAudioFrom ? InputAudioSource.Device : InputAudioSource.File;
             this.Setting.AudioId = !request.DesktopAudioFrom && request.DesktopAudioId.HasValue && request.DesktopAudioId.Value > 0 ? request.DesktopAudioId.Value : null;
-            this.Setting.AudioDevice = request.DesktopAudioFrom ? request.DesktopAudioDeviceId : "";
+            this.Setting.AudioDevice = request.DesktopAudioFrom ? request.DesktopAudioDeviceName : "";
         }
     }
 }

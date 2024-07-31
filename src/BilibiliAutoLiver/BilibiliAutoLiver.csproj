@@ -20,6 +20,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\static\2.js" />
+	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\static\3.js" />
+	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\static\docs.js" />
+	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\xm-select.js" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
