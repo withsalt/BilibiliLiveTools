@@ -11,5 +11,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
         Task<List<string>> GetVideoDevices();
 
         Task<List<string>> GetAudioDevices();
+
+        Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName);
     }
 }

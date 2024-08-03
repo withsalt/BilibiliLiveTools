@@ -42,7 +42,28 @@ namespace BilibiliAutoLiver.Utils
             {
                 return false;
             }
+            if (width <= 0 || height <= 0)
+            {
+                return false;
+            }
             return true;
+        }
+
+        public static bool Equal(string source, string target)
+        {
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(target))
+            {
+                return false;
+            }
+            if (!TryParse(source, out int sourceWidth, out int sourceHeight))
+            {
+                return false;
+            }
+            if (!TryParse(target, out int targetWidth, out int targetHeight))
+            {
+                return false;
+            }
+            return sourceWidth == targetWidth && sourceHeight == targetHeight;
         }
     }
 }

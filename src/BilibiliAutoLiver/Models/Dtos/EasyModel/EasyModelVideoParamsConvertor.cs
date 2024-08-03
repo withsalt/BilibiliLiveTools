@@ -1,16 +1,18 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Entities;
+using BilibiliAutoLiver.Services.Interface;
 
 namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
     public class EasyModelVideoParamsConvertor : BaseEasyModelParamsConvertor
     {
-        public EasyModelVideoParamsConvertor(PushSetting setting) : base(setting)
+        public EasyModelVideoParamsConvertor(IFFMpegService ffmpegService, PushSetting setting) : base(ffmpegService, setting)
         {
 
         }
 
-        protected override void Check(PushSettingUpdateRequest request)
+        protected override Task Check(PushSettingUpdateRequest request)
         {
             if (request.VideoId <= 0)
             {
@@ -19,6 +21,8 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting.VideoId = request.VideoId;
             this.Setting.AudioId = request.AudioId.HasValue && request.AudioId.Value > 0 ? request.AudioId.Value : null;
             this.Setting.IsMute = request.IsMute;
+
+            return Task.CompletedTask;
         }
     }
 }

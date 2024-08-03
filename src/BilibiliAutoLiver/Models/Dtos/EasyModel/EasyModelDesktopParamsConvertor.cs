@@ -1,18 +1,20 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
     public class EasyModelDesktopParamsConvertor : BaseEasyModelParamsConvertor
     {
-        public EasyModelDesktopParamsConvertor(PushSetting setting) : base(setting)
+        public EasyModelDesktopParamsConvertor(IFFMpegService ffmpegService, PushSetting setting) : base(ffmpegService, setting)
         {
 
         }
 
-        protected override void Check(PushSettingUpdateRequest request)
+        protected override Task Check(PushSettingUpdateRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.InputScreen))
             {
@@ -31,6 +33,8 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting.InputAudioSource = request.DesktopAudioFrom ? InputAudioSource.Device : InputAudioSource.File;
             this.Setting.AudioId = !request.DesktopAudioFrom && request.DesktopAudioId.HasValue && request.DesktopAudioId.Value > 0 ? request.DesktopAudioId.Value : null;
             this.Setting.AudioDevice = request.DesktopAudioFrom ? request.DesktopAudioDeviceName : "";
+
+            return Task.CompletedTask;
         }
     }
 }

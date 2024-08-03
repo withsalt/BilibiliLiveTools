@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Entities;
+using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver.Models.Dtos.EasyModel
@@ -8,12 +10,15 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
     {
         public PushSetting Setting { get; }
 
-        public BaseEasyModelParamsConvertor(PushSetting setting)
+        public IFFMpegService FFMpegService { get; }
+
+        public BaseEasyModelParamsConvertor(IFFMpegService ffmpegService, PushSetting setting)
         {
             this.Setting = setting;
+            this.FFMpegService = ffmpegService;
         }
 
-        public void ParamsCheck(PushSettingUpdateRequest request)
+        public async Task ParamsCheck(PushSettingUpdateRequest request)
         {
             if (string.IsNullOrEmpty(request.OutputResolution))
             {
@@ -27,9 +32,9 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting.CustumOutputParams = request.CustumOutputParams;
             this.Setting.InputType = request.InputType;
 
-            Check(request);
+            await Check(request);
         }
 
-        protected abstract void Check(PushSettingUpdateRequest request);
+        protected abstract Task Check(PushSettingUpdateRequest request);
     }
 }

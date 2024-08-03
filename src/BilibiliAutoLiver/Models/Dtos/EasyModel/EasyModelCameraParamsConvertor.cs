@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
     public class EasyModelCameraParamsConvertor : BaseEasyModelParamsConvertor
     {
-        public EasyModelCameraParamsConvertor(PushSetting setting) : base(setting)
+        public EasyModelCameraParamsConvertor(IFFMpegService ffmpegService, PushSetting setting) : base(ffmpegService, setting)
         {
 
         }
 
-        protected override void Check(PushSettingUpdateRequest request)
+        protected override async Task Check(PushSettingUpdateRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.InputDeviceName))
             {
@@ -27,6 +30,17 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception("当选择推流音频来源于设备时，音频设备不能为空");
             }
+
+            List<string> supportResolutions = await FFMpegService.ListVideoDeviceSupportResolutions(request.InputDeviceName);
+            if (supportResolutions?.Any() != true)
+            {
+                throw new Exception($"视频输入设备{request.InputDeviceName}未获取到受支持的输入分辨率");
+            }
+            if (!supportResolutions.Any(p => ResolutionHelper.Equal(p, request.InputDeviceResolution)))
+            {
+                throw new Exception($"视频输入设备{request.InputDeviceName}不支持输入分辨率：{request.InputDeviceResolution}，受支持的最大分辨率：{supportResolutions.Last()}");
+            }
+
             this.Setting.DeviceName = request.InputDeviceName;
             this.Setting.InputResolution = request.InputDeviceResolution;
             this.Setting.InputAudioSource = request.InputDeviceAudioFrom ? InputAudioSource.Device : InputAudioSource.File;

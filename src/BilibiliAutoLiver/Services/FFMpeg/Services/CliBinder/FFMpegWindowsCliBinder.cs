@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Utils;
 using CliWrap;
 using CliWrap.Buffered;
 
@@ -9,7 +11,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 {
     public class FFMpegWindowsCliBinder : BaseFFMpegCliBinder
     {
-        private string _excuteResult = null;
+        private Dictionary<int, string> _excuteResultCache = new Dictionary<int, string>();
 
         public FFMpegWindowsCliBinder(string ffmpegPath, string workingDirectory) : base(ffmpegPath, workingDirectory)
         {
@@ -18,40 +20,53 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 
         public override async Task<List<string>> GetVideoDevices()
         {
-            string output = await GetExcuteResult();
+            string output = await GetExcuteResult("-list_devices true -f dshow -i dummy".GetHashCode(), "-list_devices true -f dshow -i dummy");
             List<string> devices = ExtractDevices(output, "video");
             return devices;
         }
 
         public override async Task<List<string>> GetAudioDevices()
         {
-            string output = await GetExcuteResult();
+            string output = await GetExcuteResult("-list_devices true -f dshow -i dummy".GetHashCode(), "-list_devices true -f dshow -i dummy");
             List<string> devices = ExtractDevices(output, "audio");
             return devices;
         }
 
-        private async Task<string> GetExcuteResult()
+        public override async Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName)
         {
-            if (!string.IsNullOrWhiteSpace(_excuteResult))
+            if (string.IsNullOrWhiteSpace(deviceName))
             {
-                return _excuteResult;
+                throw new ArgumentNullException("deviceName", "设备名称不能为空");
+            }
+            string argStr = $"-f dshow -list_options true -i video=\"{deviceName}\"";
+            int type = argStr.GetHashCode();
+            string output = await GetExcuteResult(type, argStr);
+            List<string> devices = ExtractResolutions(output, deviceName);
+            return devices;
+        }
+
+        private async Task<string> GetExcuteResult(int type, string args)
+        {
+            if (_excuteResultCache.TryGetValue(type, out string excuteResult) && !string.IsNullOrWhiteSpace(excuteResult))
+            {
+                return excuteResult;
             }
             var result = await Cli.Wrap(this.FFMpegPath)
-                .WithArguments("-list_devices true -f dshow -i dummy")
+                .WithArguments(args)
                 .WithWorkingDirectory(this.WorkingDirectory)
                 .WithValidation(CommandResultValidation.None)
                 .ExecuteBufferedAsync(Encoding.UTF8);
             if (!string.IsNullOrWhiteSpace(result.StandardOutput))
             {
-                _excuteResult = result.StandardOutput;
-                return _excuteResult;
+                _excuteResultCache[type] = result.StandardOutput;
+                return _excuteResultCache[type];
             }
             if (!string.IsNullOrWhiteSpace(result.StandardError))
             {
-                _excuteResult = result.StandardError;
-                return _excuteResult;
+                _excuteResultCache[type] = result.StandardError;
+                return _excuteResultCache[type];
             }
-            return _excuteResult;
+            return null;
         }
 
         /// <summary>
@@ -62,7 +77,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
         /// <returns></returns>
         private List<string> ExtractDevices(string ffmpegOutput, string type)
         {
-            string[] lines = ffmpegOutput.Split('\n');
+            if (string.IsNullOrEmpty(ffmpegOutput))
+            {
+                throw new ArgumentNullException(nameof(ffmpegOutput), "FFMpeg输出内容为空");
+            }
+            string[] lines = ffmpegOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
             List<string> devices = new List<string>();
 
             foreach (var line in lines)
@@ -83,6 +102,71 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                 }
             }
             return devices;
+        }
+
+        private List<string> ExtractResolutions(string ffmpegOutput, string deviceName)
+        {
+            if (string.IsNullOrEmpty(ffmpegOutput))
+            {
+                throw new ArgumentNullException(nameof(ffmpegOutput), "FFMpeg输出内容为空");
+            }
+            if (ffmpegOutput.Contains("Could not find video device", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException($"没有找到设备【{deviceName}】");
+            }
+            if (ffmpegOutput.Contains("Error opening input: I/O error", StringComparison.OrdinalIgnoreCase)
+                && ffmpegOutput.Contains("Error opening input file video", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException($"没有找到设备【{deviceName}】，或设备无法访问");
+            }
+            string[] lines = ffmpegOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            List<(int width, int height)> resolutions = new List<(int width, int height)>();
+
+            foreach (var item in lines)
+            {
+                if (string.IsNullOrWhiteSpace(item)) continue;
+                if (!item.StartsWith("[dshow", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!item.Contains("vcodec=mjpeg")) continue;
+                if (item.Contains("(pc")) continue;
+                if (item.Contains("min s="))
+                {
+                    int firstIndex = item.IndexOf("min s=") + 6;
+                    int endIndex = item.IndexOf(' ', firstIndex);
+                    if (firstIndex < endIndex)
+                    {
+                        string resolution = item.Substring(firstIndex, endIndex - firstIndex);
+                        if (!string.IsNullOrWhiteSpace(resolution) && ResolutionHelper.TryParse(resolution, out int width, out int height))
+                        {
+                            resolutions.Add((width, height));
+                            continue;
+                        }
+                    }
+                }
+                if (item.Contains("max s"))
+                {
+                    int firstIndex = item.IndexOf("max s") + 6;
+                    int endIndex = item.IndexOf(' ', firstIndex);
+                    if (firstIndex < endIndex)
+                    {
+                        string resolution = item.Substring(firstIndex, endIndex - firstIndex);
+                        if (!string.IsNullOrWhiteSpace(resolution) && ResolutionHelper.TryParse(resolution, out int width, out int height))
+                        {
+                            resolutions.Add((width, height));
+                            continue;
+                        }
+                    }
+                }
+            }
+            if (resolutions.Count == 0)
+            {
+                return new List<string>();
+            }
+            List<string> result = resolutions
+                .OrderBy(p => p.width)
+                .ThenBy(p => p.height)
+                .Select(p => $"{p.width}x{p.height}")
+                .ToList();
+            return result;
         }
     }
 }
