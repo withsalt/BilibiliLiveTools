@@ -88,7 +88,6 @@ namespace BilibiliAutoLiver.Controllers
                 vm.Audios = audios.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
             }
             vm.Plugins = _pipeContainer.Get()?.Select(p => p.Name).ToList() ?? new List<string>();
-
             return View(vm);
         }
 
@@ -166,7 +165,7 @@ namespace BilibiliAutoLiver.Controllers
             }
             try
             {
-                EasyModelConvertFactory.ToEntity(request, setting);
+                EasyModelConvertFactory.ParamsCheck(request, setting);
             }
             catch (Exception ex)
             {

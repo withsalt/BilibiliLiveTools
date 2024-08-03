@@ -12,9 +12,8 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 
         }
 
-        public override void ToEntity(PushSettingUpdateRequest request)
+        protected override void Check(PushSettingUpdateRequest request)
         {
-            BaseParamsCheck(request);
             if (string.IsNullOrWhiteSpace(request.InputScreen))
             {
                 throw new Exception("推流屏幕范围不能为空");
@@ -27,10 +26,6 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception("当选择推流音频来源于设备时，音频设备不能为空");
             }
-
-            this.Setting.OutputResolution = request.OutputResolution;
-            this.Setting.CustumOutputParams = request.CustumOutputParams;
-            this.Setting.InputType = request.InputType;
 
             this.Setting.InputScreen = request.InputScreen;
             this.Setting.InputAudioSource = request.DesktopAudioFrom ? InputAudioSource.Device : InputAudioSource.File;

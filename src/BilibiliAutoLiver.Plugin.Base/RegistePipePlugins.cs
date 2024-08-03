@@ -50,6 +50,11 @@ namespace BilibiliAutoLiver.Plugin.Base
                         {
                             continue;
                         }
+                        char[] invalidChars = Path.GetInvalidPathChars();
+                        if (pipeProcess.Name.IndexOfAny(invalidChars) >= 0)
+                        {
+                            throw new Exception("加载插件【{pipeProcess.Name}】失败，插件名称包含特色字符。");
+                        }
                         logger.LogInformation($"加载插件{pipeProcess.Name}（{fileName}），默认状态：{(pipeProcess.IsEnabled ? "启用" : "禁用")}");
                         container.Add(pipeProcess);
                         exists.Add(pluginType.FullName);

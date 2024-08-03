@@ -4,6 +4,6 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
     public interface IEasyModelParamsConvertor
     {
-        public void ToEntity(PushSettingUpdateRequest request);
+        public void ParamsCheck(PushSettingUpdateRequest request);
     }
 }

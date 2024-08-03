@@ -6,7 +6,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
     public class EasyModelConvertFactory
     {
-        public static void ToEntity(PushSettingUpdateRequest request, PushSetting setting)
+        public static void ParamsCheck(PushSettingUpdateRequest request, PushSetting setting)
         {
             IEasyModelParamsConvertor convertor = null;
             switch (request.InputType)
@@ -18,15 +18,15 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
                     convertor = new EasyModelDesktopParamsConvertor(setting);
                     break;
                 case InputType.Camera:
-                    break;
                 case InputType.CameraPlus:
+                    convertor = new EasyModelCameraParamsConvertor(setting);
                     break;
             }
             if (convertor == null)
             {
                 throw new Exception("未知的推流类型");
             }
-            convertor.ToEntity(request);
+            convertor.ParamsCheck(request);
         }
     }
 }

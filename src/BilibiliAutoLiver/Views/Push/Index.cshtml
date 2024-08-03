@@ -22,7 +22,7 @@
                         <div class="layui-tab-item layui-show">
                             <div class="layui-form" lay-filter="base_output_params_form">
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">推流分辨率</label>
+                                    <label class="layui-form-label">推流分辨率<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
                                         <select id="outputResolution" name="outputResolution" lay-verify="required" lay-search>
                                             <option value="480x320">480×320</option>
@@ -407,38 +407,40 @@
 
             var pluginSelect = xmSelect.render({
                 el: '#pluginType4',
+                name: "pluginType4",
                 data: @Html.Raw(Model.PluginsToJsArray()),
             });
 
             function init() {
-                var resolution = "@Model.PushSetting.OutputResolution";
+                let resolution = "@Model.PushSetting.OutputResolution";
                 if (resolution) {
                     $("#outputResolution").val(resolution);
                 }
-                var custumOutputParams = "@Model.PushSetting.CustumOutputParams";
+                let custumOutputParams = "@Model.PushSetting.CustumOutputParams";
                 if (custumOutputParams) {
                     $('#custumOutputParams').val(custumOutputParams);
                 }
-                var inputType = "@((int)Model.PushSetting.InputType)";
+                let inputType = "@((int)Model.PushSetting.InputType)";
                 switch (inputType) {
                     case "1": {
-                        var videoId = "@(Model.PushSetting.VideoId > 0 ? Model.PushSetting.VideoId : "")";
+                        let videoId = "@(Model.PushSetting.VideoId > 0 ? Model.PushSetting.VideoId : "")";
                         if (videoId) {
                             $('#videoId').val(videoId);
                         }
-                        var audioId = "@(Model.PushSetting.AudioId > 0 ? Model.PushSetting.AudioId : "")";
+                        let audioId = "@(Model.PushSetting.AudioId > 0 ? Model.PushSetting.AudioId : "")";
                         if (audioId) {
                             $('#audioId').val(audioId);
                         }
-                        var isMute = "@Model.PushSetting.IsMute.ToString().ToLower()";
+                        let isMute = "@Model.PushSetting.IsMute.ToString().ToLower()";
                         if (isMute == "true") {
                             $("input[name='isMute']").attr("checked", true);
                         }
+                        break;
                     }
                     case "2": {
-                        var inputScreen = "@Model.PushSetting.InputScreen";
+                        let inputScreen = "@Model.PushSetting.InputScreen";
                         $("#inputScreen").val(inputScreen);
-                        var isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
+                        let isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
                         if (isFromFile == "true") {
                             $('#desktopAudioDeviceNameItem').hide();
                             $('#desktopAudioIdItem').show();
@@ -450,6 +452,58 @@
                             $('#desktopAudioDeviceName').val("@Html.Raw(Model.PushSetting.AudioDevice)");
                             $("input[name='desktopAudioFrom']").attr("checked", true);
                         }
+                        break;
+                    }
+                    case "3": {
+                        let deviceName = "@Html.Raw(Model.PushSetting.DeviceName)";
+                        let audioDevice = "@Html.Raw(Model.PushSetting.AudioDevice)";
+                        let audioId = "@Html.Raw(Model.PushSetting.AudioId)";
+                        let inputResolution = "@Model.PushSetting.InputResolution";
+                        $("#videoDeviceNameType3").val(deviceName);
+                        $("#inputResolutionType3").val(inputResolution);
+
+                        let isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
+                        if (isFromFile == "true") {
+                            $('#audioDeviceNameType3FromItem').hide();
+                            $('#audioDeviceIdType3Item').show();
+                            $("#audioDeviceIdType3").val(audioId);
+                            $("input[name='audioDeviceNameType3From']").attr("checked", false);
+                        } else {
+                            $('#audioDeviceNameType3FromItem').show();
+                            $('#audioDeviceIdType3Item').hide();
+                            $('#audioDeviceNameType3').val(audioDevice);
+                            $("input[name='audioDeviceNameType3From']").attr("checked", true);
+                        }
+                        break;
+                    }
+                    case "4": {
+                        let deviceName = "@Html.Raw(Model.PushSetting.DeviceName)";
+                        let audioDevice = "@Html.Raw(Model.PushSetting.AudioDevice)";
+                        let audioId = "@Html.Raw(Model.PushSetting.AudioId)";
+                        let inputResolution = "@Model.PushSetting.InputResolution";
+                        let plugins = "@Html.Raw(Model.PushSetting.Plugins)";
+                        $("#videoDeviceNameType4").val(deviceName);
+                        $("#inputResolutionType4").val(inputResolution);
+
+                        let isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
+                        if (isFromFile == "true") {
+                            $('#audioDeviceNameType4FromItem').hide();
+                            $('#audioDeviceIdType4Item').show();
+                            $("#audioDeviceIdType4").val(audioId);
+                            $("input[name='audioDeviceNameType4From']").attr("checked", false);
+                        } else {
+                            $('#audioDeviceNameType4FromItem').show();
+                            $('#audioDeviceIdType4Item').hide();
+                            $('#audioDeviceNameType4').val(audioDevice);
+                            $("input[name='audioDeviceNameType4From']").attr("checked", true);
+                        }
+                        if (plugins) {
+                            let pluginsItems = plugins.split(',');
+                            pluginsItems.forEach(item => {
+                                pluginSelect.setValue([{ name: item, value: item }])
+                            });
+                        }
+                        break;
                     }
                 }
                 element.tabChange('input_type_tab', inputType);
@@ -460,7 +514,7 @@
                 let doc = new DOMParser().parseFromString($("#ffmpegCommand").html(), 'text/html');
                 let divs = doc.querySelectorAll('.layui-code-line-content');
                 let code = "";
-                for (var i = 0; i < divs.length; i++) {
+                for (let i = 0; i < divs.length; i++) {
                     if (i == divs.length - 1) {
                         code += divs[i].textContent;
                     }
@@ -546,7 +600,7 @@
             });
 
             function save(obj) {
-                var loadIndex = layer.load(2, {
+                let loadIndex = layer.load(2, {
                     timeout: 300000
                 });
                 $.ajax({
@@ -570,7 +624,7 @@
                             layer.confirm('保存成功。当前正在直播中，是否重新推流？', {
                                 btn: ['是', '否']
                             }, function () {
-                                var loadIndex = layer.load(2, {
+                                let loadIndex = layer.load(2, {
                                     timeout: 300000
                                 });
                                 $.ajax({
@@ -623,11 +677,11 @@
             }
 
             form.on('submit(submit_live_setting)', function (data) {
-                var model = $("#easyModel").prop("checked") ? 1 : ($("#advanceModel").prop("checked") ? 2 : 0)
-                var isAutoRetry = $('input[name="isAutoRetry"]:checked').val() == 1;
-                var retryInterval = safeParseInt($('input[name="retryInterval"]').val());
+                let model = $("#easyModel").prop("checked") ? 1 : ($("#advanceModel").prop("checked") ? 2 : 0)
+                let isAutoRetry = $('input[name="isAutoRetry"]:checked').val() == 1;
+                let retryInterval = safeParseInt($('input[name="retryInterval"]').val());
                 if (model == 1) {
-                    var tabIndex = $('#input_type_tab .layui-this').attr('lay-id');
+                    let tabIndex = $('#input_type_tab .layui-this').attr('lay-id');
                     if (!tabIndex) {
                         layer.msg("未知的推流类型", { icon: 5 });
                         return false;
@@ -637,29 +691,42 @@
                         layer.msg("未知的推流类型", { icon: 5 });
                         return false;
                     }
-                    var inputTypeParams = { inputType: tabIndex };
-                    var baseOutputParams = form.val('base_output_params_form');
-                    var obj = null;
+                    let inputTypeParams = { inputType: tabIndex };
+                    let baseOutputParams = form.val('base_output_params_form');
+                    let obj = null;
 
                     switch (tabIndex) {
                         case 1:
-                            var inputType1Params = form.val('input_type_1');
+                            let inputType1Params = form.val('input_type_1');
                             obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
                             obj.isMute = obj.isMute == "on" ? true : false;
                             obj.videoId = safeParseInt(obj.videoId);
                             obj.audioId = safeParseInt(obj.audioId);
                             break;
                         case 2:
-                            var inputType1Params = form.val('input_type_2');
-                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
+                            let inputType2Params = form.val('input_type_2');
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType2Params);
                             obj.desktopAudioFrom = obj.desktopAudioFrom == "on" ? true : false;
                             obj.desktopAudioId = safeParseInt(obj.desktopAudioId);
                             break;
                         case 3:
-                            var inputType1Params = form.val('input_type_3');
-                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
-                            obj.desktopAudioFrom = obj.desktopAudioFrom == "on" ? true : false;
-                            obj.desktopAudioId = safeParseInt(obj.desktopAudioId);
+                            let inputType3Params = form.val('input_type_3');
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType3Params);
+                            obj.inputDeviceName = obj.videoDeviceNameType3;
+                            obj.inputDeviceResolution = obj.inputResolutionType3;
+                            obj.inputDeviceAudioDeviceName = obj.audioDeviceNameType3;
+                            obj.inputDeviceAudioFrom = obj.audioDeviceNameType3From == "on" ? true : false;
+                            obj.inputDeviceAudioId = safeParseInt(obj.audioDeviceIdType3);
+                            break;
+                        case 4:
+                            let inputType4Params = form.val('input_type_4');
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType4Params);
+                            obj.inputDeviceName = obj.videoDeviceNameType4;
+                            obj.inputDeviceResolution = obj.inputResolutionType4;
+                            obj.inputDeviceAudioDeviceName = obj.audioDeviceNameType4;
+                            obj.inputDevicePlugins = obj.pluginType4;
+                            obj.inputDeviceAudioFrom = obj.audioDeviceNameType4From == "on" ? true : false;
+                            obj.inputDeviceAudioId = safeParseInt(obj.audioDeviceIdType4);
                             break;
                         default:
                             break;
@@ -671,7 +738,7 @@
                     save(obj);
                 }
                 else if (model == 2) {
-                    var obj = {
+                    let obj = {
                         isAutoRetry: isAutoRetry,
                         retryInterval: retryInterval,
                         model: model,
@@ -686,7 +753,7 @@
             });
 
             form.on('submit(submit_start_live)', function (data) {
-                var loadIndex = layer.load(2, {
+                let loadIndex = layer.load(2, {
                     timeout: 300000
                 });
                 $.ajax({
@@ -718,7 +785,7 @@
             });
 
             form.on('submit(submit_stop_live)', function (data) {
-                var loadIndex = layer.load(2, {
+                let loadIndex = layer.load(2, {
                     timeout: 300000
                 });
                 $.ajax({

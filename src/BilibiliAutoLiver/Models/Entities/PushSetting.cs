@@ -80,7 +80,11 @@ namespace BilibiliAutoLiver.Models.Entities
         /// <summary>
         /// 设备名称
         /// </summary>
+        [MaxLength(256)]
         public string DeviceName { get; set; }
+
+        [MaxLength(1000)]
+        public string Plugins { get; set; }
 
         /// <summary>
         /// 输入分辨率

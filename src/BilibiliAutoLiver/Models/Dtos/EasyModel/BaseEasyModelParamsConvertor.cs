@@ -13,9 +13,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting = setting;
         }
 
-        public abstract void ToEntity(PushSettingUpdateRequest request);
-
-        protected void BaseParamsCheck(PushSettingUpdateRequest request)
+        public void ParamsCheck(PushSettingUpdateRequest request)
         {
             if (string.IsNullOrEmpty(request.OutputResolution))
             {
@@ -25,6 +23,13 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception($"错误的输入分辨率：{request.OutputResolution}");
             }
+            this.Setting.OutputResolution = request.OutputResolution;
+            this.Setting.CustumOutputParams = request.CustumOutputParams;
+            this.Setting.InputType = request.InputType;
+
+            Check(request);
         }
+
+        protected abstract void Check(PushSettingUpdateRequest request);
     }
 }
