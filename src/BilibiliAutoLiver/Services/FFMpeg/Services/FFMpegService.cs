@@ -67,6 +67,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
             return await GetCliBinder().GetAudioDevices();
         }
 
+        public async Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName)
+        {
+            return await GetCliBinder().ListVideoDeviceSupportResolutions(deviceName);
+        }
+
         public async Task<LibVersion> GetVersion()
         {
             return await GetCliBinder().GetVersion();

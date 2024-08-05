@@ -15,5 +15,7 @@ namespace BilibiliAutoLiver.Services.Interface
         Task<List<string>> GetVideoDevices();
 
         Task<List<string>> GetAudioDevices();
+
+        Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName);
     }
 }

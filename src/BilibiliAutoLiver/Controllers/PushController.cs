@@ -88,7 +88,6 @@ namespace BilibiliAutoLiver.Controllers
                 vm.Audios = audios.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
             }
             vm.Plugins = _pipeContainer.Get()?.Select(p => p.Name).ToList() ?? new List<string>();
-
             return View(vm);
         }
 
@@ -118,7 +117,7 @@ namespace BilibiliAutoLiver.Controllers
             switch (request.Model)
             {
                 case ConfigModel.Normal:
-                    modelUpdateResult = UpdateEasyModel(request, setting);
+                    modelUpdateResult = await UpdateEasyModel(request, setting);
                     break;
                 case ConfigModel.Advance:
                     modelUpdateResult = UpdateAdvanceModel(request, setting);
@@ -158,7 +157,7 @@ namespace BilibiliAutoLiver.Controllers
             return new ResultModel<string>(0);
         }
 
-        private ResultModel<string> UpdateEasyModel(PushSettingUpdateRequest request, PushSetting setting)
+        private async Task<ResultModel<string>> UpdateEasyModel(PushSettingUpdateRequest request, PushSetting setting)
         {
             if (!Enum.IsDefined(typeof(InputType), (int)request.InputType))
             {
@@ -166,7 +165,7 @@ namespace BilibiliAutoLiver.Controllers
             }
             try
             {
-                EasyModelConvertFactory.ToEntity(request, setting);
+                await EasyModelConvertFactory.ParamsCheck(request, setting, _ffmpeg);
             }
             catch (Exception ex)
             {

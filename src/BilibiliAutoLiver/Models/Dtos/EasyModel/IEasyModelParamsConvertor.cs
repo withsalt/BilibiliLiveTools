@@ -1,9 +1,10 @@
-﻿using BilibiliAutoLiver.Models.Entities;
+﻿using System.Threading.Tasks;
+using BilibiliAutoLiver.Models.Entities;
 
 namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
     public interface IEasyModelParamsConvertor
     {
-        public void ToEntity(PushSettingUpdateRequest request);
+        public Task ParamsCheck(PushSettingUpdateRequest request);
     }
 }

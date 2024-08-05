@@ -189,7 +189,7 @@
         public audit_info audit_info { get; set; }
     }
 
-    public class announce
+    public class @announce
     {
         public string content { get; set; }
 

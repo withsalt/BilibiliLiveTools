@@ -49,6 +49,10 @@ namespace BilibiliAutoLiver.Models.ViewModels
                 {
                     sb.Append("{ name: '" + this.Plugins[i] + "', value: '" + this.Plugins[i] + "' }");
                 }
+                else
+                {
+                    sb.Append("{ name: '" + this.Plugins[i] + "', value: '" + this.Plugins[i] + "' },");
+                }
             }
             sb.Append("]");
 

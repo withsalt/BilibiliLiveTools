@@ -1,20 +1,21 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
     public class EasyModelDesktopParamsConvertor : BaseEasyModelParamsConvertor
     {
-        public EasyModelDesktopParamsConvertor(PushSetting setting) : base(setting)
+        public EasyModelDesktopParamsConvertor(IFFMpegService ffmpegService, PushSetting setting) : base(ffmpegService, setting)
         {
 
         }
 
-        public override void ToEntity(PushSettingUpdateRequest request)
+        protected override Task Check(PushSettingUpdateRequest request)
         {
-            BaseParamsCheck(request);
             if (string.IsNullOrWhiteSpace(request.InputScreen))
             {
                 throw new Exception("推流屏幕范围不能为空");
@@ -28,14 +29,12 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
                 throw new Exception("当选择推流音频来源于设备时，音频设备不能为空");
             }
 
-            this.Setting.OutputResolution = request.OutputResolution;
-            this.Setting.CustumOutputParams = request.CustumOutputParams;
-            this.Setting.InputType = request.InputType;
-
             this.Setting.InputScreen = request.InputScreen;
             this.Setting.InputAudioSource = request.DesktopAudioFrom ? InputAudioSource.Device : InputAudioSource.File;
             this.Setting.AudioId = !request.DesktopAudioFrom && request.DesktopAudioId.HasValue && request.DesktopAudioId.Value > 0 ? request.DesktopAudioId.Value : null;
             this.Setting.AudioDevice = request.DesktopAudioFrom ? request.DesktopAudioDeviceName : "";
+
+            return Task.CompletedTask;
         }
     }
 }

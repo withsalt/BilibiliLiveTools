@@ -24,6 +24,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 
         public abstract Task<List<string>> GetAudioDevices();
 
+        public abstract Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName);
+
         public async Task<LibVersion> GetVersion()
         {
             LibVersion libVersion = new LibVersion();
