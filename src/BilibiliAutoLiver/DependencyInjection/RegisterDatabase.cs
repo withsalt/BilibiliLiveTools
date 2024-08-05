@@ -92,14 +92,14 @@ namespace BilibiliAutoLiver.DependencyInjection
             }
             IWebHostEnvironment env = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
             ILoggerFactory loggerFactory = app.ApplicationServices.GetRequiredService<ILoggerFactory>();
-            ILogger logger = loggerFactory.CreateLogger(nameof(RegisterDatabase));
+            ILogger logger = loggerFactory.CreateLogger(typeof(RegisterDatabase).FullName);
 
             IFreeSql db = ib.Get("Sqlite");
             if (db == null)
             {
                 throw new Exception($"Can not get database sqlite from IdleBus.");
             }
-            logger.LogInformation($"Automatic sync database structure is turned on, start seeding database...");
+            logger.LogInformation($"同步数据库...");
             //同步表结构
             SyncStructure(db);
             //写入种子数据
