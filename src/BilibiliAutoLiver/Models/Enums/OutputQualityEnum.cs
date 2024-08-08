@@ -1,9 +1,19 @@
-﻿namespace BilibiliAutoLiver.Models.Enums
+﻿using System.ComponentModel;
+
+namespace BilibiliAutoLiver.Models.Enums
 {
+    /// <summary>
+    /// 推流输出质量
+    /// </summary>
     public enum OutputQualityEnum
     {
-        Low = 1,
+        [Description("高")]
+        High = 1,
+
+        [Description("中等")]
         Medium = 2,
-        High = 3
+
+        [Description("低")]
+        Low = 3,
     }
 }

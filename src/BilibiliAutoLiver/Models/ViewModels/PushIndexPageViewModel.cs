@@ -31,6 +31,11 @@ namespace BilibiliAutoLiver.Models.ViewModels
         public Dictionary<long, string> Audios { get; set; } = new Dictionary<long, string>();
 
         /// <summary>
+        /// 输出质量
+        /// </summary>
+        public Dictionary<int, string> OutputQuality { get; set; } = new Dictionary<int, string>();
+
+        /// <summary>
         /// 插件
         /// </summary>
         public List<string> Plugins { get; set; }

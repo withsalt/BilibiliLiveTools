@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Entities;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 
@@ -28,7 +29,12 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception($"错误的输入分辨率：{request.OutputResolution}");
             }
+            if (!Enum.IsDefined(typeof(OutputQualityEnum), request.OutputQuality))
+            {
+                throw new Exception($"不支持的推流质量，参数值：{request.OutputQuality}");
+            }
             this.Setting.OutputResolution = request.OutputResolution;
+            this.Setting.Quality = (OutputQualityEnum)request.OutputQuality;
             this.Setting.CustumOutputParams = request.CustumOutputParams;
             this.Setting.InputType = request.InputType;
 

@@ -38,6 +38,11 @@ namespace BilibiliAutoLiver.Models.Dtos
         public string OutputResolution { get; set; }
 
         /// <summary>
+        /// 输出质量
+        /// </summary>
+        public int OutputQuality {  get; set; }
+
+        /// <summary>
         /// 自定义输出参数
         /// </summary>
         public string CustumOutputParams { get; set; }

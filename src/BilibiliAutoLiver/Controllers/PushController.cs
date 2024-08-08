@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
+using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Dtos.EasyModel;
@@ -70,6 +71,7 @@ namespace BilibiliAutoLiver.Controllers
         public async Task<IActionResult> Index()
         {
             PushIndexPageViewModel vm = new PushIndexPageViewModel();
+            vm.OutputQuality = EnumExtensions.GetEnumDescriptions<OutputQualityEnum>();
             vm.PushSetting = await _pushSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
             if (vm.PushSetting == null)
             {
