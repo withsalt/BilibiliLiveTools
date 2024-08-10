@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Settings;
+using BilibiliAutoLiver.Models.Enums;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
@@ -58,17 +58,48 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             opt.ForceFormat("flv");
             //opt.ForcePixelFormat("yuv420p");
             opt.WithConstantRateFactor(23);
-            opt.WithVideoBitrate(6000);
-            //用于设置 x264 编码器的编码速度和质量之间的权衡。
-            opt.WithSpeedPreset(Speed.VeryFast);
-            //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
-            opt.WithCustomArgument("-tune zerolatency");
-            opt.WithCustomArgument("-g 30");
-
             //推流分辨率
             if (this.Settings.PushSettingDto.OutputWidth > 0 && this.Settings.PushSettingDto.OutputHeight > 0)
             {
                 opt.Resize(this.Settings.PushSettingDto.OutputWidth, this.Settings.PushSettingDto.OutputHeight);
+            }
+        }
+
+        protected virtual void WithQualityOutputArg(FFMpegArgumentOptions opt)
+        {
+            switch (this.Settings.PushSettingDto.Quality)
+            {
+                case OutputQualityEnum.High:
+                    {
+                        opt.WithVideoBitrate(12288);
+                        //用于设置 x264 编码器的编码速度和质量之间的权衡。
+                        opt.WithSpeedPreset(Speed.Medium);
+                        //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
+                        opt.WithCustomArgument("-tune zerolatency");
+                        opt.WithCustomArgument("-g 30");
+                    }
+                    break;
+                default:
+                case OutputQualityEnum.Medium:
+                    {
+                        opt.WithVideoBitrate(8192);
+                        //用于设置 x264 编码器的编码速度和质量之间的权衡。
+                        opt.WithSpeedPreset(Speed.Faster);
+                        //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
+                        opt.WithCustomArgument("-tune zerolatency");
+                        opt.WithCustomArgument("-g 30");
+                    }
+                    break;
+                case OutputQualityEnum.Low:
+                    {
+                        opt.WithVideoBitrate(6144);
+                        //用于设置 x264 编码器的编码速度和质量之间的权衡。
+                        opt.WithSpeedPreset(Speed.SuperFast);
+                        //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
+                        opt.WithCustomArgument("-tune zerolatency");
+                        opt.WithCustomArgument("-g 30");
+                    }
+                    break;
             }
         }
 

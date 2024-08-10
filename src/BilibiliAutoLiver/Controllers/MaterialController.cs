@@ -192,55 +192,100 @@ namespace BilibiliAutoLiver.Controllers
             List<Material> materials = new List<Material>();
             foreach (var item in uploadParams.uploadFiles)
             {
-                string fileName = item.FileName;
-                if (string.IsNullOrEmpty(fileName))
+                string fileFullPath = null;
+                try
                 {
-                    return Json(new ResultModel<string>(-1, "上传文件文件名不能为空"));
-                }
-                string ext = Path.GetExtension(fileName);
-                if (string.IsNullOrEmpty(ext))
-                {
-                    return Json(new ResultModel<string>(-1, "后缀名不能为空"));
-                }
-                FileType fileType = FileType.Unknow;
-                if (_appSettings.AllowExtensions != null && _appSettings.AllowExtensions.Count > 0)
-                {
-                    foreach (var fileTypeItem in _appSettings.AllowExtensions)
+                    string fileName = item.FileName;
+                    if (string.IsNullOrEmpty(fileName))
                     {
-                        if (fileTypeItem.Values != null && fileTypeItem.Values.Contains(ext.ToLower()))
+                        return Json(new ResultModel<string>(-1, "上传文件文件名不能为空"));
+                    }
+                    string ext = Path.GetExtension(fileName);
+                    if (string.IsNullOrEmpty(ext))
+                    {
+                        return Json(new ResultModel<string>(-1, "后缀名不能为空"));
+                    }
+                    FileType fileType = FileType.Unknow;
+                    if (_appSettings.AllowExtensions != null && _appSettings.AllowExtensions.Count > 0)
+                    {
+                        foreach (var fileTypeItem in _appSettings.AllowExtensions)
                         {
-                            fileType = fileTypeItem.Type;
-                            break;
+                            if (fileTypeItem.Values != null && fileTypeItem.Values.Contains(ext.ToLower()))
+                            {
+                                fileType = fileTypeItem.Type;
+                                break;
+                            }
                         }
                     }
-                }
-                if (fileType == FileType.Unknow)
-                {
-                    return Json(new ResultModel<string>(-1, $"不支持的文件类型：{ext.TrimStart('.')}"));
-                }
+                    if (fileType == FileType.Unknow)
+                    {
+                        return Json(new ResultModel<string>(-1, $"不支持的文件类型：{ext.TrimStart('.')}"));
+                    }
 
-                ext = ext.ToLower();
-                string fileNewName = Guid.NewGuid().ToString("n") + ext;
-                (string, string) fileSaveResult = await SaveFile(item, fileNewName);
-                if (string.IsNullOrEmpty(fileSaveResult.Item1))
-                {
-                    return Json(new ResultModel<string>(-1, "保存文件失败"));
-                }
+                    ext = ext.ToLower();
 
-                Material material = new Material()
+                    string fileNewName = Guid.NewGuid().ToString("n") + ext;
+                    (string, string) fileSaveResult = await SaveFile(item, fileNewName);
+                    if (string.IsNullOrEmpty(fileSaveResult.Item1))
+                    {
+                        return Json(new ResultModel<string>(-1, "保存文件失败"));
+                    }
+                    fileFullPath = fileSaveResult.Item2;
+                    if (ext == ".txt")
+                    {
+                        await UploadFileListCheck(fileFullPath);
+                    }
+                    Material material = new Material()
+                    {
+                        Name = fileName,
+                        Path = fileSaveResult.Item1,
+                        FileType = fileType,
+                        Size = new FileInfo(fileSaveResult.Item2).Length / 1024,
+                        CreatedTime = DateTime.UtcNow,
+                        CreatedUserId = GlobalConfigConstant.SYS_USERID
+                    };
+                    materials.Add(material);
+                }
+                catch (Exception ex)
                 {
-                    Name = fileName,
-                    Path = fileSaveResult.Item1,
-                    FileType = fileType,
-                    Size = new FileInfo(fileSaveResult.Item2).Length / 1024,
-                    CreatedTime = DateTime.UtcNow,
-                    CreatedUserId = GlobalConfigConstant.SYS_USERID
-                };
-                materials.Add(material);
+                    if (!string.IsNullOrWhiteSpace(fileFullPath) && System.IO.File.Exists(fileFullPath))
+                    {
+                        System.IO.File.Delete(fileFullPath);
+                    }
+                    return Json(new ResultModel<string>(-1, ex.Message));
+                }
             }
             await _repository.InsertAsync(materials);
             //上传成功
             return Json(new ResultModel<string>(0));
+        }
+
+        private async Task UploadFileListCheck(string filePath)
+        {
+            if (!System.IO.File.Exists(filePath))
+            {
+                throw new Exception("上传的文件不存在");
+            }
+            var allLines = (await System.IO.File.ReadAllLinesAsync(filePath))
+                ?.Where(p => !string.IsNullOrWhiteSpace(p))
+                .Select(p => p.Trim(' ', '\r', '\n'))
+                .ToList();
+            if (allLines?.Any() != true)
+            {
+                throw new Exception("上传的素材列表文件为空");
+            }
+            foreach (var line in allLines)
+            {
+                string file = line;
+                if (file.StartsWith("file ", StringComparison.OrdinalIgnoreCase))
+                {
+                    file = file.Substring(5).Trim(' ', '\'', '\"');
+                }
+                if (!System.IO.File.Exists(file))
+                {
+                    throw new Exception($"上传的素材列表文件中，文件“{line}”不存在");
+                }
+            }
         }
 
         private async Task<(string relativePath, string absolutePath)> SaveFile(IFormFile formFile, string fileNewName)

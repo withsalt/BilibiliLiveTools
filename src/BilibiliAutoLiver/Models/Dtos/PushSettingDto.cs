@@ -10,6 +10,11 @@ namespace BilibiliAutoLiver.Models.Dtos
         public InputType InputType { get; set; }
 
         /// <summary>
+        /// 输出质量
+        /// </summary>
+        public OutputQualityEnum Quality { get; set; }
+
+        /// <summary>
         /// 输出分辨率（宽）
         /// </summary>
         public int OutputWidth { get; set; }
@@ -50,11 +55,6 @@ namespace BilibiliAutoLiver.Models.Dtos
         public string DeviceName {  get; set; }
 
         /// <summary>
-        /// 帧数
-        /// </summary>
-        public double InputFramerate {  get; set; }
-
-        /// <summary>
         /// 输出分辨率（宽）
         /// </summary>
         public int InputWidth { get; set; }
@@ -63,5 +63,12 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// 输出分辨率（高）
         /// </summary>
         public int InputHeight { get; set; }
+
+        /// <summary>
+        /// 帧数
+        /// </summary>
+        public double InputFramerate {  get; set; }
+
+
     }
 }

@@ -20,7 +20,7 @@ namespace BilibiliAutoLiver.DependencyInjection
                 options.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 options.Encoding = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? Encoding.Default : Encoding.UTF8;
 
-                if (Path.Exists(options.TemporaryFilesFolder))
+                if (!Path.Exists(options.TemporaryFilesFolder))
                 {
                     Directory.CreateDirectory(options.TemporaryFilesFolder);
                 }

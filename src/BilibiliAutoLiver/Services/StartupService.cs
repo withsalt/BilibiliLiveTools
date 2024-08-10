@@ -49,6 +49,11 @@ namespace BilibiliAutoLiver.Services
                 //登录成功之后，启动定时任务
                 await _jobScheduler.Start(token);
                 //开始推流
+#if DEBUG
+                _logger.LogWarning($"开发，不推流");
+                return ;
+#endif
+
                 await _pushProxyService.Start();
             }
             catch (Exception ex)

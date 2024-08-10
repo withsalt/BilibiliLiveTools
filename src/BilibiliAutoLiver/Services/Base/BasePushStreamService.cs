@@ -82,8 +82,10 @@ namespace BilibiliAutoLiver.Services.Base
             if (!pushSetting.IsUpdate)
                 return null;
 
-            if (!ResolutionHelper.TryParse(pushSetting.OutputResolution, out int width, out int height))
+            if (!ResolutionHelper.TryParse(pushSetting.OutputResolution, out int outputWidth, out int outputHeight))
                 throw new ArgumentException(pushSetting.OutputResolution, $"输出分辨率格式不正确，{pushSetting.OutputResolution}");
+            if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out int inputWidth, out int inputHeight))
+                throw new ArgumentException(pushSetting.InputResolution, $"输入分辨率格式不正确，{pushSetting.OutputResolution}");
 
             var materialRepository = provider.GetRequiredService<IMaterialRepository>();
 
@@ -106,12 +108,17 @@ namespace BilibiliAutoLiver.Services.Base
             PushSettingDto pushSettingDto = new PushSettingDto()
             {
                 InputType = pushSetting.InputType,
-                OutputWidth = width,
-                OutputHeight = height,
+                InputFramerate = pushSetting.InputFramerate,
+                InputWidth = inputWidth,
+                InputHeight = inputHeight,
+                InputScreen = pushSetting.InputScreen,
+                OutputWidth = outputWidth,
+                OutputHeight = outputHeight,
                 CustumOutputParams = pushSetting.CustumOutputParams,
                 VideoPath = MaterialPath.GetAbsolutePath(videoMaterial, _appSettings.DataDirectory),
                 AudioPath = string.IsNullOrWhiteSpace(audioMaterial?.Path) ? string.Empty : MaterialPath.GetAbsolutePath(audioMaterial, _appSettings.DataDirectory),
                 IsMute = pushSetting.IsMute,
+                Quality = pushSetting.Quality,
             };
             return pushSettingDto;
         }
