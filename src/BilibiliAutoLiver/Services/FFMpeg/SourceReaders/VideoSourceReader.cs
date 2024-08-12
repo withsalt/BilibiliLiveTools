@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Settings;
 using FFMpegCore;
 using Microsoft.Extensions.Logging;
 
@@ -29,7 +28,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
                 WithCommonOutputArg(opt);
-                WithQualityOutputArg(opt);
             });
             return rt;
         }

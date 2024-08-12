@@ -8,6 +8,6 @@
 
         public string RoomName { get; set; }
 
-        public string Time {  get; set; }
+        public string Time { get; set; }
     }
 }

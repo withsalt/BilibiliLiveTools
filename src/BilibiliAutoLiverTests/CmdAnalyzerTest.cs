@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using BilibiliAutoLiver.Models.Enums;
-using BilibiliAutoLiver.Models.Settings;
-using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
-using BilibiliAutoLiver.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using BilibiliAutoLiver.Utils;
 
 namespace BilibiliLiverTests
 {

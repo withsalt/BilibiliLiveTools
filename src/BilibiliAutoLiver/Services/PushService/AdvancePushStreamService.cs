@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -211,7 +210,7 @@ namespace BilibiliAutoLiver.Services.PushService
                     if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
                     {
                         Status = PushStatus.Waiting;
-                        await Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
                 }
                 catch (OperationCanceledException)
@@ -232,12 +231,30 @@ namespace BilibiliAutoLiver.Services.PushService
                     //如果开启了自动重试
                     if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
                     {
-                        await Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
                 }
                 finally
                 {
                     proc?.Dispose();
+                }
+            }
+        }
+
+        private readonly static object _disposeLock = new object();
+        private static bool _disposed = false;
+
+        public override void Dispose()
+        {
+            if (!_disposed)
+            {
+                lock (_disposeLock)
+                {
+                    if (!_disposed)
+                    {
+                        _disposed = true;
+                        this.Stop();
+                    }
                 }
             }
         }

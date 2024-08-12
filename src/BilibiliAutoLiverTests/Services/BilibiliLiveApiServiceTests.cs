@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Bilibili.AspNetCore.Apis.Interface;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Bilibili.AspNetCore.Apis.Interface;
 
 namespace BilibiliLiverTests.Services
 {

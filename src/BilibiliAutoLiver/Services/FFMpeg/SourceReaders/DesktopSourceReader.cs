@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using Microsoft.Extensions.Logging;

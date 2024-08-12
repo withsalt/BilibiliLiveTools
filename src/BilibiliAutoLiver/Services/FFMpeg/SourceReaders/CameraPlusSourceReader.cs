@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
 using BilibiliAutoLiver.Services.FFMpeg.Pipe;

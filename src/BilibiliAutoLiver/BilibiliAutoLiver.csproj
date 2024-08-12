@@ -20,27 +20,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\static\2.js" />
-	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\static\3.js" />
-	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\static\docs.js" />
-	  <None Include="wwwroot\lib\xm-select-v1.2.4\dist\xm-select.js" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
 		<PackageReference Include="MailKit" Version="4.7.1.1" />
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.7" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11" />
-		<PackageReference Include="Quartz.AspNetCore" Version="3.12.0" />
-		<PackageReference Include="Quartz.Plugins" Version="3.12.0" />
-		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.12.0" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.12" />
+		<PackageReference Include="Quartz.AspNetCore" Version="3.13.0" />
+		<PackageReference Include="Quartz.Plugins" Version="3.13.0" />
+		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.13.0" />
 		<PackageReference Include="CliWrap" Version="3.6.6" />
 		<PackageReference Include="FreeSql" Version="3.2.833" />
 		<PackageReference Include="FreeSql.Repository" Version="3.2.833" />
 		<PackageReference Include="FreeSql.Provider.SqliteCore" Version="3.2.833" />
-		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.8" />
+		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.9" />
 	</ItemGroup>
 
 	<PropertyGroup>

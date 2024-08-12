@@ -60,22 +60,22 @@ namespace BilibiliAutoLiver.Models.Entities
         /// <summary>
         /// 推流视频Id
         /// </summary>
-        public long VideoId {  get; set; }
+        public long VideoId { get; set; }
 
         /// <summary>
         /// 是否静音
         /// </summary>
-        public bool IsMute {  get; set; }
+        public bool IsMute { get; set; }
 
         /// <summary>
         /// 推流音频Id
         /// </summary>
-        public long? AudioId {  get; set; }
+        public long? AudioId { get; set; }
 
         /// <summary>
         /// 音频设备
         /// </summary>
-        public string AudioDevice {  get; set; }
+        public string AudioDevice { get; set; }
 
         /// <summary>
         /// 设备名称

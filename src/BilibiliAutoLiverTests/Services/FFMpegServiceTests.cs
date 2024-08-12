@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using BilibiliAutoLiver.Services.Interface;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using BilibiliAutoLiver.Services.Interface;
 
 namespace BilibiliLiverTests.Services
 {
@@ -33,7 +31,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task GetVideoDevicesTest()
         {
-             await _ffmpeg.GetVideoDevices();
+            await _ffmpeg.GetVideoDevices();
         }
 
         [TestMethod()]

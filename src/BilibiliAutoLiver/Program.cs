@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.DependencyInjection;
-using Bilibili.AspNetCore.Apis.Providers;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Plugin.Base;
@@ -21,7 +20,7 @@ namespace BilibiliAutoLiver
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Console.Title = $"哔哩哔哩无人值守直播工具 v{VersionHelper.GetVersion()} By withsalt(https://github.com/withsalt)";
 
@@ -115,7 +114,7 @@ namespace BilibiliAutoLiver
             app.Lifetime.ApplicationStarted.Register((obj, token)
                 => Task.Run(() => app.Services.GetRequiredService<IStartupService>().Start(token), CancellationToken.None), null);
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

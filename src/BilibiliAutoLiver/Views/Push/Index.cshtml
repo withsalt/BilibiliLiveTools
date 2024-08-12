@@ -523,6 +523,15 @@
                     }
                 }
                 element.tabChange('input_type_tab', inputType);
+                //移除原画选项
+                if (inputType != "1" && $("#outputQuality option[value='9']").length > 0) {
+                    var oldVal = $("#outputQuality").val();
+                    if (oldVal == "9") {
+                        $("#outputQuality").val("1");
+                    }
+                    $("#outputQuality option[value='9']").remove();
+                    form.render();
+                }
                 form.render();
             }
 
@@ -540,80 +549,6 @@
                 }
                 return code;
             }
-
-            form.on('radio(isAutoRetry)', function (data) {
-                if (data.value == 1) {
-                    $('#retrySet').show();
-                } else {
-                    $('#retrySet').hide();
-                }
-            });
-
-            form.on('switch(easyModel)', function (data) {
-                if (this.checked) {
-                    $('#easyModelBody').show();
-                    $('#advanceModelBody').hide();
-                    $("#advanceModel").prop("checked", false);
-                } else {
-                    $('#easyModelBody').hide();
-                    $('#advanceModelBody').show();
-                    $("#advanceModel").prop("checked", true);
-                }
-                form.render();
-            });
-
-
-            form.on('switch(advanceModel)', function (data) {
-                if (this.checked) {
-                    $('#easyModelBody').hide();
-                    $('#advanceModelBody').show();
-                    $("#easyModel").prop("checked", false);
-                } else {
-                    $('#easyModelBody').show();
-                    $('#advanceModelBody').hide();
-                    $("#easyModel").prop("checked", true);
-                }
-                form.render();
-            });
-
-            form.on('switch(desktopAudioFrom)', function (data) {
-                if (this.checked) {
-                    $('#desktopAudioDeviceNameItem').show();
-                    $('#desktopAudioIdItem').hide();
-                    $("#desktopAudioId").val("");
-                } else {
-                    $('#desktopAudioDeviceNameItem').hide();
-                    $('#desktopAudioIdItem').show();
-                    $('#desktopAudioDeviceName').val("");
-                }
-                form.render();
-            });
-
-            form.on('switch(audioDeviceNameType3From)', function (data) {
-                if (this.checked) {
-                    $('#audioDeviceNameType3FromItem').show();
-                    $('#audioDeviceIdType3Item').hide();
-                    $("#audioDeviceIdType3").val("");
-                } else {
-                    $('#audioDeviceNameType3FromItem').hide();
-                    $('#audioDeviceIdType3Item').show();
-                    $('#audioDeviceNameType3').val("");
-                }
-                form.render();
-            });
-
-            form.on('switch(audioDeviceNameType4From)', function (data) {
-                if (this.checked) {
-                    $('#audioDeviceNameType4FromItem').show();
-                    $('#audioDeviceIdType4Item').hide();
-                    $("#audioDeviceIdType4").val("");
-                } else {
-                    $('#audioDeviceNameType4FromItem').hide();
-                    $('#audioDeviceIdType4Item').show();
-                    $('#audioDeviceNameType4').val("");
-                }
-                form.render();
-            });
 
             function save(obj) {
                 let loadIndex = layer.load(2, {
@@ -691,6 +626,79 @@
                     return 0;
                 }
             }
+
+            form.on('radio(isAutoRetry)', function (data) {
+                if (data.value == 1) {
+                    $('#retrySet').show();
+                } else {
+                    $('#retrySet').hide();
+                }
+            });
+
+            form.on('switch(easyModel)', function (data) {
+                if (this.checked) {
+                    $('#easyModelBody').show();
+                    $('#advanceModelBody').hide();
+                    $("#advanceModel").prop("checked", false);
+                } else {
+                    $('#easyModelBody').hide();
+                    $('#advanceModelBody').show();
+                    $("#advanceModel").prop("checked", true);
+                }
+                form.render();
+            });
+
+            form.on('switch(advanceModel)', function (data) {
+                if (this.checked) {
+                    $('#easyModelBody').hide();
+                    $('#advanceModelBody').show();
+                    $("#easyModel").prop("checked", false);
+                } else {
+                    $('#easyModelBody').show();
+                    $('#advanceModelBody').hide();
+                    $("#easyModel").prop("checked", true);
+                }
+                form.render();
+            });
+
+            form.on('switch(desktopAudioFrom)', function (data) {
+                if (this.checked) {
+                    $('#desktopAudioDeviceNameItem').show();
+                    $('#desktopAudioIdItem').hide();
+                    $("#desktopAudioId").val("");
+                } else {
+                    $('#desktopAudioDeviceNameItem').hide();
+                    $('#desktopAudioIdItem').show();
+                    $('#desktopAudioDeviceName').val("");
+                }
+                form.render();
+            });
+
+            form.on('switch(audioDeviceNameType3From)', function (data) {
+                if (this.checked) {
+                    $('#audioDeviceNameType3FromItem').show();
+                    $('#audioDeviceIdType3Item').hide();
+                    $("#audioDeviceIdType3").val("");
+                } else {
+                    $('#audioDeviceNameType3FromItem').hide();
+                    $('#audioDeviceIdType3Item').show();
+                    $('#audioDeviceNameType3').val("");
+                }
+                form.render();
+            });
+
+            form.on('switch(audioDeviceNameType4From)', function (data) {
+                if (this.checked) {
+                    $('#audioDeviceNameType4FromItem').show();
+                    $('#audioDeviceIdType4Item').hide();
+                    $("#audioDeviceIdType4").val("");
+                } else {
+                    $('#audioDeviceNameType4FromItem').hide();
+                    $('#audioDeviceIdType4Item').show();
+                    $('#audioDeviceNameType4').val("");
+                }
+                form.render();
+            });
 
             form.on('submit(submit_live_setting)', function (data) {
                 let model = $("#easyModel").prop("checked") ? 1 : ($("#advanceModel").prop("checked") ? 2 : 0)
@@ -835,6 +843,27 @@
                     }
                 });
                 return false;
+            });
+
+            // 切换事件
+            element.on('tab(input_type_tab)', function (obj) {
+                var id = this.getAttribute('lay-id');
+                if (id == "1") {
+                    if ($("#outputQuality option[value='9']").length == 0) {
+                        $("#outputQuality").append('<option value="9">原画</option>');
+                        form.render();
+                    }
+                }
+                else {
+                    if ($("#outputQuality option[value='9']").length > 0) {
+                        var oldVal = $("#outputQuality").val();
+                        if (oldVal == "9") {
+                            $("#outputQuality").val("1");
+                        }
+                        $("#outputQuality option[value='9']").remove();
+                        form.render();
+                    }
+                }
             });
 
             init();

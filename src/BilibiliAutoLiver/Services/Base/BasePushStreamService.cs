@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -84,8 +85,30 @@ namespace BilibiliAutoLiver.Services.Base
 
             if (!ResolutionHelper.TryParse(pushSetting.OutputResolution, out int outputWidth, out int outputHeight))
                 throw new ArgumentException(pushSetting.OutputResolution, $"输出分辨率格式不正确，{pushSetting.OutputResolution}");
-            if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out int inputWidth, out int inputHeight))
-                throw new ArgumentException(pushSetting.InputResolution, $"输入分辨率格式不正确，{pushSetting.OutputResolution}");
+
+            int inputWidth = 0, inputHeight = 0;
+
+            switch (pushSetting.InputType)
+            {
+                case InputType.Video:
+                    break;
+                case InputType.Desktop:
+                    break;
+                case InputType.Camera:
+                    if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out inputWidth, out inputHeight))
+                    {
+                        throw new ArgumentException(pushSetting.InputResolution, $"输入分辨率格式不正确，{pushSetting.OutputResolution}");
+                    }
+                    break;
+                case InputType.CameraPlus:
+                    if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out inputWidth, out inputHeight))
+                    {
+                        throw new ArgumentException(pushSetting.InputResolution, $"输入分辨率格式不正确，{pushSetting.OutputResolution}");
+                    }
+                    break;
+                default:
+                    break;
+            }
 
             var materialRepository = provider.GetRequiredService<IMaterialRepository>();
 
@@ -221,15 +244,17 @@ namespace BilibiliAutoLiver.Services.Base
             }
         }
 
-        protected async Task Delay(int sec, CancellationTokenSource tokenSource)
+        protected void Delay(int sec, CancellationTokenSource tokenSource)
         {
             _logger.LogWarning($"等待{sec}s后重新推流...");
-            await Task.Delay(sec * 1000, tokenSource.Token);
+            Stopwatch sw = Stopwatch.StartNew();
+            int timeout = sec * 1000;
+            while (sw.ElapsedMilliseconds <= timeout && !tokenSource.IsCancellationRequested)
+            {
+                Thread.Sleep(100);
+            }
         }
 
-        public void Dispose()
-        {
-            this.Stop();
-        }
+        public abstract void Dispose();
     }
 }

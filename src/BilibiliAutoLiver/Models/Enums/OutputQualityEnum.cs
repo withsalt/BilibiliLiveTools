@@ -15,5 +15,8 @@ namespace BilibiliAutoLiver.Models.Enums
 
         [Description("低")]
         Low = 3,
+
+        [Description("原画")]
+        Original = 9,
     }
 }

@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Settings;
 using FlashCap;
 using SkiaSharp;
 

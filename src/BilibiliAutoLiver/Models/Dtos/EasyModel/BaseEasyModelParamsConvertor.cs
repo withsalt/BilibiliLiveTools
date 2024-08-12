@@ -33,6 +33,10 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception($"不支持的推流质量，参数值：{request.OutputQuality}");
             }
+            if (request.OutputQuality == (int)OutputQualityEnum.Original && request.InputType != InputType.Video)
+            {
+                throw new Exception($"只有推流视频时，才能选择输出质量为原画");
+            }
             this.Setting.OutputResolution = request.OutputResolution;
             this.Setting.Quality = (OutputQualityEnum)request.OutputQuality;
             this.Setting.CustumOutputParams = request.CustumOutputParams;

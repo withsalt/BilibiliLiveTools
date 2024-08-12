@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BilibiliAutoLiver.Models.Dtos
+﻿namespace BilibiliAutoLiver.Models.Dtos
 {
     public class MaterialDto
     {

@@ -40,7 +40,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// <summary>
         /// 输出质量
         /// </summary>
-        public int OutputQuality {  get; set; }
+        public int OutputQuality { get; set; }
 
         /// <summary>
         /// 自定义输出参数

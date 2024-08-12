@@ -1,5 +1,4 @@
-﻿using System;
-using Bilibili.AspNetCore.Apis.DependencyInjection;
+﻿using Bilibili.AspNetCore.Apis.DependencyInjection;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services;

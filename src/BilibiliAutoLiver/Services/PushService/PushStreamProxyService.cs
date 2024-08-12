@@ -77,19 +77,11 @@ namespace BilibiliAutoLiver.Services.PushService
 
         public async Task<bool> Start()
         {
-            try
-            {
-                var service = GetService();
-                await service.CheckLiveSetting();
-                await service.CheckLiveRoom();
-                await service.CheckFFmpegBinary();
-                return await service.Start();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"开启推流失败，{ex.Message}");
-                return false;
-            }
+            var service = GetService();
+            await service.CheckLiveSetting();
+            await service.CheckLiveRoom();
+            await service.CheckFFmpegBinary();
+            return await service.Start();
         }
 
         public async Task<bool> Stop()

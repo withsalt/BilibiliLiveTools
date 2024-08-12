@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
@@ -51,7 +50,7 @@ namespace BilibiliAutoLiver.Services
                 //开始推流
 #if DEBUG
                 _logger.LogWarning($"开发，不推流");
-                return ;
+                return;
 #endif
 
                 await _pushProxyService.Start();

@@ -47,12 +47,12 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// <summary>
         /// 输入屏幕参数
         /// </summary>
-        public string InputScreen {  get; set; }
+        public string InputScreen { get; set; }
 
         /// <summary>
         /// 设备名称
         /// </summary>
-        public string DeviceName {  get; set; }
+        public string DeviceName { get; set; }
 
         /// <summary>
         /// 输出分辨率（宽）
@@ -67,7 +67,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// <summary>
         /// 帧数
         /// </summary>
-        public double InputFramerate {  get; set; }
+        public double InputFramerate { get; set; }
 
 
     }
