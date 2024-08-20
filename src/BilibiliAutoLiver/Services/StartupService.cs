@@ -65,13 +65,13 @@ namespace BilibiliAutoLiver.Services
         {
             try
             {
-                _lockService.Lock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, 300);
+                _lockService.Lock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300));
                 //通过保存的Cookie登录
                 UserInfo userInfo = await _accountService.LoginByCookie();
                 _lockService.UnLock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
                 if (userInfo == null)
                 {
-                    if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, 300))
+                    if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300)))
                     {
                         try
                         {

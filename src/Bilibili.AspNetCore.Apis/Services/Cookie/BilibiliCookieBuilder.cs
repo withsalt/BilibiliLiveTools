@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Bilibili.AspNetCore.Apis.Exceptions;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -62,6 +63,14 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
                 else
                 {
                     throw new Exception($"Try parse \"{item}\" to cookie header value failed.");
+                }
+            }
+            var dedeUserID = _cookies.Where(p => p.Cookies.Any(t => t.Name.Equals("DedeUserID", StringComparison.OrdinalIgnoreCase))).FirstOrDefault();
+            if (dedeUserID != null && dedeUserID.Expires != null)
+            {
+                if (dedeUserID.Expires <= DateTime.UtcNow)
+                {
+                    throw new CookieExpiredException($"当前保存的Cookie已过期，过期时间：{dedeUserID.Expires.Value.ToLocalTime()}");
                 }
             }
         }

@@ -93,7 +93,7 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public Task<string> LoginByQrCode()
         {
-            if (!_lockService.TryLock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY))
+            if (_lockService.IsLocked(CacheKeyConstant.LOGING_STATUS_CACHE_KEY))
             {
                 return Task.FromResult("别着急，再等等...");
             }
@@ -101,7 +101,7 @@ namespace BilibiliAutoLiver.Controllers
             {
                 return Task.FromResult("正在通过扫描二维码登录");
             }
-            if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, 300))
+            if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300)))
             {
                 try
                 {

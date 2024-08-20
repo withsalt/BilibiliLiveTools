@@ -40,18 +40,19 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly ILogger<BilibiliAccountApiService> _logger;
         private readonly IServer _server;
         private readonly IMemoryCache _cache;
-
-        private readonly static object _locker = new object();
+        private readonly ILocalLockService _localLocker;
 
         public BilibiliAccountApiService(ILogger<BilibiliAccountApiService> logger
             , IBilibiliCookieService cookie
             , IServer server
-            , IMemoryCache cache)
+            , IMemoryCache cache
+            , ILocalLockService localLocker)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
             _server = server ?? throw new ArgumentNullException(nameof(IServer));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _localLocker = localLocker ?? throw new ArgumentNullException(nameof(localLocker));
             _httpClient = new HttpClientService(_cookie);
         }
 
@@ -62,8 +63,15 @@ namespace Bilibili.AspNetCore.Apis.Services
                 ResultModel<UserInfo> result = withCache ? _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY) : null;
                 if (result == null)
                 {
-                    lock (_locker)
+                    bool isLocked = false;
+                    string lockKey = "GET_USER_INFO_LOCK";
+                    try
                     {
+                        isLocked = _localLocker.SpinLock(lockKey, 60);
+                        if (!isLocked)
+                        {
+                            _logger.LogWarning($"获取员工信息加锁失败");
+                        }
                         result = withCache ? _cache.Get<ResultModel<UserInfo>>(CacheKeyConstant.USERINFO_CACHE_KEY) : null;
                         if (result != null)
                         {
@@ -74,6 +82,10 @@ namespace Bilibili.AspNetCore.Apis.Services
                         {
                             _cache.Set(CacheKeyConstant.USERINFO_CACHE_KEY, result, TimeSpan.FromSeconds(60));
                         }
+                    }
+                    finally
+                    {
+                        if (isLocked) _localLocker.UnLock(lockKey, true);
                     }
                 }
                 if (result == null || result.Data == null)

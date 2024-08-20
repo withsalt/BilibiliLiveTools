@@ -26,6 +26,7 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly IMemoryCache _cache;
         private readonly IHttpClientService _httpClient;
         private readonly IBilibiliCookieRepositoryProvider _cookieRepository;
+        private readonly ILocalLockService _localLocker;
 
         /// <summary>
         /// 获取cookie是否需要刷新
@@ -52,11 +53,13 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public BilibiliCookieService(ILogger<BilibiliCookieService> logger
             , IMemoryCache cache
-            , IBilibiliCookieRepositoryProvider cookieRepository)
+            , IBilibiliCookieRepositoryProvider cookieRepository
+            , ILocalLockService localLocker)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _cookieRepository = cookieRepository ?? throw new ArgumentNullException(nameof(cookieRepository));
+            _localLocker = localLocker ?? throw new ArgumentNullException(nameof(localLocker));
             _httpClient = new HttpClientService(this);
         }
 
@@ -142,23 +145,41 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 _cache.Remove(CacheKeyConstant.COOKIE_KEY);
             }
+            bool isLocked = _localLocker.SpinLock("GET_COOKIES_SPIN_LOCK_KEY", 60);
+            if (!isLocked)
+            {
+                _logger.LogWarning("获取Cookie时加锁失败");
+            }
             CookiesData cookiesConfig = _cache.GetOrCreate(CacheKeyConstant.COOKIE_KEY, entry =>
             {
-                string cookieStr = _cookieRepository.Read()
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
-
-                if (!AES.TryDecrypt(cookieStr, _key, _vector, out cookieStr))
+                try
                 {
+                    string cookieStr = _cookieRepository.Read()
+                        .ConfigureAwait(false).GetAwaiter().GetResult();
+
+                    if (!AES.TryDecrypt(cookieStr, _key, _vector, out cookieStr))
+                    {
+                        return null;
+                    }
+                    //构建Cookie（注意：有先后顺序）
+                    CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, cookieStr)
+                        .SetBnut()
+                        .SetUuid()
+                        .SetLsid()
+                        .SetBuvid3_4()
+                        .SetBuvidFp()
+                        .SetTicket()
+                        .Build();
+                    //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
+                    entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
+                    return cookies;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"获取Cookie失败，{ex.Message}");
+
                     return null;
                 }
-                //构建Cookie（注意：有先后顺序）
-                CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, cookieStr)
-                    .SetBnut().SetUuid().SetLsid()
-                    .SetBuvid3_4().SetBuvidFp().SetTicket()
-                    .Build();
-                //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
-                entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
-                return cookies;
             });
             return cookiesConfig;
         }
