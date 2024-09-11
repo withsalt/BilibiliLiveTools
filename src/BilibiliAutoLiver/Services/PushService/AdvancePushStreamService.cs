@@ -188,7 +188,7 @@ namespace BilibiliAutoLiver.Services.PushService
                     //start live
                     ProcessStartInfo psi = await BuildProcessStartInfo();
                     _logger.LogInformation($"ffmpeg推流命令：{psi.FileName} {psi.Arguments}");
-                    _logger.LogInformation("推流参数初始化完成，开始推流...");
+                    _logger.LogInformation("推流参数初始化完成");
                     //启动
                     proc = Process.Start(psi);
                     if (proc == null || proc.Id <= 0)
@@ -196,6 +196,7 @@ namespace BilibiliAutoLiver.Services.PushService
                         throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
                     }
                     Status = PushStatus.Running;
+                    _logger.LogInformation("开始推流...");
                     await proc.WaitForExitAsync(_tokenSource.Token);
                     proc.Kill();
                     //delay 100ms的原因是ffmpeg本身也会接收ctrl-c，但是C#的控制台要比ffmpeg慢一点。

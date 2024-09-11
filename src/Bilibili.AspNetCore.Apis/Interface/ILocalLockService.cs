@@ -24,7 +24,14 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        bool UnLock(string key, bool isSpan = false);
+        bool UnLock(string key);
+
+        /// <summary>
+        /// 自旋锁解锁
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        bool SpinUnLock(string key);
 
         /// <summary>
         /// 自旋锁

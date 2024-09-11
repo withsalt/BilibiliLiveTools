@@ -145,43 +145,54 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 _cache.Remove(CacheKeyConstant.COOKIE_KEY);
             }
-            bool isLocked = _localLocker.SpinLock("GET_COOKIES_SPIN_LOCK_KEY", 60);
-            if (!isLocked)
+            string lockKey = "GET_COOKIES_SPIN_LOCK_KEY";
+            bool isLocked = false;
+            try
             {
-                _logger.LogWarning("获取Cookie时加锁失败");
-            }
-            CookiesData cookiesConfig = _cache.GetOrCreate(CacheKeyConstant.COOKIE_KEY, entry =>
-            {
-                try
+                isLocked = _localLocker.SpinLock(lockKey, 60);
+                if (!isLocked)
                 {
-                    string cookieStr = _cookieRepository.Read()
-                        .ConfigureAwait(false).GetAwaiter().GetResult();
-
-                    if (!AES.TryDecrypt(cookieStr, _key, _vector, out cookieStr))
-                    {
-                        return null;
-                    }
-                    //构建Cookie（注意：有先后顺序）
-                    CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, cookieStr)
-                        .SetBnut()
-                        .SetUuid()
-                        .SetLsid()
-                        .SetBuvid3_4()
-                        .SetBuvidFp()
-                        .SetTicket()
-                        .Build();
-                    //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
-                    entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
-                    return cookies;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"获取Cookie失败，{ex.Message}");
-
+                    _logger.LogWarning("获取Cookie时加锁失败");
                     return null;
                 }
-            });
-            return cookiesConfig;
+                CookiesData cookiesConfig = _cache.GetOrCreate(CacheKeyConstant.COOKIE_KEY, entry =>
+                {
+                    try
+                    {
+                        string cookieStr = _cookieRepository.Read()
+                            .ConfigureAwait(false).GetAwaiter().GetResult();
+
+                        if (!AES.TryDecrypt(cookieStr, _key, _vector, out cookieStr))
+                        {
+                            return null;
+                        }
+                        //构建Cookie（注意：有先后顺序）
+                        CookiesData cookies = new BilibiliCookieBuilder(_logger, _httpClient, cookieStr)
+                            .SetBnut()
+                            .SetUuid()
+                            .SetLsid()
+                            .SetBuvid3_4()
+                            .SetBuvidFp()
+                            .SetTicket()
+                            .Build();
+                        //设置当前缓存过期时间和ticket过期时间一致，如果ticket为空，那么就是10分钟
+                        entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
+                        return cookies;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"获取Cookie失败，{ex.Message}");
+
+                        return null;
+                    }
+                });
+                return cookiesConfig;
+            }
+            finally
+            {
+                if (isLocked)
+                    _localLocker.SpinUnLock(lockKey);
+            }
         }
 
         public string GetCsrf()
