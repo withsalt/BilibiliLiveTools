@@ -85,7 +85,8 @@ namespace Bilibili.AspNetCore.Apis.Services
                     }
                     finally
                     {
-                        if (isLocked) _localLocker.UnLock(lockKey, true);
+                        if (isLocked) 
+                            _localLocker.SpinUnLock(lockKey);
                     }
                 }
                 if (result == null || result.Data == null)
@@ -111,9 +112,10 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 return null;
             }
-            if (_cookie.WillExpired().Item1)
+            var willExpired = _cookie.WillExpired();
+            if (willExpired.Item1)
             {
-                _logger.LogInformation($"Cookie即将过期，过期时间：{_cookie.WillExpired().Item2}，刷新Cookie。");
+                _logger.LogInformation($"Cookie即将过期，过期时间：{willExpired.Item2}，刷新Cookie。");
                 await _cookie.RefreshCookie();
             }
             if (await _cookie.CookieNeedToRefresh())

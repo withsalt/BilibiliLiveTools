@@ -9,7 +9,6 @@ namespace Bilibili.AspNetCore.Apis.Services.Lock
     public class LocalLockService : ILocalLockService
     {
         private ConcurrentDictionary<string, DateTime> Container { get; } = new ConcurrentDictionary<string, DateTime>();
-        private ConcurrentDictionary<string, bool> SpanLockFlags { get; } = new ConcurrentDictionary<string, bool>();
 
         private readonly static object _lock = new object();
 
@@ -70,13 +69,13 @@ namespace Bilibili.AspNetCore.Apis.Services.Lock
             bool isLocked = false;
 
             int timeWaited = 0;
-            const int waitInterval = 50;
+            const int waitInterval = 10;
             int timeoutMilliseconds = timeoutSeconds * 1000;
             Stopwatch sw = Stopwatch.StartNew();
 
             while (sw.ElapsedMilliseconds < timeoutMilliseconds && !isLocked)
             {
-                isLocked = SpanLockFlags.TryAdd(key, true);
+                isLocked = Container.TryAdd($"SPIN_{key}", DateTime.UtcNow);
                 if (isLocked)
                 {
                     break;
@@ -88,23 +87,24 @@ namespace Bilibili.AspNetCore.Apis.Services.Lock
             return isLocked;
         }
 
-
-        public bool UnLock(string key, bool isSpan = false)
+        public bool SpinUnLock(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentNullException("key");
             }
-            if (isSpan)
+            return Container.TryRemove($"SPIN_{key}", out _);
+        }
+
+        public bool UnLock(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
             {
-                return SpanLockFlags.TryRemove(key, out _);
+                throw new ArgumentNullException("key");
             }
-            else
+            lock (_lock)
             {
-                lock (_lock)
-                {
-                    return Container.TryRemove(key, out _);
-                }
+                return Container.TryRemove(key, out _);
             }
         }
     }

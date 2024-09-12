@@ -154,9 +154,10 @@ namespace BilibiliAutoLiver.Services.PushService
                         .CancellableThrough(out _cancel);
 
                     _logger.LogInformation($"ffmpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
-                    _logger.LogInformation("推流参数初始化完成，开始推流...");
+                    _logger.LogInformation("推流参数初始化完成");
                     //启动
                     Status = PushStatus.Running;
+                    _logger.LogInformation("开始推流...");
                     await processor.ProcessAsynchronously();
 
                     //如果开启了自动重试
