@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using FFMpegCore;
@@ -25,34 +26,38 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             _logger = logger;
         }
 
-        public abstract ISourceReader WithInputArg();
-
-        public abstract FFMpegArgumentProcessor WithOutputArg();
-
-        protected void WithCommonOutputArg(FFMpegArgumentOptions opt)
+        public virtual ISourceReader WithInputArg()
         {
-            //音频
-            WithAudioArgument(opt);
+            GetVideoInputArg();
+            GetAudioInputArg();
+            return this;
+        }
 
-            //音频编码
-            if (HasAudio())
-            {
-                opt.WithAudioCodec(AudioCodec.Aac);
-                opt.WithAudioSamplingRate(44100);
-                opt.WithAudioBitrate(AudioQuality.Normal);
-            }
-            opt.ForcePixelFormat("yuv420p");
-            //视频编码
-            WithQualityOutputArg(opt);
-            //输出格式
-            opt.ForceFormat("flv");
-            //opt.ForcePixelFormat("yuv420p");
+        public virtual FFMpegArgumentProcessor WithOutputArg()
+        {
+            if (FFMpegArguments == null) 
+                throw new Exception("请先指定输入参数");
 
-            //推流分辨率
-            if (this.Settings.PushSettingDto.OutputWidth > 0 && this.Settings.PushSettingDto.OutputHeight > 0)
+            var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
-                opt.Resize(this.Settings.PushSettingDto.OutputWidth, this.Settings.PushSettingDto.OutputHeight);
-            }
+                //音频
+                WithAudioArgument(opt);
+                
+                //视频编码
+                WithQualityOutputArg(opt);
+
+                //PixelFormat
+                opt.ForcePixelFormat("yuv420p");
+                //输出格式
+                opt.ForceFormat("flv");
+
+                //推流分辨率
+                if (this.Settings.PushSettingDto.OutputWidth > 0 && this.Settings.PushSettingDto.OutputHeight > 0)
+                {
+                    opt.Resize(this.Settings.PushSettingDto.OutputWidth, this.Settings.PushSettingDto.OutputHeight);
+                }
+            });
+            return rt;
         }
 
         protected virtual void WithQualityOutputArg(FFMpegArgumentOptions opt)
@@ -107,56 +112,32 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
         }
 
-        protected void GetAudioInputArg()
+        /// <summary>
+        /// 获取视频输入参数
+        /// </summary>
+        protected abstract void GetVideoInputArg();
+
+        /// <summary>
+        /// 获取音频输入参数
+        /// </summary>
+        protected abstract void GetAudioInputArg();
+
+        /// <summary>
+        /// 是否包含音频流
+        /// </summary>
+        /// <returns></returns>
+        protected abstract bool HasAudioStream();
+
+        protected virtual void WithMuteArgument(FFMpegArgumentOptions opt)
         {
-            if (!HasAudio())
-            {
-                return;
-            }
-            this.FFMpegArguments.AddFileInput(this.Settings.PushSettingDto.AudioInfo.FullPath, true, opt =>
-            {
-                opt.WithCustomArgument("-stream_loop -1");
-            });
+
         }
 
-        protected bool HasAudio()
+        protected virtual void WithAudioArgument(FFMpegArgumentOptions opt)
         {
-            if (this.Settings.PushSettingDto.AudioInfo == null || string.IsNullOrWhiteSpace(this.Settings.PushSettingDto.AudioInfo.FullPath))
-            {
-                return false;
-            }
-            if (!File.Exists(this.Settings.PushSettingDto.AudioInfo.FullPath))
-            {
-                throw new FileNotFoundException($"音频输入源{this.Settings.PushSettingDto.AudioInfo.FullPath}文件不存在", this.Settings.PushSettingDto.AudioInfo.FullPath);
-            }
-            return true;
-        }
-
-        protected void WithMuteArgument(FFMpegArgumentOptions opt)
-        {
-            if (this.Settings.PushSettingDto.IsMute)
-            {
-                opt.DisableChannel(Channel.Audio);
-            }
-        }
-
-        protected void WithAudioArgument(FFMpegArgumentOptions opt)
-        {
-            if (!HasAudio())
-            {
-                return;
-            }
-            if (this.Settings.PushSettingDto.IsMute)
-            {
-                //视频静音，但是包含音频
-                opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex}");
-                opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}");
-            }
-            else
-            {
-
-            }
-            opt.UsingShortest();
+            opt.WithAudioCodec(AudioCodec.Aac);
+            opt.WithAudioSamplingRate(44100);
+            opt.WithAudioBitrate(AudioQuality.Normal);
         }
 
         public virtual void Dispose()

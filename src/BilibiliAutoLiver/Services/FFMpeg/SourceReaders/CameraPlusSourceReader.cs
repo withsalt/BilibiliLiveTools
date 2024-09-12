@@ -110,25 +110,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
         }
 
-        public override ISourceReader WithInputArg()
-        {
-            GetVideoInputArg();
-            GetAudioInputArg();
-            return this;
-        }
-
-        public override FFMpegArgumentProcessor WithOutputArg()
-        {
-            if (FFMpegArguments == null)
-                throw new Exception("请先指定输入参数");
-            var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
-            {
-                WithCommonOutputArg(opt);
-            });
-            return rt;
-        }
-
-        private void GetVideoInputArg()
+        protected override void GetVideoInputArg()
         {
             hasFrameArrived = false;
             while (!hasFrameArrived)
@@ -145,6 +127,16 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
                 WithMuteArgument(opt);
             });
+        }
+
+        protected override void GetAudioInputArg()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool HasAudioStream()
+        {
+            throw new NotImplementedException();
         }
 
         public override void Dispose()

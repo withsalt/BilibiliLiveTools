@@ -15,24 +15,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         }
 
-        public override ISourceReader WithInputArg()
+        protected override void GetAudioInputArg()
         {
-            GetVideoInputArg();
-            GetAudioInputArg();
-            return this;
+            throw new NotImplementedException();
         }
 
-        public override FFMpegArgumentProcessor WithOutputArg()
-        {
-            if (FFMpegArguments == null) throw new Exception("请先指定输入参数");
-            var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
-            {
-                WithCommonOutputArg(opt);
-            });
-            return rt;
-        }
-
-        private void GetVideoInputArg()
+        protected override void GetVideoInputArg()
         {
             if (!ScreenParamsHelper.TryParse(this.Settings.PushSettingDto.InputScreen, out string message, out Rectangle? rectangle))
             {
@@ -86,6 +74,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 throw new NotSupportedException("不支持的系统类型");
             }
+        }
+
+        protected override bool HasAudioStream()
+        {
+            throw new NotImplementedException();
         }
     }
 }
