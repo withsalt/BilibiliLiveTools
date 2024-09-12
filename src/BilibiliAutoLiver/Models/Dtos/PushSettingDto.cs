@@ -30,16 +30,6 @@ namespace BilibiliAutoLiver.Models.Dtos
         public string CustumOutputParams { get; set; }
 
         /// <summary>
-        /// 推流视频Id
-        /// </summary>
-        public string VideoPath { get; set; }
-
-        /// <summary>
-        /// 推流音频Id
-        /// </summary>
-        public string AudioPath { get; set; }
-
-        /// <summary>
         /// 是否静音
         /// </summary>
         public bool IsMute { get; set; }
@@ -69,6 +59,14 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// </summary>
         public double InputFramerate { get; set; }
 
+        /// <summary>
+        /// 视频信息
+        /// </summary>
+        public MaterialDto VideoInfo { get; set; }
 
+        /// <summary>
+        /// 音频信息
+        /// </summary>
+        public MaterialDto AudioInfo { get; set; }
     }
 }

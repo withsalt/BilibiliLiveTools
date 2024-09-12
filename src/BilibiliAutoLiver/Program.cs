@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using NLog.Web;
 
 namespace BilibiliAutoLiver
@@ -76,9 +78,23 @@ namespace BilibiliAutoLiver
 
             // Add services to the container.
 #if DEBUG
-            builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            builder.Services.AddControllersWithViews()
+                .AddNewtonsoftJson(options => {
+                    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                }).AddRazorRuntimeCompilation();
 #else
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews()
+                .AddNewtonsoftJson(options => {
+                    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                });
 #endif
 
             var app = builder.Build();

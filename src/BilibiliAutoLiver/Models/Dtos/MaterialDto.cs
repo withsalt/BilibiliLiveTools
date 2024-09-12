@@ -1,4 +1,6 @@
-﻿namespace BilibiliAutoLiver.Models.Dtos
+﻿using FFMpegCore;
+
+namespace BilibiliAutoLiver.Models.Dtos
 {
     public class MaterialDto
     {
@@ -28,6 +30,12 @@
         /// 文件类型
         /// </summary>
         public string FileType { get; set; }
+
+        public string Description { get; set; }
+
+        public string Duration { get; set; }
+
+        public MediaInfo MediaInfo {  get; set; }
 
         /// <summary>
         /// 创建时间

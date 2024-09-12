@@ -16,6 +16,7 @@ using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
 using DJT.Data.Model.Common;
+using FFMpegCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -234,19 +235,23 @@ namespace BilibiliAutoLiver.Controllers
                     {
                         return Json(new ResultModel<string>(-1, "保存文件失败"));
                     }
+                    MediaInfo mediaInfo = null;
                     fileFullPath = fileSaveResult.Item2;
                     if (ext == ".txt")
                     {
                         await UploadFileListCheck(fileFullPath);
                     }
-                    switch (fileType)
+                    else
                     {
-                        case FileType.Video:
-                            await VideoFileVerify(fileFullPath);
-                            break;
-                        case FileType.Music:
-                            await AudioFileVerify(fileFullPath);
-                            break;
+                        switch (fileType)
+                        {
+                            case FileType.Video:
+                                mediaInfo = await VideoFileVerify(fileFullPath);
+                                break;
+                            case FileType.Music:
+                                mediaInfo = await AudioFileVerify(fileFullPath);
+                                break;
+                        }
                     }
                     Material material = new Material()
                     {
@@ -255,7 +260,8 @@ namespace BilibiliAutoLiver.Controllers
                         FileType = fileType,
                         Size = new FileInfo(fileSaveResult.Item2).Length / 1024,
                         CreatedTime = DateTime.UtcNow,
-                        CreatedUserId = GlobalConfigConstant.SYS_USERID
+                        CreatedUserId = GlobalConfigConstant.SYS_USERID,
+                        MediaInfo = JsonConvert.SerializeObject(mediaInfo)
                     };
                     materials.Add(material);
                 }
@@ -273,14 +279,40 @@ namespace BilibiliAutoLiver.Controllers
             return Json(new ResultModel<string>(0));
         }
 
-        private async Task VideoFileVerify(string path)
+        private async Task<MediaInfo> VideoFileVerify(string path)
         {
-            var info = await _ffprobeService.Analyse(path);
+            try
+            {
+                IMediaAnalysis info = await _ffprobeService.Analyse(path);
+                if (info.PrimaryVideoStream == null)
+                {
+                    throw new Exception("上传的视频素材不包含视频流");
+                }
+                return new MediaInfo(info, FileType.Video);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"无法解析上传的视频文件");
+                throw new Exception("无法解析上传的视频文件");
+            }
         }
 
-        private async Task AudioFileVerify(string path)
+        private async Task<MediaInfo> AudioFileVerify(string path)
         {
-
+            try
+            {
+                IMediaAnalysis info = await _ffprobeService.Analyse(path);
+                if (info.PrimaryAudioStream == null)
+                {
+                    throw new Exception("上传的音频素材不包含视频流");
+                }
+                return new MediaInfo(info, FileType.Music);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"无法解析上传的音频文件");
+                throw new Exception("无法解析上传的音频文件");
+            }
         }
 
         private async Task UploadFileListCheck(string filePath)

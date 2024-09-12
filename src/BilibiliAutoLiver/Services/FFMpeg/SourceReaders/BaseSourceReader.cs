@@ -18,9 +18,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected string RtmpAddr { get; set; }
 
-        protected string videoMuteMapOpt = null;
-        protected string audioMuteMapOpt = null;
-
         public BaseSourceReader(SettingDto setting, string rtmpAddr, ILogger logger)
         {
             this.Settings = setting;
@@ -34,20 +31,9 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected void WithCommonOutputArg(FFMpegArgumentOptions opt)
         {
-            //禁用视频中的音频
-            if (!string.IsNullOrEmpty(videoMuteMapOpt))
-            {
-                opt.WithCustomArgument(videoMuteMapOpt);
-            }
-            //禁用音频中的视频
-            if (!string.IsNullOrEmpty(audioMuteMapOpt))
-            {
-                opt.WithCustomArgument(audioMuteMapOpt);
-            }
-            if (!string.IsNullOrEmpty(videoMuteMapOpt) || !string.IsNullOrEmpty(audioMuteMapOpt))
-            {
-                opt.UsingShortest();
-            }
+            //音频
+            WithAudioArgument(opt);
+
             //音频编码
             if (HasAudio())
             {
@@ -127,22 +113,21 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 return;
             }
-            this.FFMpegArguments.AddFileInput(this.Settings.PushSettingDto.AudioPath, true, opt =>
+            this.FFMpegArguments.AddFileInput(this.Settings.PushSettingDto.AudioInfo.FullPath, true, opt =>
             {
                 opt.WithCustomArgument("-stream_loop -1");
-                audioMuteMapOpt = "-map 1:a:0";
             });
         }
 
         protected bool HasAudio()
         {
-            if (string.IsNullOrWhiteSpace(this.Settings.PushSettingDto.AudioPath))
+            if (this.Settings.PushSettingDto.AudioInfo == null || string.IsNullOrWhiteSpace(this.Settings.PushSettingDto.AudioInfo.FullPath))
             {
                 return false;
             }
-            if (!File.Exists(this.Settings.PushSettingDto.AudioPath))
+            if (!File.Exists(this.Settings.PushSettingDto.AudioInfo.FullPath))
             {
-                throw new FileNotFoundException($"音频输入源{this.Settings.PushSettingDto.AudioPath}文件不存在", this.Settings.PushSettingDto.AudioPath);
+                throw new FileNotFoundException($"音频输入源{this.Settings.PushSettingDto.AudioInfo.FullPath}文件不存在", this.Settings.PushSettingDto.AudioInfo.FullPath);
             }
             return true;
         }
@@ -151,15 +136,27 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         {
             if (this.Settings.PushSettingDto.IsMute)
             {
-                if (HasAudio())
-                {
-                    videoMuteMapOpt = "-map 0:v:0";
-                }
-                else
-                {
-                    opt.DisableChannel(Channel.Audio);
-                }
+                opt.DisableChannel(Channel.Audio);
             }
+        }
+
+        protected void WithAudioArgument(FFMpegArgumentOptions opt)
+        {
+            if (!HasAudio())
+            {
+                return;
+            }
+            if (this.Settings.PushSettingDto.IsMute)
+            {
+                //视频静音，但是包含音频
+                opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex}");
+                opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}");
+            }
+            else
+            {
+
+            }
+            opt.UsingShortest();
         }
 
         public virtual void Dispose()

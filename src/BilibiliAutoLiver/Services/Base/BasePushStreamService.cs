@@ -138,10 +138,10 @@ namespace BilibiliAutoLiver.Services.Base
                 OutputWidth = outputWidth,
                 OutputHeight = outputHeight,
                 CustumOutputParams = pushSetting.CustumOutputParams,
-                VideoPath = MaterialPath.GetAbsolutePath(videoMaterial, _appSettings.DataDirectory),
-                AudioPath = string.IsNullOrWhiteSpace(audioMaterial?.Path) ? string.Empty : MaterialPath.GetAbsolutePath(audioMaterial, _appSettings.DataDirectory),
                 IsMute = pushSetting.IsMute,
                 Quality = pushSetting.Quality,
+                VideoInfo = videoMaterial.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
+                AudioInfo = audioMaterial?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
             };
             return pushSettingDto;
         }

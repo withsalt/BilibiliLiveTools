@@ -34,17 +34,18 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         private void GetVideoInputArg()
         {
-            if (string.IsNullOrEmpty(this.Settings.PushSettingDto.VideoPath))
+            if (this.Settings.PushSettingDto.VideoInfo == null 
+                || string.IsNullOrEmpty(this.Settings.PushSettingDto.VideoInfo.FullPath))
             {
                 throw new ArgumentNullException("视频输入源Path不能为空");
             }
-            if (!File.Exists(this.Settings.PushSettingDto.VideoPath))
+            if (!File.Exists(this.Settings.PushSettingDto.VideoInfo.FullPath))
             {
-                throw new FileNotFoundException($"视频输入源{this.Settings.PushSettingDto.VideoPath}文件不存在", this.Settings.PushSettingDto.VideoPath);
+                throw new FileNotFoundException($"视频输入源{this.Settings.PushSettingDto.VideoInfo.FullPath}文件不存在", this.Settings.PushSettingDto.VideoInfo.FullPath);
             }
-            if (this.Settings.PushSettingDto.VideoPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+            if (this.Settings.PushSettingDto.VideoInfo.FullPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
             {
-                var allLines = System.IO.File.ReadAllLines(this.Settings.PushSettingDto.VideoPath)
+                var allLines = System.IO.File.ReadAllLines(this.Settings.PushSettingDto.VideoInfo.FullPath)
                     ?.Where(p => !string.IsNullOrWhiteSpace(p))
                     .Select(p => p.Trim(' ', '\r', '\n'))
                     .ToList();
@@ -75,7 +76,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             else
             {
-                FFMpegArguments = FFMpegArguments.FromFileInput(this.Settings.PushSettingDto.VideoPath, true, opt =>
+                FFMpegArguments = FFMpegArguments.FromFileInput(this.Settings.PushSettingDto.VideoInfo.FullPath, true, opt =>
                 {
                     opt.WithCustomArgument("-re");
                     opt.WithCustomArgument("-stream_loop -1");

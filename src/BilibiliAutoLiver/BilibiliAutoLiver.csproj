@@ -24,6 +24,7 @@
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
 		<PackageReference Include="MailKit" Version="4.7.1.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.8" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.12" />
 		<PackageReference Include="Quartz.AspNetCore" Version="3.13.0" />

@@ -107,7 +107,7 @@ namespace BilibiliAutoLiver.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Select soup info list by page failed. {ex.Message}", ex);
+                _logger.LogError($"Query material list by page failed. {ex.Message}", ex);
                 return null;
             }
         }

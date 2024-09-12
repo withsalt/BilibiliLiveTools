@@ -1,7 +1,10 @@
-﻿using BilibiliAutoLiver.Extensions;
+﻿using System;
+using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
+using FFMpegCore;
 using FreeSql.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace BilibiliAutoLiver.Models.Entities
 {
@@ -16,6 +19,7 @@ namespace BilibiliAutoLiver.Models.Entities
         /// <summary>
         /// 文件路径
         /// </summary>
+        [Column(StringLength = 512)]
         public string Path { get; set; }
 
         /// <summary>
@@ -28,21 +32,42 @@ namespace BilibiliAutoLiver.Models.Entities
         /// </summary>
         public FileType FileType { get; set; }
 
+        public string Description { get; set; }
+
+        public string MediaInfo { get; set; }
+
         public MaterialDto ToDto(string basePath)
         {
             string path = System.IO.Path.Combine(basePath, Path);
             string fullPath = System.IO.Path.GetFullPath(path);
 
-            return new MaterialDto()
+            var dto = new MaterialDto()
             {
                 Id = Id,
                 Name = Name,
                 Size = ConvertFileSize(Size),
+                Duration = "",
                 Path = $"~/{this.Path}",
                 FullPath = fullPath,
                 FileType = EnumExtensions.GetEnumDescription(FileType),
+                Description = Description,
+                MediaInfo = this.GetMediaInfo(),
                 CreatedTime = CreatedTime.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
             };
+            if (dto.MediaInfo != null)
+            {
+                dto.Duration = TimeSpan.FromSeconds(dto.MediaInfo.Duration).ToString(@"hh\:mm\:ss");
+            }
+            return dto;
+        }
+
+        public MediaInfo GetMediaInfo()
+        {
+            if (!string.IsNullOrWhiteSpace(this.MediaInfo))
+            {
+                return JsonConvert.DeserializeObject<MediaInfo>(this.MediaInfo);
+            }
+            return null;
         }
 
         private string ConvertFileSize(long fileSizeInBytes)
