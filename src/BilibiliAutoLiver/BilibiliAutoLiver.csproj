@@ -54,11 +54,20 @@
 		<None Update="runtimes\linux-arm64\bin\ffmpeg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="runtimes\linux-arm64\bin\ffprobe">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="runtimes\linux-arm\bin\ffmpeg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="runtimes\linux-arm\bin\ffprobe">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="runtimes\linux-x64\bin\ffmpeg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="runtimes\linux-x64\bin\ffprobe">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="runtimes\win-x64\bin\ffmpeg.exe">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
