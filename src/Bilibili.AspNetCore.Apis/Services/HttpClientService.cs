@@ -156,9 +156,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                     {
                         resultObj = JsonUtil.DeserializeJsonToObject<ResultModel<T>>(data);
                     }
-                    //set cookie
-                    IEnumerable<string> setCookies = response.Headers.SingleOrDefault(header => header.Key == "Set-Cookie").Value;
-                    if (setCookies?.Any() == true)
+                    if (response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string> setCookies) && setCookies?.Any() == true)
                     {
                         List<CookieHeaderValue> cookies = new List<CookieHeaderValue>();
                         foreach (var item in setCookies)

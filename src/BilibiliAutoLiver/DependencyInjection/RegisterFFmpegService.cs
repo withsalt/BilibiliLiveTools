@@ -30,6 +30,7 @@ namespace BilibiliAutoLiver.DependencyInjection
         public static IServiceCollection AddFFmpegService(this IServiceCollection services)
         {
             services.AddSingleton<IFFMpegService, FFMpegService>();
+            services.AddSingleton<IFFProbeService, FFProbeService>();
             return services;
         }
 
@@ -69,6 +70,12 @@ namespace BilibiliAutoLiver.DependencyInjection
                 if (File.Exists(path))
                 {
                     SetUnixFileExecutable(path);
+
+                    string ffprobePath = Path.Combine(defaultBinPath, "ffprobe");
+                    if (File.Exists(ffprobePath))
+                    {
+                        SetUnixFileExecutable(ffprobePath);
+                    }
                     return defaultBinPath;
                 }
                 if (File.Exists("/usr/bin/ffmpeg"))

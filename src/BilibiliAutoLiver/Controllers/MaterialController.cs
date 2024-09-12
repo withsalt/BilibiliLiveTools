@@ -14,6 +14,7 @@ using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Models.ViewModels;
 using BilibiliAutoLiver.Repository.Interface;
+using BilibiliAutoLiver.Services.Interface;
 using DJT.Data.Model.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +37,7 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly IMaterialRepository _repository;
         private readonly AppSettings _appSettings;
+        private readonly IFFProbeService _ffprobeService;
 
         public MaterialController(ILogger<MaterialController> logger
             , IMemoryCache cache
@@ -43,6 +45,7 @@ namespace BilibiliAutoLiver.Controllers
             , IBilibiliCookieService cookieService
             , IBilibiliLiveApiService liveApiService
             , IMaterialRepository repository
+            , IFFProbeService ffprobeService
             , IOptions<AppSettings> settingOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -52,6 +55,7 @@ namespace BilibiliAutoLiver.Controllers
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
+            _ffprobeService = ffprobeService ?? throw new ArgumentNullException(nameof(ffprobeService));
         }
 
         [HttpGet]
@@ -235,6 +239,15 @@ namespace BilibiliAutoLiver.Controllers
                     {
                         await UploadFileListCheck(fileFullPath);
                     }
+                    switch (fileType)
+                    {
+                        case FileType.Video:
+                            await VideoFileVerify(fileFullPath);
+                            break;
+                        case FileType.Music:
+                            await AudioFileVerify(fileFullPath);
+                            break;
+                    }
                     Material material = new Material()
                     {
                         Name = fileName,
@@ -258,6 +271,16 @@ namespace BilibiliAutoLiver.Controllers
             await _repository.InsertAsync(materials);
             //上传成功
             return Json(new ResultModel<string>(0));
+        }
+
+        private async Task VideoFileVerify(string path)
+        {
+            var info = await _ffprobeService.Analyse(path);
+        }
+
+        private async Task AudioFileVerify(string path)
+        {
+
         }
 
         private async Task UploadFileListCheck(string filePath)
