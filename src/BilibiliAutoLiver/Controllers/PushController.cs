@@ -175,6 +175,11 @@ namespace BilibiliAutoLiver.Controllers
             }
             try
             {
+                if(request.InputType == InputType.Video && request.VideoId > 0)
+                {
+                    request.Material = (await _materialRepository.GetAsync(request.VideoId))
+                        ?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory));
+                }
                 await EasyModelConvertFactory.ParamsCheck(request, setting, _ffmpeg);
             }
             catch (Exception ex)

@@ -119,5 +119,7 @@ namespace BilibiliAutoLiver.Models.Dtos
 
         #endregion
 
+        public MaterialDto Material { get; set; }
+
     }
 }

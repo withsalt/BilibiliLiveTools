@@ -22,6 +22,11 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting.AudioId = request.AudioId.HasValue && request.AudioId.Value > 0 ? request.AudioId.Value : null;
             this.Setting.IsMute = request.IsMute;
 
+            if (request.Material.IsDemuxConcat && this.Setting.AudioId > 0)
+            {
+                throw new Exception($"选择一个视频集合时，不能包含音频");
+            }
+
             return Task.CompletedTask;
         }
     }

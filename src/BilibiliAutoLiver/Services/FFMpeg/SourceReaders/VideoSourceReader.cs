@@ -92,6 +92,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override void WithAudioArgument(FFMpegArgumentOptions opt)
         {
+            if (this.Settings.PushSettingDto.VideoInfo.IsDemuxConcat)
+            {
+                return;
+            }
             if (!HasAudioStream())
             {
                 if (!this.Settings.PushSettingDto.IsMute && this.Settings.PushSettingDto.VideoInfo.MediaInfo.AudioStream != null)
@@ -128,6 +132,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override bool HasAudioStream()
         {
+            if (this.Settings.PushSettingDto.VideoInfo.IsDemuxConcat)
+            {
+                return false;
+            }
             if (this.Settings.PushSettingDto.AudioInfo == null || string.IsNullOrWhiteSpace(this.Settings.PushSettingDto.AudioInfo.FullPath))
             {
                 return false;
