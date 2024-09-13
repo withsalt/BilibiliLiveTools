@@ -16,7 +16,8 @@
             <div class="layui-card-body" id="easyModelBody" style="@(Model.PushSetting.Model == ConfigModel.Normal ? "" : "display:none")">
                 <div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
                     <ul class="layui-tab-title">
-                        <li class="layui-this">基础设置</li>
+                        <li class="layui-this" lay-id="1">基础设置</li>
+                        <li lay-id="2">高级设置</li>
                     </ul>
                     <div class="layui-tab-content">
                         <div class="layui-tab-item layui-show">
@@ -54,6 +55,23 @@
                                     <label class="layui-form-label">自定义输出参数</label>
                                     <div class="layui-input-inline">
                                         <textarea id="custumOutputParams" name="custumOutputParams" placeholder="自定义的ffmpeg输出参数。可为空，但是不能与下面配置项参数相同。最长不能超过512字符。" class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div class="layui-form" lay-filter="advance_output_params_form">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">自定义编码器</label>
+                                    <div class="layui-input-inline">
+                                        <select id="custumVideoCodec" name="custumVideoCodec" lay-verify="required">
+                                            <option value="">请选择</option>
+                                            @foreach (var item in Model.VideoCodecs)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                        <div class="layui-form-mid layui-text-em">没有特殊需求，不建议选择此项。默认使用H264编码。</div>
                                     </div>
                                 </div>
                             </div>
@@ -324,7 +342,7 @@
         </div>
 
         <div class="layui-card">
-            <div class="layui-card-header layui-card-header-custum">不间断直播设置</div>
+            <div class="layui-card-header layui-card-header-custum">直播设置</div>
             <div class="layui-card-body" pad15>
                 <div class="layui-form" lay-filter="">
                     <div class="layui-form-item">
@@ -346,7 +364,6 @@
             </div>
         </div>
     </div>
-
 </div>
 <div class="layui-btn-container footer-container">
     <div class="layui-form" lay-filter="">
@@ -435,6 +452,10 @@
                 let custumOutputParams = "@Model.PushSetting.CustumOutputParams";
                 if (custumOutputParams) {
                     $('#custumOutputParams').val(custumOutputParams);
+                }
+                let custumVideoCodec = "@Model.PushSetting.CustumVideoCodec";
+                if (custumVideoCodec){
+                    $("#custumVideoCodec").val(custumVideoCodec);
                 }
                 let inputType = "@((int)Model.PushSetting.InputType)";
                 switch (inputType) {
@@ -717,6 +738,7 @@
                     }
                     let inputTypeParams = { inputType: tabIndex };
                     let baseOutputParams = form.val('base_output_params_form');
+                    let advanceOutputParams = form.val('advance_output_params_form');
                     let obj = null;
 
                     if (!baseOutputParams.outputQuality || baseOutputParams.outputQuality == "") {
@@ -727,20 +749,20 @@
                     switch (tabIndex) {
                         case 1:
                             let inputType1Params = form.val('input_type_1');
-                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType1Params);
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, advanceOutputParams, inputType1Params);
                             obj.isMute = obj.isMute == "on" ? true : false;
                             obj.videoId = safeParseInt(obj.videoId);
                             obj.audioId = safeParseInt(obj.audioId);
                             break;
                         case 2:
                             let inputType2Params = form.val('input_type_2');
-                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType2Params);
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, advanceOutputParams, inputType2Params);
                             obj.desktopAudioFrom = obj.desktopAudioFrom == "on" ? true : false;
                             obj.desktopAudioId = safeParseInt(obj.desktopAudioId);
                             break;
                         case 3:
                             let inputType3Params = form.val('input_type_3');
-                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType3Params);
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, advanceOutputParams, inputType3Params);
                             obj.inputDeviceName = obj.videoDeviceNameType3;
                             obj.inputDeviceResolution = obj.inputResolutionType3;
                             obj.inputDeviceAudioDeviceName = obj.audioDeviceNameType3;
@@ -749,7 +771,7 @@
                             break;
                         case 4:
                             let inputType4Params = form.val('input_type_4');
-                            obj = Object.assign({}, inputTypeParams, baseOutputParams, inputType4Params);
+                            obj = Object.assign({}, inputTypeParams, baseOutputParams, advanceOutputParams, inputType4Params);
                             obj.inputDeviceName = obj.videoDeviceNameType4;
                             obj.inputDeviceResolution = obj.inputResolutionType4;
                             obj.inputDeviceAudioDeviceName = obj.audioDeviceNameType4;

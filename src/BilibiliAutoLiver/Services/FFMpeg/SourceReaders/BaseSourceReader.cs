@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using FFMpegCore;
@@ -35,14 +36,14 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         public virtual FFMpegArgumentProcessor WithOutputArg()
         {
-            if (FFMpegArguments == null) 
+            if (FFMpegArguments == null)
                 throw new Exception("请先指定输入参数");
 
             var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
                 //音频
                 WithAudioArgument(opt);
-                
+
                 //视频编码
                 WithQualityOutputArg(opt);
 
@@ -67,22 +68,22 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 case OutputQualityEnum.High:
                     {
                         //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(VideoCodec.LibX264);
-                        opt.WithVideoBitrate(12288);
+                        opt.WithVideoCodec(GetVideoCodec());
+                        opt.WithVideoBitrate(8000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
                         opt.WithSpeedPreset(Speed.Medium);
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
-                        opt.WithConstantRateFactor(20);
+                        opt.WithConstantRateFactor(25);
                     }
                     break;
                 default:
                 case OutputQualityEnum.Medium:
                     {
                         //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(VideoCodec.LibX264);
-                        opt.WithVideoBitrate(8192);
+                        opt.WithVideoCodec(GetVideoCodec());
+                        opt.WithVideoBitrate(4000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
                         opt.WithSpeedPreset(Speed.Faster);
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
@@ -94,14 +95,14 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 case OutputQualityEnum.Low:
                     {
                         //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(VideoCodec.LibX264);
-                        opt.WithVideoBitrate(6144);
+                        opt.WithVideoCodec(GetVideoCodec());
+                        opt.WithVideoBitrate(2000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
                         opt.WithSpeedPreset(Speed.SuperFast);
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
-                        opt.WithConstantRateFactor(20);
+                        opt.WithConstantRateFactor(15);
                     }
                     break;
                 case OutputQualityEnum.Original:
@@ -135,9 +136,54 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected virtual void WithAudioArgument(FFMpegArgumentOptions opt)
         {
-            opt.WithAudioCodec(AudioCodec.Aac);
-            opt.WithAudioSamplingRate(44100);
-            opt.WithAudioBitrate(AudioQuality.Normal);
+            switch (this.Settings.PushSettingDto.Quality)
+            {
+                case OutputQualityEnum.High:
+                    {
+                        opt.WithAudioCodec(AudioCodec.Aac);
+                        opt.WithAudioBitrate(AudioQuality.Ultra);
+                        opt.WithAudioSamplingRate(48000);
+                    }
+                    break;
+                default:
+                case OutputQualityEnum.Medium:
+                    {
+                        opt.WithAudioCodec(AudioCodec.Aac);
+                        opt.WithAudioBitrate(AudioQuality.Good);
+                        opt.WithAudioSamplingRate(48000);
+                    }
+                    break;
+                case OutputQualityEnum.Low:
+                    {
+                        opt.WithAudioCodec(AudioCodec.Aac);
+                        opt.WithAudioBitrate(AudioQuality.Normal);
+                        opt.WithAudioSamplingRate(44100);
+                    }
+                    break;
+                case OutputQualityEnum.Original:
+                    {
+                        //opt.CopyChannel(Channel.Audio);
+                    }
+                    break;
+            }
+        }
+
+        private Codec GetVideoCodec()
+        {
+            if (string.IsNullOrEmpty(this.Settings.PushSettingDto.CustumVideoCodec))
+            {
+                return VideoCodec.LibX264;
+            }
+            if (this.Settings.PushSettingDto.VideoCodecs?.Any() != true)
+            {
+                return VideoCodec.LibX264;
+            }
+            Codec target = this.Settings.PushSettingDto.VideoCodecs.FirstOrDefault(p => p.Name == this.Settings.PushSettingDto.CustumVideoCodec);
+            if(target == null)
+            {
+                throw new Exception($"没有找到受支持的编码器名称：{this.Settings.PushSettingDto.CustumVideoCodec}");
+            }
+            return target;
         }
 
         public virtual void Dispose()

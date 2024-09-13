@@ -40,6 +40,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             this.Setting.OutputResolution = request.OutputResolution;
             this.Setting.Quality = (OutputQualityEnum)request.OutputQuality;
             this.Setting.CustumOutputParams = request.CustumOutputParams;
+            this.Setting.CustumVideoCodec = request.CustumVideoCodec;
             this.Setting.InputType = request.InputType;
 
             await Check(request);

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder;
 using BilibiliAutoLiver.Services.Interface;
+using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.Services
@@ -15,6 +17,9 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
     public class FFMpegService : BaseFFPlayService, IFFMpegService
     {
         private readonly ILogger<FFMpegService> _logger;
+
+        private List<Codec> _allSupportsVideoCodecs = null;
+        private readonly static object _getVideoCodecsLocker = new object();
 
         public FFMpegService(ILogger<FFMpegService> logger)
         {
@@ -37,6 +42,29 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
                 throw new FileNotFoundException("The snapshot output file not exist.", outPath);
             }
             return true;
+        }
+
+        public IReadOnlyList<Codec> GetVideoCodecs()
+        {
+            if (_allSupportsVideoCodecs != null)
+            {
+                return _allSupportsVideoCodecs;
+            }
+            lock (_getVideoCodecsLocker)
+            {
+                if (_allSupportsVideoCodecs != null)
+                {
+                    return _allSupportsVideoCodecs;
+                }
+                var allVideoCodes = FFMpegCore.FFMpeg.GetVideoCodecs();
+                if (allVideoCodes?.Any() != true)
+                {
+                    return new List<Codec>();
+                }
+                _allSupportsVideoCodecs = allVideoCodes
+                    .Where(p => p.Name.Contains("264", StringComparison.OrdinalIgnoreCase) || p.Name.Contains("265", StringComparison.OrdinalIgnoreCase) || p.Name.Contains("hevc", StringComparison.OrdinalIgnoreCase)).ToList();
+                return _allSupportsVideoCodecs;
+            }
         }
 
         public string GetBinaryPath()

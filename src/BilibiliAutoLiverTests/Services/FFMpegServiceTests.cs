@@ -45,5 +45,11 @@ namespace BilibiliLiverTests.Services
         {
             await _ffmpeg.ListVideoDeviceSupportResolutions("Logi C270 HD WebCam");
         }
+
+        [TestMethod()]
+        public void GetSupportVideoCodecTest()
+        {
+            var rt = _ffmpeg.GetVideoCodecs();
+        }
     }
 }

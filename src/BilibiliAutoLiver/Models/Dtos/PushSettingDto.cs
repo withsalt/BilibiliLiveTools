@@ -1,4 +1,6 @@
-﻿using BilibiliAutoLiver.Models.Enums;
+﻿using System.Collections.Generic;
+using BilibiliAutoLiver.Models.Enums;
+using FFMpegCore.Enums;
 
 namespace BilibiliAutoLiver.Models.Dtos
 {
@@ -28,6 +30,11 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// 自定义输出参数
         /// </summary>
         public string CustumOutputParams { get; set; }
+
+        /// <summary>
+        /// 自定义视频编码器
+        /// </summary>
+        public string CustumVideoCodec { get; set; }
 
         /// <summary>
         /// 是否静音
@@ -68,5 +75,10 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// 音频信息
         /// </summary>
         public MaterialDto AudioInfo { get; set; }
+
+        /// <summary>
+        /// 所有受支持的编码器
+        /// </summary>
+        public IReadOnlyList<Codec> VideoCodecs {  get; set; }
     }
 }

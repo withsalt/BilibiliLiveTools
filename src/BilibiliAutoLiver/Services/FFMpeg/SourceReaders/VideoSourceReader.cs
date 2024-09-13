@@ -27,7 +27,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 throw new FileNotFoundException($"视频输入源{this.Settings.PushSettingDto.VideoInfo.FullPath}文件不存在", this.Settings.PushSettingDto.VideoInfo.FullPath);
             }
-            if (this.Settings.PushSettingDto.VideoInfo.FullPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+            if (this.Settings.PushSettingDto.VideoInfo.IsDemuxConcat)
             {
                 var allLines = System.IO.File.ReadAllLines(this.Settings.PushSettingDto.VideoInfo.FullPath)
                     ?.Where(p => !string.IsNullOrWhiteSpace(p))
@@ -94,30 +94,36 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         {
             if (!HasAudioStream())
             {
+                if (!this.Settings.PushSettingDto.IsMute && this.Settings.PushSettingDto.VideoInfo.MediaInfo.AudioStream != null)
+                {
+                    base.WithAudioArgument(opt);
+                }
                 return;
-            }
-            if (this.Settings.PushSettingDto.IsMute)
-            {
-                //视频静音，但是包含音频
-                opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex}");
-                opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}");
             }
             else
             {
-                //视频不静音，但是包含音频
-                if(this.Settings.PushSettingDto.VideoInfo.MediaInfo.AudioStream == null)
+                if (this.Settings.PushSettingDto.IsMute)
                 {
-                    //视频不包含音轨
+                    //视频静音，但是包含音频
                     opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex}");
                     opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}");
                 }
                 else
                 {
-                    opt.WithCustomArgument($"-filter_complex \"[0:a:0][1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}]amerge=inputs=2[aout]\" -map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex} -map \"[aout]\"");
+                    //视频不静音，但是包含音频
+                    if (this.Settings.PushSettingDto.VideoInfo.MediaInfo.AudioStream == null)
+                    {
+                        //视频不包含音轨
+                        opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex}");
+                        opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}");
+                    }
+                    else
+                    {
+                        opt.WithCustomArgument($"-filter_complex \"[0:a:0][1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}]amerge=inputs=2[aout]\" -map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex} -map \"[aout]\"");
+                    }
                 }
+                base.WithAudioArgument(opt);
             }
-            base.WithAudioArgument(opt);
-            //opt.UsingShortest();
         }
 
         protected override bool HasAudioStream()

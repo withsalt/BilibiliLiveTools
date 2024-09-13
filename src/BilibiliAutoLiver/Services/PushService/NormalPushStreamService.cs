@@ -233,7 +233,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 throw new Exception("登录失败，Cookie已失效");
             }
             //获取直播间信息
-            var liveRoomInfo = await _api.GetMyLiveRoomInfo();
+            MyLiveRoomInfo liveRoomInfo = await _api.GetMyLiveRoomInfo();
             if (liveRoomInfo.area_v2_id != setting.LiveSetting.AreaId || liveRoomInfo.title != setting.LiveSetting.RoomName)
             {
                 await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, setting.LiveSetting.RoomName, setting.LiveSetting.AreaId);

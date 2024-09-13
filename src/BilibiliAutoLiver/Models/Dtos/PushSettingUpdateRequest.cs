@@ -48,6 +48,11 @@ namespace BilibiliAutoLiver.Models.Dtos
         public string CustumOutputParams { get; set; }
 
         /// <summary>
+        /// 自定义视频编码器
+        /// </summary>
+        public string CustumVideoCodec { get; set; }
+
+        /// <summary>
         /// 推流视频Id
         /// </summary>
         public long VideoId { get; set; }

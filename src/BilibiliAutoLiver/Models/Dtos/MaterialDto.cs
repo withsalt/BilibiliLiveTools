@@ -1,4 +1,5 @@
-﻿using FFMpegCore;
+﻿using System;
+using FFMpegCore;
 
 namespace BilibiliAutoLiver.Models.Dtos
 {
@@ -41,5 +42,16 @@ namespace BilibiliAutoLiver.Models.Dtos
         /// 创建时间
         /// </summary>
         public string CreatedTime { get; set; }
+
+        /// <summary>
+        /// 是否为队列
+        /// </summary>
+        public bool IsDemuxConcat
+        {
+            get
+            {
+                return this.FullPath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase);
+            }
+        }
     }
 }

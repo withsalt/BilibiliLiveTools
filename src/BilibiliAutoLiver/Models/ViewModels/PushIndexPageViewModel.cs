@@ -20,6 +20,11 @@ namespace BilibiliAutoLiver.Models.ViewModels
         public List<string> AudioDevices { get; set; }
 
         /// <summary>
+        /// 支持的视频编码器
+        /// </summary>
+        public List<string> VideoCodecs {  get; set; }
+
+        /// <summary>
         /// 视频素材
         /// </summary>
         public Dictionary<long, string> Videos { get; set; } = new Dictionary<long, string>();

@@ -138,10 +138,12 @@ namespace BilibiliAutoLiver.Services.Base
                 OutputWidth = outputWidth,
                 OutputHeight = outputHeight,
                 CustumOutputParams = pushSetting.CustumOutputParams,
+                CustumVideoCodec = pushSetting.CustumVideoCodec,
                 IsMute = pushSetting.IsMute,
                 Quality = pushSetting.Quality,
                 VideoInfo = videoMaterial.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
                 AudioInfo = audioMaterial?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
+                VideoCodecs = _ffmpeg.GetVideoCodecs(),
             };
             return pushSettingDto;
         }

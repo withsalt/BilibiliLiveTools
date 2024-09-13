@@ -17,6 +17,7 @@ using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Repository.Interface;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
+using FFMpegCore.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -79,6 +80,14 @@ namespace BilibiliAutoLiver.Controllers
             //列出支持设备的命令
             vm.AudioDevices = await _ffmpeg.GetAudioDevices();
             vm.VideoDevices = await _ffmpeg.GetVideoDevices();
+
+            //列出支持的编码器
+            IReadOnlyList<Codec> allCodecs = _ffmpeg.GetVideoCodecs();
+            if (allCodecs == null)
+            {
+                allCodecs = new List<Codec>();
+            }
+            vm.VideoCodecs = allCodecs.Select(p => p.Name).ToList();
             //素材
             var allMaterials = await _materialRepository.Where(p => !p.IsDeleted).ToListAsync();
             if (allMaterials?.Any() == true)
