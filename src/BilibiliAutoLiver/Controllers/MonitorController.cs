@@ -67,7 +67,7 @@ namespace BilibiliAutoLiver.Controllers
                 {
                     Data = new List<string>()
                     {
-                        $"Ä¿Ç°Î´¿ªÆô¼à¿ØÓ´~",
+                        $"ç›®å‰æœªå¼€å¯ç›‘æ§å“Ÿ~",
                     }
                 };
             }
@@ -80,7 +80,7 @@ namespace BilibiliAutoLiver.Controllers
                 {
                     Data = new List<string>()
                     {
-                        setting?.IsEnabled == true ? "Ä¿Ç°»¹Ã»ÓĞÔËĞĞÈÕÖ¾£¬ÉÔµÈÒ»»á¶ùÓ´~" : $"Ä¿Ç°Î´¿ªÆô¼à¿ØÓ´~",
+                        setting?.IsEnabled == true ? "ç›®å‰è¿˜æ²¡æœ‰è¿è¡Œæ—¥å¿—ï¼Œç¨ç­‰ä¸€ä¼šå„¿å“Ÿ~" : $"ç›®å‰æœªå¼€å¯ç›‘æ§å“Ÿ~",
                     }
                 };
             }
@@ -97,7 +97,7 @@ namespace BilibiliAutoLiver.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return new ResultModel<string>(-1, "²ÎÊı´íÎó");
+                    return new ResultModel<string>(-1, "å‚æ•°é”™è¯¯");
                 }
                 MonitorSetting setting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
                 if (setting == null)
@@ -111,7 +111,7 @@ namespace BilibiliAutoLiver.Controllers
                         || string.IsNullOrEmpty(setting.MailAddress)
                         || string.IsNullOrEmpty(setting.Receivers))
                     {
-                        return new ResultModel<string>(-1, "¿ªÆôÖ±²¥¼à¿ØĞèÒªÏÈÅäÖÃÓÊÏäÉèÖÃ");
+                        return new ResultModel<string>(-1, "å¼€å¯ç›´æ’­ç›‘æ§éœ€è¦å…ˆé…ç½®é‚®ç®±è®¾ç½®");
                     }
                 }
 
@@ -125,7 +125,7 @@ namespace BilibiliAutoLiver.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"¸üĞÂ¼à¿ØÖ±²¥¼äĞÅÏ¢Ê§°Ü£¬{ex.Message}");
+                _logger.LogError(ex, $"æ›´æ–°ç›‘æ§ç›´æ’­é—´ä¿¡æ¯å¤±è´¥ï¼Œ{ex.Message}");
                 return new ResultModel<string>(-1, ex.Message);
             }
         }
@@ -140,13 +140,13 @@ namespace BilibiliAutoLiver.Controllers
                     || string.IsNullOrWhiteSpace(setting.SmtpServer)
                     || string.IsNullOrWhiteSpace(setting.MailAddress))
                 {
-                    return new ResultModel<string>(-1, "ÇëÏÈÅäÖÃ·¢ĞÅÉèÖÃ");
+                    return new ResultModel<string>(-1, "è¯·å…ˆé…ç½®å‘ä¿¡è®¾ç½®");
                 }
                 if (!setting.IsEnableEmailNotice)
                 {
-                    return new ResultModel<string>(-1, "ÇëÏÈ¿ªÆôÓÊ¼şÍ¨Öª");
+                    return new ResultModel<string>(-1, "è¯·å…ˆå¼€å¯é‚®ä»¶é€šçŸ¥");
                 }
-                var sendRt = await _emailNoticeService.Send("BilibiliLiveTools·¢ĞÅ²âÊÔÓÊ¼ş", "µ±ÄãÊÕµ½Õâ·âÓÊ¼şµÄÊ±ºò£¬±íÃ÷ÄãµÄÓÊÏäÒÑ¾­ÕıÈ·ÅäÖÃ¡£");
+                var sendRt = await _emailNoticeService.Send("BilibiliLiveToolså‘ä¿¡æµ‹è¯•é‚®ä»¶", "å½“ä½ æ”¶åˆ°è¿™å°é‚®ä»¶çš„æ—¶å€™ï¼Œè¡¨æ˜ä½ çš„é‚®ç®±å·²ç»æ­£ç¡®é…ç½®ã€‚");
                 if (sendRt.Item1 != SendStatus.Success)
                 {
                     return new ResultModel<string>(-1, sendRt.Item2);
@@ -167,7 +167,7 @@ namespace BilibiliAutoLiver.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return new ResultModel<string>(-1, "²ÎÊı´íÎó");
+                    return new ResultModel<string>(-1, "å‚æ•°é”™è¯¯");
                 }
                 MonitorSetting setting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
                 if (setting == null)
@@ -180,27 +180,27 @@ namespace BilibiliAutoLiver.Controllers
                 }
                 if (request.SmtpSsl && request.SmtpPort != 587 && request.SmtpPort != 465 && request.SmtpPort != 2525)
                 {
-                    return new ResultModel<string>(-1, "SMTP¶Ë¿Ú²»ÕıÈ·");
+                    return new ResultModel<string>(-1, "SMTPç«¯å£ä¸æ­£ç¡®");
                 }
                 if (!request.SmtpSsl && request.SmtpPort != 25)
                 {
-                    return new ResultModel<string>(-1, "SMTP¶Ë¿Ú²»ÕıÈ·");
+                    return new ResultModel<string>(-1, "SMTPç«¯å£ä¸æ­£ç¡®");
                 }
                 if (!IsValidEmail(request.MailAddress))
                 {
-                    return new ResultModel<string>(-1, "·¢¼şÈËµØÖ·²»ÕıÈ·");
+                    return new ResultModel<string>(-1, "å‘ä»¶äººåœ°å€ä¸æ­£ç¡®");
                 }
 
                 var receivers = request.Receivers
-                    .Replace('£»', ';')
-                    .Replace('£¬', ';')
+                    .Replace('ï¼›', ';')
+                    .Replace('ï¼Œ', ';')
                     .Replace(',', ';')
                     .Trim().Split(';');
                 foreach (var receiver in receivers)
                 {
                     if (!IsValidEmail(receiver))
                     {
-                        return new ResultModel<string>(-1, $"ÊÕ¼şÈËµØÖ·{receiver}²»ÕıÈ·");
+                        return new ResultModel<string>(-1, $"æ”¶ä»¶äººåœ°å€{receiver}ä¸æ­£ç¡®");
                     }
                 }
 
@@ -221,7 +221,7 @@ namespace BilibiliAutoLiver.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"¸üĞÂ¼à¿ØÖ±²¥¼äĞÅÏ¢Ê§°Ü£¬{ex.Message}");
+                _logger.LogError(ex, $"æ›´æ–°ç›‘æ§ç›´æ’­é—´ä¿¡æ¯å¤±è´¥ï¼Œ{ex.Message}");
                 return new ResultModel<string>(-1, ex.Message);
             }
         }

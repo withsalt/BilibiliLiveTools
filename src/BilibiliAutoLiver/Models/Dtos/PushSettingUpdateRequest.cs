@@ -98,6 +98,11 @@ namespace BilibiliAutoLiver.Models.Dtos
         public string InputDeviceResolution { get; set; }
 
         /// <summary>
+        /// 设备输入帧数
+        /// </summary>
+        public int InputDeviceFramerate { get; set; }
+
+        /// <summary>
         /// 推流类型为设备时，输入的音频信息
         /// </summary>
         public bool InputDeviceAudioFrom { get; set; }

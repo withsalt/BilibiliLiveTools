@@ -23,5 +23,17 @@ namespace BilibiliAutoLiver.Utils
             }
             return true;
         }
+
+        public static (string format, string deviceName) GetDeviceFormatAndName(string device)
+        {
+            int index = device.IndexOf(',');
+            if (index < 0)
+            {
+                throw new Exception("设备名称不符合规范，设备名称格式：[格式],[设备名称]");
+            }
+            string format = device.Substring(0, index);
+            string name = device.Substring(index + 1);
+            return (format, name);
+        }
     }
 }

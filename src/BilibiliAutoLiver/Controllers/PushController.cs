@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Extensions;
@@ -75,20 +76,20 @@ namespace BilibiliAutoLiver.Controllers
             vm.PushSetting = await _pushSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
             if (vm.PushSetting == null)
             {
-                throw new Exception("»ñÈ¡ÍÆÁ÷ÅäÖÃÊ§°Ü£¡");
+                throw new Exception("è·å–æ¨æµé…ç½®å¤±è´¥ï¼");
             }
-            //ÁĞ³öÖ§³ÖÉè±¸µÄÃüÁî
+            //åˆ—å‡ºæ”¯æŒè®¾å¤‡çš„å‘½ä»¤
             vm.AudioDevices = await _ffmpeg.GetAudioDevices();
             vm.VideoDevices = await _ffmpeg.GetVideoDevices();
 
-            //ÁĞ³öÖ§³ÖµÄ±àÂëÆ÷
+            //åˆ—å‡ºæ”¯æŒçš„ç¼–ç å™¨
             IReadOnlyList<Codec> allCodecs = _ffmpeg.GetVideoCodecs();
             if (allCodecs == null)
             {
                 allCodecs = new List<Codec>();
             }
-            vm.VideoCodecs = allCodecs.Select(p => p.Name).ToList();
-            //ËØ²Ä
+            vm.VideoCodecs = allCodecs.Select(p => p.Name).OrderBy(p => p).ToList();
+            //ç´ æ
             var allMaterials = await _materialRepository.Where(p => !p.IsDeleted).ToListAsync();
             if (allMaterials?.Any() == true)
             {
@@ -107,7 +108,7 @@ namespace BilibiliAutoLiver.Controllers
             PushSetting setting = await _pushSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
             if (setting == null)
             {
-                return new ResultModel<string>(-1, "»ñÈ¡ÍÆÁ÷ÅäÖÃÊ§°Ü");
+                return new ResultModel<string>(-1, "è·å–æ¨æµé…ç½®å¤±è´¥");
             }
             if (!ModelState.IsValid)
             {
@@ -115,7 +116,7 @@ namespace BilibiliAutoLiver.Controllers
                 return new ResultModel<string>(-1, string.Join(';', errors));
             }
 
-            //¸üĞÂÅäÖÃ
+            //æ›´æ–°é…ç½®
             setting.Model = request.Model;
             setting.IsAutoRetry = request.IsAutoRetry;
             setting.RetryInterval = request.RetryInterval;
@@ -133,7 +134,7 @@ namespace BilibiliAutoLiver.Controllers
                     modelUpdateResult = UpdateAdvanceModel(request, setting);
                     break;
                 default:
-                    return new ResultModel<string>(-1, "²ÎÊı´íÎó£¬Î´ÖªµÄÉèÖÃÀàĞÍ");
+                    return new ResultModel<string>(-1, "å‚æ•°é”™è¯¯ï¼ŒæœªçŸ¥çš„è®¾ç½®ç±»å‹");
             }
             if (modelUpdateResult.Code != 0)
             {
@@ -143,7 +144,7 @@ namespace BilibiliAutoLiver.Controllers
             int updateResult = await _pushSettingRepository.UpdateAsync(setting);
             if (updateResult <= 0)
             {
-                return new ResultModel<string>(-1, "±£´æÅäÖÃĞÅÏ¢Ê§°Ü");
+                return new ResultModel<string>(-1, "ä¿å­˜é…ç½®ä¿¡æ¯å¤±è´¥");
             }
             if (_proxyService.GetStatus() != PushStatus.Stopped)
             {
@@ -156,9 +157,9 @@ namespace BilibiliAutoLiver.Controllers
         {
             if (string.IsNullOrWhiteSpace(setting.FFmpegCommand))
             {
-                return new ResultModel<string>(-1, "ÍÆÁ÷ÃüÁî²»ÄÜÎª¿Õ");
+                return new ResultModel<string>(-1, "æ¨æµå‘½ä»¤ä¸èƒ½ä¸ºç©º");
             }
-            //½âÎöÍÆÁ÷ÃüÁî 
+            //è§£ææ¨æµå‘½ä»¤ 
             if (!CmdAnalyzer.TryParse(request.FFmpegCommand, _appSettings.AdvanceStrictMode, Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory), "", out string message, out _, out _, out _))
             {
                 return new ResultModel<string>(-1, message);
@@ -171,11 +172,11 @@ namespace BilibiliAutoLiver.Controllers
         {
             if (!Enum.IsDefined(typeof(InputType), (int)request.InputType))
             {
-                return new ResultModel<string>(-1, "Î´ÖªµÄÍÆÁ÷ÀàĞÍ");
+                return new ResultModel<string>(-1, "æœªçŸ¥çš„æ¨æµç±»å‹");
             }
             try
             {
-                if(request.InputType == InputType.Video && request.VideoId > 0)
+                if (request.InputType == InputType.Video && request.VideoId > 0)
                 {
                     request.Material = (await _materialRepository.GetAsync(request.VideoId))
                         ?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory));
@@ -199,19 +200,22 @@ namespace BilibiliAutoLiver.Controllers
                     return new ResultModel<string>(0);
                 }
                 bool result = await _proxyService.Stop();
-                if (!result)
+                if (result)
                 {
-                    return new ResultModel<string>(-1, "Í£Ö¹ÍÆÁ÷Ê§°Ü");
-                }
-                else
-                {
+                    //è·å–ç›´æ’­é—´ä¿¡æ¯
+                    MyLiveRoomInfo liveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
+                    if (liveRoomInfo != null)
+                    {
+                        await _liveApiService.StopLive(liveRoomInfo.room_id);
+                    }
                     return new ResultModel<string>(0);
                 }
+                return new ResultModel<string>(-1, "åœæ­¢æ¨æµå¤±è´¥");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Í£Ö¹ÍÆÁ÷Ê§°Ü");
-                return new ResultModel<string>(-1, $"Í£Ö¹ÍÆÁ÷Ê§°Ü£¬{ex.Message}");
+                _logger.LogError(ex, "åœæ­¢æ¨æµå¤±è´¥");
+                return new ResultModel<string>(-1, $"åœæ­¢æ¨æµå¤±è´¥ï¼Œ{ex.Message}");
             }
         }
 
@@ -227,7 +231,7 @@ namespace BilibiliAutoLiver.Controllers
                 bool result = await _proxyService.Start();
                 if (!result)
                 {
-                    return new ResultModel<string>(-1, "¿ªÆôÍÆÁ÷Ê§°Ü");
+                    return new ResultModel<string>(-1, "å¼€å¯æ¨æµå¤±è´¥");
                 }
                 else
                 {
@@ -236,8 +240,8 @@ namespace BilibiliAutoLiver.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "¿ªÆôÍÆÁ÷Ê§°Ü");
-                return new ResultModel<string>(-1, $"¿ªÆôÍÆÁ÷Ê§°Ü£¬{ex.Message}");
+                _logger.LogError(ex, "å¼€å¯æ¨æµå¤±è´¥");
+                return new ResultModel<string>(-1, $"å¼€å¯æ¨æµå¤±è´¥ï¼Œ{ex.Message}");
             }
         }
 
@@ -251,13 +255,13 @@ namespace BilibiliAutoLiver.Controllers
                     bool stoprResult = await _proxyService.Stop();
                     if (!stoprResult)
                     {
-                        return new ResultModel<string>(-1, "ÖØĞÂÍÆÁ÷Ê§°Ü£¬Í£Ö¹µ±Ç°ÕıÔÚ½øĞĞÖĞµÄÍÆÁ÷Ê§°Ü¡£");
+                        return new ResultModel<string>(-1, "é‡æ–°æ¨æµå¤±è´¥ï¼Œåœæ­¢å½“å‰æ­£åœ¨è¿›è¡Œä¸­çš„æ¨æµå¤±è´¥ã€‚");
                     }
                 }
                 bool result = await _proxyService.Start();
                 if (!result)
                 {
-                    return new ResultModel<string>(-1, "ÖØĞÂÍÆÁ÷Ê§°Ü£¬¿ªÆôÍÆÁ÷Ê§°Ü");
+                    return new ResultModel<string>(-1, "é‡æ–°æ¨æµå¤±è´¥ï¼Œå¼€å¯æ¨æµå¤±è´¥");
                 }
                 else
                 {
@@ -266,13 +270,13 @@ namespace BilibiliAutoLiver.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "ÖØĞÂÍÆÁ÷Ê§°Ü");
-                return new ResultModel<string>(-1, $"ÖØĞÂÍÆÁ÷Ê§°Ü£¬{ex.Message}");
+                _logger.LogError(ex, "é‡æ–°æ¨æµå¤±è´¥");
+                return new ResultModel<string>(-1, $"é‡æ–°æ¨æµå¤±è´¥ï¼Œ{ex.Message}");
             }
         }
 
         /// <summary>
-        /// »ñÈ¡µ±Ç°ÍÆÁ÷×´Ì¬
+        /// è·å–å½“å‰æ¨æµçŠ¶æ€
         /// </summary>
         /// <returns></returns>
         [HttpGet]

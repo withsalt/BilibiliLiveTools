@@ -97,7 +97,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                     if (firstQuote != lastQuote)
                     {
                         string deviceName = line.Substring(firstQuote + 1, lastQuote - firstQuote - 1).Trim(' ');
-                        devices.Add(deviceName);
+                        devices.Add("dshow," + deviceName);
                     }
                 }
             }

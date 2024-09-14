@@ -42,10 +42,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
                 //音频
-                WithAudioArgument(opt);
+                GetAudioOutputArg(opt);
 
                 //视频编码
-                WithQualityOutputArg(opt);
+                GetVideoOutputArg(opt);
 
                 //PixelFormat
                 opt.ForcePixelFormat("yuv420p");
@@ -53,18 +53,27 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 opt.ForceFormat("flv");
 
                 //推流分辨率
-                if (this.Settings.PushSettingDto.OutputWidth > 0 && this.Settings.PushSettingDto.OutputHeight > 0)
+                if (this.Settings.PushSetting.OutputWidth > 0 && this.Settings.PushSetting.OutputHeight > 0)
                 {
-                    opt.Resize(this.Settings.PushSettingDto.OutputWidth, this.Settings.PushSettingDto.OutputHeight);
+                    opt.Resize(this.Settings.PushSetting.OutputWidth, this.Settings.PushSetting.OutputHeight);
                 }
             });
             return rt;
         }
 
-        protected virtual void WithQualityOutputArg(FFMpegArgumentOptions opt)
+        /// <summary>
+        /// 获取视频输入参数
+        /// </summary>
+        protected abstract void GetVideoInputArg();
+
+        /// <summary>
+        /// 获取视频输出参数
+        /// </summary>
+        /// <param name="opt"></param>
+        protected virtual void GetVideoOutputArg(FFMpegArgumentOptions opt)
         {
             var codec = GetVideoCodec();
-            switch (this.Settings.PushSettingDto.Quality)
+            switch (this.Settings.PushSetting.Quality)
             {
                 case OutputQualityEnum.High:
                     {
@@ -130,29 +139,17 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         }
 
         /// <summary>
-        /// 获取视频输入参数
-        /// </summary>
-        protected abstract void GetVideoInputArg();
-
-        /// <summary>
         /// 获取音频输入参数
         /// </summary>
         protected abstract void GetAudioInputArg();
 
         /// <summary>
-        /// 是否包含音频流
+        /// 获取音频输出参数
         /// </summary>
-        /// <returns></returns>
-        protected abstract bool HasAudioStream();
-
-        protected virtual void WithMuteArgument(FFMpegArgumentOptions opt)
+        /// <param name="opt"></param>
+        protected virtual void GetAudioOutputArg(FFMpegArgumentOptions opt)
         {
-
-        }
-
-        protected virtual void WithAudioArgument(FFMpegArgumentOptions opt)
-        {
-            switch (this.Settings.PushSettingDto.Quality)
+            switch (this.Settings.PushSetting.Quality)
             {
                 case OutputQualityEnum.High:
                     {
@@ -184,20 +181,26 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
         }
 
+        /// <summary>
+        /// 是否包含音频流
+        /// </summary>
+        /// <returns></returns>
+        protected abstract bool HasAudioStream();
+
         private Codec GetVideoCodec()
         {
-            if (string.IsNullOrEmpty(this.Settings.PushSettingDto.CustumVideoCodec))
+            if (string.IsNullOrEmpty(this.Settings.PushSetting.CustumVideoCodec))
             {
                 return VideoCodec.LibX264;
             }
-            if (this.Settings.PushSettingDto.VideoCodecs?.Any() != true)
+            if (this.Settings.PushSetting.VideoCodecs?.Any() != true)
             {
                 return VideoCodec.LibX264;
             }
-            Codec target = this.Settings.PushSettingDto.VideoCodecs.FirstOrDefault(p => p.Name == this.Settings.PushSettingDto.CustumVideoCodec);
+            Codec target = this.Settings.PushSetting.VideoCodecs.FirstOrDefault(p => p.Name == this.Settings.PushSetting.CustumVideoCodec);
             if (target == null)
             {
-                throw new Exception($"没有找到受支持的编码器名称：{this.Settings.PushSettingDto.CustumVideoCodec}");
+                throw new Exception($"没有找到受支持的编码器名称：{this.Settings.PushSetting.CustumVideoCodec}");
             }
             return target;
         }

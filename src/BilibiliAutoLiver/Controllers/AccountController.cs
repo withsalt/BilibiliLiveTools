@@ -74,20 +74,20 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            _logger.LogInformation("ÊÖ¶¯²Ù×÷ÍË³öµÇÂ¼¡£");
-            //Çå³ıµÇÂ¼×´Ì¬
+            _logger.LogInformation("æ‰‹åŠ¨æ“ä½œé€€å‡ºç™»å½•ã€‚");
+            //æ¸…é™¤ç™»å½•çŠ¶æ€
             _accountService.Logout();
-            //Í£Ö¹ÍÆÁ÷
+            //åœæ­¢æ¨æµ
             await _pushStreamProxyService.Stop();
-            //µÇ³ö
+            //ç™»å‡º
             await HttpContext.SignOutAsync();
-            //ÖØĞÂÇëÇóµÇÂ¼¶şÎ¬Âë
+            //é‡æ–°è¯·æ±‚ç™»å½•äºŒç»´ç 
             _ = await LoginByQrCode();
             return RedirectToAction("Login", "Account");
         }
 
         /// <summary>
-        /// ÇëÇóÍ¨¹ı¶şÎ¬ÂëµÇÂ¼
+        /// è¯·æ±‚é€šè¿‡äºŒç»´ç ç™»å½•
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -95,11 +95,11 @@ namespace BilibiliAutoLiver.Controllers
         {
             if (_lockService.IsLocked(CacheKeyConstant.LOGING_STATUS_CACHE_KEY))
             {
-                return Task.FromResult("±ğ×Å¼±£¬ÔÙµÈµÈ...");
+                return Task.FromResult("åˆ«ç€æ€¥ï¼Œå†ç­‰ç­‰...");
             }
             if (_accountService.TryGetQrCodeLoginStatus(out _))
             {
-                return Task.FromResult("ÕıÔÚÍ¨¹ıÉ¨Ãè¶şÎ¬ÂëµÇÂ¼");
+                return Task.FromResult("æ­£åœ¨é€šè¿‡æ‰«æäºŒç»´ç ç™»å½•");
             }
             if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300)))
             {
@@ -114,13 +114,13 @@ namespace BilibiliAutoLiver.Controllers
             }
             else
             {
-                return Task.FromResult("ÕıÔÚÍ¨¹ıÉ¨Ãè¶şÎ¬ÂëµÇÂ¼");
+                return Task.FromResult("æ­£åœ¨é€šè¿‡æ‰«æäºŒç»´ç ç™»å½•");
             }
             return Task.FromResult("Ok");
         }
 
         /// <summary>
-        /// Ë¢ĞÂCookie
+        /// åˆ·æ–°Cookie
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -129,8 +129,8 @@ namespace BilibiliAutoLiver.Controllers
             try
             {
                 await _cookie.RefreshCookie();
-                _logger.LogInformation("Ç¿ÖÆÖØĞÂË¢ĞÂCookie³É¹¦¡£");
-                return Content("Ë¢ĞÂ³É¹¦");
+                _logger.LogInformation("å¼ºåˆ¶é‡æ–°åˆ·æ–°CookieæˆåŠŸã€‚");
+                return Content("åˆ·æ–°æˆåŠŸ");
             }
             catch (Exception ex)
             {
@@ -142,7 +142,7 @@ namespace BilibiliAutoLiver.Controllers
         [AllowAnonymous]
         public BilibiliAccountLoginStatus Status()
         {
-            //µÚÒ»´Î¿ªÆôÓ¦ÓÃ£¬ÕıÔÚ³¢ÊÔÍ¨¹ıCookieµÇÂ¼
+            //ç¬¬ä¸€æ¬¡å¼€å¯åº”ç”¨ï¼Œæ­£åœ¨å°è¯•é€šè¿‡Cookieç™»å½•
             if (_cache.Get<bool>(CacheKeyConstant.LOGING_STATUS_CACHE_KEY) == true)
             {
                 return new BilibiliAccountLoginStatus()
@@ -169,7 +169,7 @@ namespace BilibiliAutoLiver.Controllers
                 }
                 else
                 {
-                    //Î´µÇÂ¼
+                    //æœªç™»å½•
                     status.Status = AccountLoginStatus.NotLogin;
                     status.QrCodeStatus = new QrCodeLoginStatus()
                     {

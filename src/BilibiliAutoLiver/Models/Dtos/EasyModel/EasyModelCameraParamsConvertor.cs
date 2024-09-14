@@ -30,8 +30,12 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception("当选择推流音频来源于设备时，音频设备不能为空");
             }
-
-            List<string> supportResolutions = await FFMpegService.ListVideoDeviceSupportResolutions(request.InputDeviceName);
+            if (request.InputDeviceFramerate <= 0)
+            {
+                throw new Exception("输入帧数不能为空或参数错误");
+            }
+            (string format, string deviceName) = CommonHelper.GetDeviceFormatAndName(request.InputDeviceName);
+            List<string> supportResolutions = await FFMpegService.ListVideoDeviceSupportResolutions(deviceName);
             if (supportResolutions?.Any() != true)
             {
                 throw new Exception($"视频输入设备{request.InputDeviceName}未获取到受支持的输入分辨率");
@@ -43,6 +47,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 
             this.Setting.DeviceName = request.InputDeviceName;
             this.Setting.InputResolution = request.InputDeviceResolution;
+            this.Setting.InputFramerate = request.InputDeviceFramerate;
             this.Setting.InputAudioSource = request.InputDeviceAudioFrom ? InputAudioSource.Device : InputAudioSource.File;
             this.Setting.AudioId = !request.InputDeviceAudioFrom && request.InputDeviceAudioId.HasValue && request.InputDeviceAudioId.Value > 0 ? request.InputDeviceAudioId.Value : null;
             this.Setting.AudioDevice = request.InputDeviceAudioFrom ? request.InputDeviceAudioDeviceName : "";

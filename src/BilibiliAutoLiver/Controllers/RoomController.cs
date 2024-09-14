@@ -48,7 +48,7 @@ namespace BilibiliAutoLiver.Controllers
             MyLiveRoomInfo myLiveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
             List<LiveAreaItem> liveAreas = await _liveApiService.GetLiveAreas();
 
-            //¿ÉÄÜÔÚBÕ¾ĞŞ¸ÄÁËĞÅÏ¢£¬ËùÒÔĞèÒªÅĞ¶ÏÊı¾İ¿âÖĞÊÇ·ñÒ»ÖÂ£¬²»Ò»ÖÂ·´Ïò¸üĞÂ
+            //å¯èƒ½åœ¨Bç«™ä¿®æ”¹äº†ä¿¡æ¯ï¼Œæ‰€ä»¥éœ€è¦åˆ¤æ–­æ•°æ®åº“ä¸­æ˜¯å¦ä¸€è‡´ï¼Œä¸ä¸€è‡´åå‘æ›´æ–°
             LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
             if (liveSetting == null)
             {
@@ -67,7 +67,7 @@ namespace BilibiliAutoLiver.Controllers
             }
             else
             {
-                //¸üĞÂ·ÖÇø
+                //æ›´æ–°åˆ†åŒº
                 if (liveSetting.AreaId != myLiveRoomInfo.area_v2_id
                     || liveSetting.RoomName != myLiveRoomInfo.audit_info.audit_title
                     || liveSetting.Content != myLiveRoomInfo.announce.content)
@@ -97,9 +97,9 @@ namespace BilibiliAutoLiver.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return new ResultModel<string>(-1, "²ÎÊı´íÎó");
+                    return new ResultModel<string>(-1, "å‚æ•°é”™è¯¯");
                 }
-                //µ÷ÓÃBÕ¾api£¬ÏÈ¸üĞÂbÕ¾Ö±²¥ĞÅÏ¢
+                //è°ƒç”¨Bç«™apiï¼Œå…ˆæ›´æ–°bç«™ç›´æ’­ä¿¡æ¯
                 LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
                 if (liveSetting == null)
                 {
@@ -109,12 +109,12 @@ namespace BilibiliAutoLiver.Controllers
                         CreatedUserId = GlobalConfigConstant.SYS_USERID,
                     };
                 }
-                //¸üĞÂ·ÖÇø
+                //æ›´æ–°åˆ†åŒº
                 if (liveSetting.AreaId != request.AreaId || liveSetting.RoomName != request.RoomName)
                 {
                     if (!await _liveApiService.UpdateLiveRoomInfo(request.RoomId, request.RoomName, request.AreaId))
                     {
-                        return new ResultModel<string>(-1, "¸üĞÂBilibiliÖ±²¥ĞÅÏ¢Ê§°Ü");
+                        return new ResultModel<string>(-1, "æ›´æ–°Bilibiliç›´æ’­ä¿¡æ¯å¤±è´¥");
                     }
                 }
 
@@ -129,7 +129,7 @@ namespace BilibiliAutoLiver.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"¸üĞÂÖ±²¥¼äĞÅÏ¢Ê§°Ü£¬{ex.Message}");
+                _logger.LogError(ex, $"æ›´æ–°ç›´æ’­é—´ä¿¡æ¯å¤±è´¥ï¼Œ{ex.Message}");
                 return new ResultModel<string>(-1, ex.Message);
             }
         }
@@ -141,9 +141,9 @@ namespace BilibiliAutoLiver.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return new ResultModel<string>(-1, "²ÎÊı´íÎó");
+                    return new ResultModel<string>(-1, "å‚æ•°é”™è¯¯");
                 }
-                //µ÷ÓÃBÕ¾api£¬ÏÈ¸üĞÂbÕ¾Ö±²¥ĞÅÏ¢
+                //è°ƒç”¨Bç«™apiï¼Œå…ˆæ›´æ–°bç«™ç›´æ’­ä¿¡æ¯
                 LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
                 if (liveSetting == null)
                 {
@@ -153,12 +153,12 @@ namespace BilibiliAutoLiver.Controllers
                         CreatedUserId = GlobalConfigConstant.SYS_USERID,
                     };
                 }
-                //¸üĞÂ¹«¸æ
+                //æ›´æ–°å…¬å‘Š
                 if (liveSetting.Content != request.Content)
                 {
                     if (!await _liveApiService.UpdateRoomNews(request.RoomId, request.Content))
                     {
-                        return new ResultModel<string>(-1, "¸üĞÂBilibiliÖ±²¥¼ä¹«¸æÊ§°Ü");
+                        return new ResultModel<string>(-1, "æ›´æ–°Bilibiliç›´æ’­é—´å…¬å‘Šå¤±è´¥");
                     }
                 }
 
@@ -171,13 +171,13 @@ namespace BilibiliAutoLiver.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"¸üĞÂÖ±²¥¼ä¹«¸æÊ§°Ü£¬{ex.Message}");
+                _logger.LogError(ex, $"æ›´æ–°ç›´æ’­é—´å…¬å‘Šå¤±è´¥ï¼Œ{ex.Message}");
                 return new ResultModel<string>(-1, ex.Message);
             }
         }
 
         /// <summary>
-        /// µ¼³ö·ÖÇøĞÅÏ¢ÎªMarkdown¸ñÊ½
+        /// å¯¼å‡ºåˆ†åŒºä¿¡æ¯ä¸ºMarkdownæ ¼å¼
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
@@ -188,13 +188,13 @@ namespace BilibiliAutoLiver.Controllers
             List<LiveAreaItem> info = await _liveApiService.GetLiveAreas();
             if (info == null || info.Count == 0)
             {
-                throw new Exception("»ñÈ¡Ö±²¥·ÖÇøÊ§°Ü¡£");
+                throw new Exception("è·å–ç›´æ’­åˆ†åŒºå¤±è´¥ã€‚");
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("### Ö±²¥¼ä·ÖÇøĞÅÏ¢");
+            sb.AppendLine("### ç›´æ’­é—´åˆ†åŒºä¿¡æ¯");
             sb.AppendLine();
-            sb.AppendLine("|  AreaId | ·ÖÀàÃû³Æ  | ·ÖÇøÃû³Æ  |");
+            sb.AppendLine("|  AreaId | åˆ†ç±»åç§°  | åˆ†åŒºåç§°  |");
             sb.AppendLine("| :------------ | :------------ | :------------ |");
             foreach (var bigCate in info)
             {

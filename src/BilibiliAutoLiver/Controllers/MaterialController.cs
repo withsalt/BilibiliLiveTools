@@ -75,7 +75,7 @@ namespace BilibiliAutoLiver.Controllers
             QuaryPageModel<MaterialDto> materials = await _repository.GetPageAsync(request);
             if (materials == null)
             {
-                return Json(new ResultModel<QuaryPageModel<MaterialDto>>(-1, "¼ÓÔØÊı¾İÊ§°Ü¡£"));
+                return Json(new ResultModel<QuaryPageModel<MaterialDto>>(-1, "åŠ è½½æ•°æ®å¤±è´¥ã€‚"));
             }
             return Json(new ResultModel<QuaryPageModel<MaterialDto>>()
             {
@@ -86,7 +86,7 @@ namespace BilibiliAutoLiver.Controllers
         }
 
         /// <summary>
-        /// É¾³ıÎÄ¼ş
+        /// åˆ é™¤æ–‡ä»¶
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -97,17 +97,17 @@ namespace BilibiliAutoLiver.Controllers
             {
                 if (ids?.Any() != true)
                 {
-                    throw new Exception("ÎÄ¼şID²»ÄÜÎª¿Õ¡£");
+                    throw new Exception("æ–‡ä»¶IDä¸èƒ½ä¸ºç©ºã€‚");
                 }
                 var items = await _repository.Where(p => ids.Contains(p.Id)).ToListAsync();
                 if (items?.Any() != true)
                 {
-                    throw new Exception("²éÕÒÎÄ¼şĞÅÏ¢Ê§°Ü¡£");
+                    throw new Exception("æŸ¥æ‰¾æ–‡ä»¶ä¿¡æ¯å¤±è´¥ã€‚");
                 }
                 int result = await _repository.DeleteAsync(p => ids.Contains(p.Id));
                 if (result <= 0)
                 {
-                    throw new Exception("É¾³ıÎÄ¼şÊ§°Ü¡£");
+                    throw new Exception("åˆ é™¤æ–‡ä»¶å¤±è´¥ã€‚");
                 }
                 foreach (var item in items)
                 {
@@ -127,7 +127,7 @@ namespace BilibiliAutoLiver.Controllers
         }
 
         /// <summary>
-        /// Í¨¹ıidÏÂÔØÎÄ¼ş
+        /// é€šè¿‡idä¸‹è½½æ–‡ä»¶
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -141,7 +141,7 @@ namespace BilibiliAutoLiver.Controllers
                     return new ContentResult()
                     {
                         StatusCode = 404,
-                        Content = "ÎÄ¼şID²»ÄÜÎª¿Õ¡£"
+                        Content = "æ–‡ä»¶IDä¸èƒ½ä¸ºç©ºã€‚"
                     };
                 }
                 var material = await _repository.FindAsync(id);
@@ -150,7 +150,7 @@ namespace BilibiliAutoLiver.Controllers
                     return new ContentResult()
                     {
                         StatusCode = 404,
-                        Content = "»ñÈ¡ÎÄ¼şĞÅÏ¢Ê§°Ü¡£"
+                        Content = "è·å–æ–‡ä»¶ä¿¡æ¯å¤±è´¥ã€‚"
                     };
                 }
                 string path = Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory, material.Path);
@@ -159,7 +159,7 @@ namespace BilibiliAutoLiver.Controllers
                     return new ContentResult()
                     {
                         StatusCode = 404,
-                        Content = "µ±Ç°ÎÄ¼ş²»´æÔÚ¡£"
+                        Content = "å½“å‰æ–‡ä»¶ä¸å­˜åœ¨ã€‚"
                     };
                 }
                 string fileName = Path.GetFileName(path);
@@ -175,7 +175,7 @@ namespace BilibiliAutoLiver.Controllers
                 return new ContentResult()
                 {
                     StatusCode = 404,
-                    Content = $"»ñÈ¡ÎÄ¼şÊ§°Ü£¬´íÎó£º{ex.Message}"
+                    Content = $"è·å–æ–‡ä»¶å¤±è´¥ï¼Œé”™è¯¯ï¼š{ex.Message}"
                 };
             }
         }
@@ -188,7 +188,7 @@ namespace BilibiliAutoLiver.Controllers
             IFormFileCollection files = Request.Form.Files;
             if (files == null || files.Count == 0)
             {
-                return Json(new ResultModel<string>(-1, "ÉÏ´«ÎÄ¼şÎª¿Õ"));
+                return Json(new ResultModel<string>(-1, "ä¸Šä¼ æ–‡ä»¶ä¸ºç©º"));
             }
             foreach (var item in files)
             {
@@ -203,12 +203,12 @@ namespace BilibiliAutoLiver.Controllers
                     string fileName = item.FileName;
                     if (string.IsNullOrEmpty(fileName))
                     {
-                        return Json(new ResultModel<string>(-1, "ÉÏ´«ÎÄ¼şÎÄ¼şÃû²»ÄÜÎª¿Õ"));
+                        return Json(new ResultModel<string>(-1, "ä¸Šä¼ æ–‡ä»¶æ–‡ä»¶åä¸èƒ½ä¸ºç©º"));
                     }
                     string ext = Path.GetExtension(fileName);
                     if (string.IsNullOrEmpty(ext))
                     {
-                        return Json(new ResultModel<string>(-1, "ºó×ºÃû²»ÄÜÎª¿Õ"));
+                        return Json(new ResultModel<string>(-1, "åç¼€åä¸èƒ½ä¸ºç©º"));
                     }
                     FileType fileType = FileType.Unknow;
                     if (_appSettings.AllowExtensions != null && _appSettings.AllowExtensions.Count > 0)
@@ -224,7 +224,7 @@ namespace BilibiliAutoLiver.Controllers
                     }
                     if (fileType == FileType.Unknow)
                     {
-                        return Json(new ResultModel<string>(-1, $"²»Ö§³ÖµÄÎÄ¼şÀàĞÍ£º{ext.TrimStart('.')}"));
+                        return Json(new ResultModel<string>(-1, $"ä¸æ”¯æŒçš„æ–‡ä»¶ç±»å‹ï¼š{ext.TrimStart('.')}"));
                     }
 
                     ext = ext.ToLower();
@@ -233,7 +233,7 @@ namespace BilibiliAutoLiver.Controllers
                     (string, string) fileSaveResult = await SaveFile(item, fileNewName);
                     if (string.IsNullOrEmpty(fileSaveResult.Item1))
                     {
-                        return Json(new ResultModel<string>(-1, "±£´æÎÄ¼şÊ§°Ü"));
+                        return Json(new ResultModel<string>(-1, "ä¿å­˜æ–‡ä»¶å¤±è´¥"));
                     }
                     MediaInfo mediaInfo = null;
                     fileFullPath = fileSaveResult.Item2;
@@ -275,7 +275,7 @@ namespace BilibiliAutoLiver.Controllers
                 }
             }
             await _repository.InsertAsync(materials);
-            //ÉÏ´«³É¹¦
+            //ä¸Šä¼ æˆåŠŸ
             return Json(new ResultModel<string>(0));
         }
 
@@ -286,14 +286,14 @@ namespace BilibiliAutoLiver.Controllers
                 IMediaAnalysis info = await _ffprobeService.Analyse(path);
                 if (info.PrimaryVideoStream == null)
                 {
-                    throw new Exception("ÉÏ´«µÄÊÓÆµËØ²Ä²»°üº¬ÊÓÆµÁ÷");
+                    throw new Exception("ä¸Šä¼ çš„è§†é¢‘ç´ æä¸åŒ…å«è§†é¢‘æµ");
                 }
                 return new MediaInfo(info, FileType.Video);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"ÎŞ·¨½âÎöÉÏ´«µÄÊÓÆµÎÄ¼ş");
-                throw new Exception("ÎŞ·¨½âÎöÉÏ´«µÄÊÓÆµÎÄ¼ş");
+                _logger.LogWarning(ex, $"æ— æ³•è§£æä¸Šä¼ çš„è§†é¢‘æ–‡ä»¶");
+                throw new Exception("æ— æ³•è§£æä¸Šä¼ çš„è§†é¢‘æ–‡ä»¶");
             }
         }
 
@@ -304,14 +304,14 @@ namespace BilibiliAutoLiver.Controllers
                 IMediaAnalysis info = await _ffprobeService.Analyse(path);
                 if (info.PrimaryAudioStream == null)
                 {
-                    throw new Exception("ÉÏ´«µÄÒôÆµËØ²Ä²»°üº¬ÊÓÆµÁ÷");
+                    throw new Exception("ä¸Šä¼ çš„éŸ³é¢‘ç´ æä¸åŒ…å«è§†é¢‘æµ");
                 }
                 return new MediaInfo(info, FileType.Music);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"ÎŞ·¨½âÎöÉÏ´«µÄÒôÆµÎÄ¼ş");
-                throw new Exception("ÎŞ·¨½âÎöÉÏ´«µÄÒôÆµÎÄ¼ş");
+                _logger.LogWarning(ex, $"æ— æ³•è§£æä¸Šä¼ çš„éŸ³é¢‘æ–‡ä»¶");
+                throw new Exception("æ— æ³•è§£æä¸Šä¼ çš„éŸ³é¢‘æ–‡ä»¶");
             }
         }
 
@@ -319,7 +319,7 @@ namespace BilibiliAutoLiver.Controllers
         {
             if (!System.IO.File.Exists(filePath))
             {
-                throw new Exception("ÉÏ´«µÄÎÄ¼ş²»´æÔÚ");
+                throw new Exception("ä¸Šä¼ çš„æ–‡ä»¶ä¸å­˜åœ¨");
             }
             var allLines = (await System.IO.File.ReadAllLinesAsync(filePath))
                 ?.Where(p => !string.IsNullOrWhiteSpace(p))
@@ -327,7 +327,7 @@ namespace BilibiliAutoLiver.Controllers
                 .ToList();
             if (allLines?.Any() != true)
             {
-                throw new Exception("ÉÏ´«µÄËØ²ÄÁĞ±íÎÄ¼şÎª¿Õ");
+                throw new Exception("ä¸Šä¼ çš„ç´ æåˆ—è¡¨æ–‡ä»¶ä¸ºç©º");
             }
             foreach (var line in allLines)
             {
@@ -338,7 +338,7 @@ namespace BilibiliAutoLiver.Controllers
                 }
                 if (!System.IO.File.Exists(file))
                 {
-                    throw new Exception($"ÉÏ´«µÄËØ²ÄÁĞ±íÎÄ¼şÖĞ£¬ÎÄ¼ş¡°{line}¡±²»´æÔÚ");
+                    throw new Exception($"ä¸Šä¼ çš„ç´ æåˆ—è¡¨æ–‡ä»¶ä¸­ï¼Œæ–‡ä»¶â€œ{line}â€ä¸å­˜åœ¨");
                 }
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using BilibiliAutoLiver.Models;
@@ -25,7 +26,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         public CameraPlusSourceReader(SettingDto setting, string rtmpAddr, ILogger logger, IPipeContainer pipeContainer) : base(setting, rtmpAddr, logger)
         {
             this.PipeContainer = pipeContainer;
-            this.DeviceProvider = new CameraDeviceProvider(this.Settings.PushSettingDto, OnFrameArrived);
+            this.DeviceProvider = new CameraDeviceProvider(this.Settings.PushSetting, OnFrameArrived);
             this.DeviceProvider.Start();
             this.PipeSource = new CameraFramePipeSource(frameQueue);
         }
@@ -124,19 +125,29 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 opt.ForcePixelFormat(streamFormat);
                 opt.WithFramerate(_frameRate);
                 opt.Resize(this.DeviceProvider.Size.Width, this.DeviceProvider.Size.Height);
-
-                WithMuteArgument(opt);
             });
         }
 
         protected override void GetAudioInputArg()
         {
-            throw new NotImplementedException();
+            
         }
 
         protected override bool HasAudioStream()
         {
-            throw new NotImplementedException();
+            if (!string.IsNullOrEmpty(this.Settings.PushSetting.AudioDevice))
+            {
+                return true;
+            }
+            if (this.Settings.PushSetting.AudioMaterial != null && !string.IsNullOrWhiteSpace(this.Settings.PushSetting.AudioMaterial.FullPath))
+            {
+                if (!File.Exists(this.Settings.PushSetting.AudioMaterial.FullPath))
+                {
+                    throw new FileNotFoundException($"音频输入源{this.Settings.PushSetting.AudioMaterial.FullPath}文件不存在", this.Settings.PushSetting.AudioMaterial.FullPath);
+                }
+                return true;
+            }
+            return false;
         }
 
         public override void Dispose()

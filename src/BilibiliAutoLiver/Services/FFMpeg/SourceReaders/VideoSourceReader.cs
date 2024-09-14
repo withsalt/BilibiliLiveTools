@@ -18,18 +18,18 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override void GetVideoInputArg()
         {
-            if (this.Settings.PushSettingDto.VideoInfo == null
-                || string.IsNullOrEmpty(this.Settings.PushSettingDto.VideoInfo.FullPath))
+            if (this.Settings.PushSetting.VideoMaterial == null
+                || string.IsNullOrEmpty(this.Settings.PushSetting.VideoMaterial.FullPath))
             {
                 throw new ArgumentNullException("视频输入源Path不能为空");
             }
-            if (!File.Exists(this.Settings.PushSettingDto.VideoInfo.FullPath))
+            if (!File.Exists(this.Settings.PushSetting.VideoMaterial.FullPath))
             {
-                throw new FileNotFoundException($"视频输入源{this.Settings.PushSettingDto.VideoInfo.FullPath}文件不存在", this.Settings.PushSettingDto.VideoInfo.FullPath);
+                throw new FileNotFoundException($"视频输入源{this.Settings.PushSetting.VideoMaterial.FullPath}文件不存在", this.Settings.PushSetting.VideoMaterial.FullPath);
             }
-            if (this.Settings.PushSettingDto.VideoInfo.IsDemuxConcat)
+            if (this.Settings.PushSetting.VideoMaterial.IsDemuxConcat)
             {
-                var allLines = System.IO.File.ReadAllLines(this.Settings.PushSettingDto.VideoInfo.FullPath)
+                var allLines = System.IO.File.ReadAllLines(this.Settings.PushSetting.VideoMaterial.FullPath)
                     ?.Where(p => !string.IsNullOrWhiteSpace(p))
                     .Select(p => p.Trim(' ', '\r', '\n'))
                     .ToList();
@@ -56,7 +56,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     opt.WithCustomArgument("-stream_loop -1");
 
                     //没有音频的情况下静音视频
-                    if (!HasAudioStream() && this.Settings.PushSettingDto.IsMute)
+                    if (!HasAudioStream() && this.Settings.PushSetting.IsMute)
                     {
                         opt.DisableChannel(Channel.Audio);
                     }
@@ -64,13 +64,13 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             else
             {
-                FFMpegArguments = FFMpegArguments.FromFileInput(this.Settings.PushSettingDto.VideoInfo.FullPath, true, opt =>
+                FFMpegArguments = FFMpegArguments.FromFileInput(this.Settings.PushSetting.VideoMaterial.FullPath, true, opt =>
                 {
                     opt.WithCustomArgument("-re");
                     opt.WithCustomArgument("-stream_loop -1");
 
                     //没有音频的情况下静音视频
-                    if (!HasAudioStream() && this.Settings.PushSettingDto.IsMute)
+                    if (!HasAudioStream() && this.Settings.PushSetting.IsMute)
                     {
                         opt.DisableChannel(Channel.Audio);
                     }
@@ -84,65 +84,65 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 return;
             }
-            this.FFMpegArguments.AddFileInput(this.Settings.PushSettingDto.AudioInfo.FullPath, true, opt =>
+            this.FFMpegArguments.AddFileInput(this.Settings.PushSetting.AudioMaterial.FullPath, true, opt =>
             {
                 opt.WithCustomArgument("-stream_loop -1");
             });
         }
 
-        protected override void WithAudioArgument(FFMpegArgumentOptions opt)
+        protected override void GetAudioOutputArg(FFMpegArgumentOptions opt)
         {
-            if (this.Settings.PushSettingDto.VideoInfo.IsDemuxConcat)
+            if (this.Settings.PushSetting.VideoMaterial.IsDemuxConcat)
             {
                 return;
             }
             if (!HasAudioStream())
             {
-                if (!this.Settings.PushSettingDto.IsMute && this.Settings.PushSettingDto.VideoInfo.MediaInfo.AudioStream != null)
+                if (!this.Settings.PushSetting.IsMute && this.Settings.PushSetting.VideoMaterial.MediaInfo.AudioStream != null)
                 {
-                    base.WithAudioArgument(opt);
+                    base.GetAudioOutputArg(opt);
                 }
                 return;
             }
             else
             {
-                if (this.Settings.PushSettingDto.IsMute)
+                if (this.Settings.PushSetting.IsMute)
                 {
                     //视频静音，但是包含音频
-                    opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex}");
-                    opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}");
+                    opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSetting.VideoMaterial.MediaInfo.PrimaryIndex}");
+                    opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSetting.AudioMaterial.MediaInfo.PrimaryIndex}");
                 }
                 else
                 {
                     //视频不静音，但是包含音频
-                    if (this.Settings.PushSettingDto.VideoInfo.MediaInfo.AudioStream == null)
+                    if (this.Settings.PushSetting.VideoMaterial.MediaInfo.AudioStream == null)
                     {
                         //视频不包含音轨
-                        opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex}");
-                        opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}");
+                        opt.WithCustomArgument($"-map 0:v:{this.Settings.PushSetting.VideoMaterial.MediaInfo.PrimaryIndex}");
+                        opt.WithCustomArgument($"-map 1:a:{this.Settings.PushSetting.AudioMaterial.MediaInfo.PrimaryIndex}");
                     }
                     else
                     {
-                        opt.WithCustomArgument($"-filter_complex \"[0:a:0][1:a:{this.Settings.PushSettingDto.AudioInfo.MediaInfo.PrimaryIndex}]amerge=inputs=2[aout]\" -map 0:v:{this.Settings.PushSettingDto.VideoInfo.MediaInfo.PrimaryIndex} -map \"[aout]\"");
+                        opt.WithCustomArgument($"-filter_complex \"[0:a:0][1:a:{this.Settings.PushSetting.AudioMaterial.MediaInfo.PrimaryIndex}]amerge=inputs=2[aout]\" -map 0:v:{this.Settings.PushSetting.VideoMaterial.MediaInfo.PrimaryIndex} -map \"[aout]\"");
                     }
                 }
-                base.WithAudioArgument(opt);
+                base.GetAudioOutputArg(opt);
             }
         }
 
         protected override bool HasAudioStream()
         {
-            if (this.Settings.PushSettingDto.VideoInfo.IsDemuxConcat)
+            if (this.Settings.PushSetting.VideoMaterial.IsDemuxConcat)
             {
                 return false;
             }
-            if (this.Settings.PushSettingDto.AudioInfo == null || string.IsNullOrWhiteSpace(this.Settings.PushSettingDto.AudioInfo.FullPath))
+            if (this.Settings.PushSetting.AudioMaterial == null || string.IsNullOrWhiteSpace(this.Settings.PushSetting.AudioMaterial.FullPath))
             {
                 return false;
             }
-            if (!File.Exists(this.Settings.PushSettingDto.AudioInfo.FullPath))
+            if (!File.Exists(this.Settings.PushSetting.AudioMaterial.FullPath))
             {
-                throw new FileNotFoundException($"音频输入源{this.Settings.PushSettingDto.AudioInfo.FullPath}文件不存在", this.Settings.PushSettingDto.AudioInfo.FullPath);
+                throw new FileNotFoundException($"音频输入源{this.Settings.PushSetting.AudioMaterial.FullPath}文件不存在", this.Settings.PushSetting.AudioMaterial.FullPath);
             }
             return true;
         }

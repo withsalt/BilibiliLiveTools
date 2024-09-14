@@ -1,7 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Utils;
 using FFMpegCore;
+using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
@@ -15,30 +18,40 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override void GetAudioInputArg()
         {
-            throw new NotImplementedException();
+            
         }
 
         protected override void GetVideoInputArg()
         {
-            PushSettingDto pushSetting = this.Settings.PushSettingDto;
+            PushSettingDto pushSetting = this.Settings.PushSetting;
+            (string format, string deviceName) = CommonHelper.GetDeviceFormatAndName(this.Settings.PushSetting.DeviceName);
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                FFMpegArguments = FFMpegArguments.FromFileInput($"video={pushSetting.DeviceName}", false, opt =>
+                FFMpegArguments = FFMpegArguments.FromDeviceInput($"video=\"{deviceName}\"", opt =>
                 {
-                    opt.ForceFormat("dshow");
+                    opt.ForceFormat(format);
                     opt.WithFramerate(pushSetting.InputFramerate);
                     opt.WithCustomArgument($"-video_size {pushSetting.InputWidth}x{pushSetting.InputHeight}");
-                    WithMuteArgument(opt);
+                    //没有音频的情况下静音视频
+                    if (!HasAudioStream())
+                    {
+                        opt.DisableChannel(Channel.Audio);
+                    }
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                FFMpegArguments = FFMpegArguments.FromFileInput($"video={pushSetting.DeviceName}", false, opt =>
+                FFMpegArguments = FFMpegArguments.FromDeviceInput($"video=\"{pushSetting.DeviceName}\"", opt =>
                 {
                     opt.ForceFormat("v4l2");
                     opt.WithFramerate(pushSetting.InputFramerate);
                     opt.WithCustomArgument($"-video_size {pushSetting.InputWidth}x{pushSetting.InputHeight}");
-                    WithMuteArgument(opt);
+                    //没有音频的情况下静音视频
+                    if (!HasAudioStream())
+                    {
+                        opt.DisableChannel(Channel.Audio);
+                    }
                 });
             }
             else
@@ -49,7 +62,19 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override bool HasAudioStream()
         {
-            throw new NotImplementedException();
+            if (!string.IsNullOrEmpty(this.Settings.PushSetting.AudioDevice))
+            {
+                return true;
+            }
+            if (this.Settings.PushSetting.AudioMaterial != null && !string.IsNullOrWhiteSpace(this.Settings.PushSetting.AudioMaterial.FullPath))
+            {
+                if (!File.Exists(this.Settings.PushSetting.AudioMaterial.FullPath))
+                {
+                    throw new FileNotFoundException($"音频输入源{this.Settings.PushSetting.AudioMaterial.FullPath}文件不存在", this.Settings.PushSetting.AudioMaterial.FullPath);
+                }
+                return true;
+            }
+            return false;
         }
     }
 }

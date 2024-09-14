@@ -68,9 +68,8 @@ namespace BilibiliAutoLiver.Services.Base
                 LiveSetting liveSetting = await provider.GetRequiredService<ILiveSettingRepository>().Where(p => !p.IsDeleted).FirstAsync();
                 return new SettingDto()
                 {
-                    PushSetting = pushSetting,
                     LiveSetting = liveSetting,
-                    PushSettingDto = await ConvertPushSettingToDto(scope.ServiceProvider, pushSetting),
+                    PushSetting = await ConvertPushSettingToDto(scope.ServiceProvider, pushSetting),
                 };
             }
         }
@@ -130,19 +129,34 @@ namespace BilibiliAutoLiver.Services.Base
             Material audioMaterial = materials.Where(p => p.FileType == FileType.Music).FirstOrDefault();
             PushSettingDto pushSettingDto = new PushSettingDto()
             {
+                Key = pushSetting.Key,
+                Model = pushSetting.Model,
+                Quality = pushSetting.Quality,
+                FFmpegCommand = pushSetting.FFmpegCommand,
                 InputType = pushSetting.InputType,
-                InputFramerate = pushSetting.InputFramerate,
-                InputWidth = inputWidth,
-                InputHeight = inputHeight,
-                InputScreen = pushSetting.InputScreen,
-                OutputWidth = outputWidth,
-                OutputHeight = outputHeight,
+                OutputResolution = pushSetting.OutputResolution,
                 CustumOutputParams = pushSetting.CustumOutputParams,
                 CustumVideoCodec = pushSetting.CustumVideoCodec,
+                VideoId = pushSetting.VideoId,
                 IsMute = pushSetting.IsMute,
-                Quality = pushSetting.Quality,
-                VideoInfo = videoMaterial.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
-                AudioInfo = audioMaterial?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
+                AudioId = pushSetting.AudioId,
+                AudioDevice = pushSetting.AudioDevice,
+                DeviceName = pushSetting.DeviceName,
+                Plugins = pushSetting.Plugins,
+                InputResolution = pushSetting.InputResolution,
+                InputFramerate = pushSetting.InputFramerate,
+                InputScreen = pushSetting.InputScreen,
+                InputAudioSource = pushSetting.InputAudioSource,
+                IsAutoRetry = pushSetting.IsAutoRetry,
+                RetryInterval = pushSetting.RetryInterval,
+                IsUpdate = pushSetting.IsUpdate,
+
+                OutputWidth = outputWidth,
+                OutputHeight = outputHeight,
+                InputWidth = inputWidth,
+                InputHeight = inputHeight,
+                VideoMaterial = videoMaterial.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
+                AudioMaterial = audioMaterial?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
                 VideoCodecs = _ffmpeg.GetVideoCodecs(),
             };
             return pushSettingDto;
@@ -243,6 +257,20 @@ namespace BilibiliAutoLiver.Services.Base
                     _logger.ThrowLogError($"修改直播间名称为【{setting.LiveSetting.RoomName}】，分区为【{setting.LiveSetting.AreaId}】失败！");
                 }
                 _logger.LogInformation($"修改直播间名称为【{setting.LiveSetting.RoomName}】，分区为【{setting.LiveSetting.AreaId}】成功！");
+            }
+        }
+
+        /// <summary>
+        /// 网络联通检查
+        /// </summary>
+        /// <param name="tokenSource"></param>
+        /// <returns></returns>
+        protected async Task CheckNetwork(CancellationTokenSource tokenSource)
+        {
+            while (!await NetworkUtil.Ping() && !tokenSource.IsCancellationRequested)
+            {
+                _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
+                await Task.Delay(10000, tokenSource.Token);
             }
         }
 

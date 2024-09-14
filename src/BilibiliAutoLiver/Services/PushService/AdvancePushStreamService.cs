@@ -180,11 +180,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 try
                 {
                     //check network
-                    while (!await NetworkUtil.Ping())
-                    {
-                        _logger.LogWarning($"网络连接已断开，将在10秒后重新检查网络连接...");
-                        await Task.Delay(10000, _tokenSource.Token);
-                    }
+                    await CheckNetwork(_tokenSource);
                     //start live
                     ProcessStartInfo psi = await BuildProcessStartInfo();
                     _logger.LogInformation($"ffmpeg推流命令：{psi.FileName} {psi.Arguments}");
