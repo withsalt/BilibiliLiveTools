@@ -39,7 +39,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithCustomArgument($"-offset_y {rectangle.Value.Y}");
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument(opt);
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -53,7 +52,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     {
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument(opt);
                 });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -67,7 +65,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     {
                         opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
                     }
-                    WithMuteArgument(opt);
                 });
             }
             else
@@ -78,7 +75,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override bool HasAudioStream()
         {
-            throw new NotImplementedException();
+            this.Settings.PushSettingDto
+            return false;
         }
     }
 }

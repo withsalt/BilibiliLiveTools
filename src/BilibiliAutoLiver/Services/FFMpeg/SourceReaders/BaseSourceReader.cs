@@ -63,15 +63,21 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected virtual void WithQualityOutputArg(FFMpegArgumentOptions opt)
         {
+            var codec = GetVideoCodec();
             switch (this.Settings.PushSettingDto.Quality)
             {
                 case OutputQualityEnum.High:
                     {
                         //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(GetVideoCodec());
+                        opt.WithVideoCodec(codec);
                         opt.WithVideoBitrate(8000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        opt.WithSpeedPreset(Speed.Medium);
+                        if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
+                        {
+                            opt.WithSpeedPreset(Speed.Medium);
+                        }
+                        //帧同步，可变帧率
+                        opt.WithCustomArgument("-vsync vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
@@ -82,10 +88,15 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 case OutputQualityEnum.Medium:
                     {
                         //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(GetVideoCodec());
+                        opt.WithVideoCodec(codec);
                         opt.WithVideoBitrate(4000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        opt.WithSpeedPreset(Speed.Faster);
+                        if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
+                        {
+                            opt.WithSpeedPreset(Speed.Faster);
+                        }
+                        //帧同步，可变帧率
+                        opt.WithCustomArgument("-vsync vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
@@ -95,10 +106,15 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 case OutputQualityEnum.Low:
                     {
                         //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(GetVideoCodec());
+                        opt.WithVideoCodec(codec);
                         opt.WithVideoBitrate(2000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        opt.WithSpeedPreset(Speed.SuperFast);
+                        if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
+                        {
+                            opt.WithSpeedPreset(Speed.SuperFast);
+                        }
+                        //帧同步，可变帧率
+                        opt.WithCustomArgument("-vsync vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
@@ -179,7 +195,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 return VideoCodec.LibX264;
             }
             Codec target = this.Settings.PushSettingDto.VideoCodecs.FirstOrDefault(p => p.Name == this.Settings.PushSettingDto.CustumVideoCodec);
-            if(target == null)
+            if (target == null)
             {
                 throw new Exception($"没有找到受支持的编码器名称：{this.Settings.PushSettingDto.CustumVideoCodec}");
             }
