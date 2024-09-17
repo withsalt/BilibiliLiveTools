@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
@@ -67,6 +68,7 @@ namespace BilibiliAutoLiver.Services.PushService
             }
             Status = PushStatus.Starting;
             _tokenSource = new CancellationTokenSource();
+            _ffmpeg.ClearLog();
             _mainTask = Task.Run(PushStream);
             return true;
         }
@@ -113,6 +115,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 _tokenSource?.Dispose();
                 _mainTask = null;
                 _tokenSource = null;
+                _ffmpeg.ClearLog();
 
                 Status = PushStatus.Stopped;
             }
@@ -122,7 +125,7 @@ namespace BilibiliAutoLiver.Services.PushService
         /// 初始化推流
         /// </summary>
         /// <returns></returns>
-        private async Task<ProcessStartInfo> BuildProcessStartInfo()
+        private async Task<(string cmdName, string cmdArg)> BuildFFMpegCommand()
         {
             SettingDto setting = await GetSetting();
             //检查Cookie是否有效
@@ -154,16 +157,7 @@ namespace BilibiliAutoLiver.Services.PushService
             {
                 cmdName = _ffmpeg.GetBinaryPath();
             }
-            var psi = new ProcessStartInfo
-            {
-                FileName = cmdName,
-                Arguments = cmdArgs,
-                RedirectStandardOutput = true,
-                RedirectStandardError = false,
-                UseShellExecute = false,
-                CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
-            };
-            return psi;
+            return (cmdName, cmdArgs);
         }
 
         /// <summary>
@@ -182,19 +176,42 @@ namespace BilibiliAutoLiver.Services.PushService
                     //check network
                     await CheckNetwork(_tokenSource);
                     //start live
-                    ProcessStartInfo psi = await BuildProcessStartInfo();
-                    _logger.LogInformation($"ffmpeg推流命令：{psi.FileName} {psi.Arguments}");
+                    (string cmdName, string cmdArg) = await BuildFFMpegCommand();
+
+                    _logger.LogInformation($"ffmpeg推流命令：{cmdName} {cmdArg}");
                     _logger.LogInformation("推流参数初始化完成");
+
                     //启动
-                    proc = Process.Start(psi);
-                    if (proc == null || proc.Id <= 0)
+                    proc = new Process();
+                    proc.StartInfo.FileName = cmdName;
+                    proc.StartInfo.Arguments = cmdArg;
+                    proc.StartInfo.RedirectStandardOutput = true;
+                    proc.StartInfo.RedirectStandardError = true;
+                    proc.StartInfo.UseShellExecute = false;
+                    proc.StartInfo.CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+                    proc.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+                    proc.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+
+                    //接受输出
+                    proc.OutputDataReceived += FFMpegOutputDataReceived;
+                    proc.ErrorDataReceived += FFMpegOutputDataReceived;
+
+                    bool isStart = proc.Start();
+                    if (!isStart)
                     {
                         throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
                     }
+                    // 开始异步读取输出
+                    proc.BeginOutputReadLine();
+                    proc.BeginErrorReadLine();
+
                     Status = PushStatus.Running;
                     _logger.LogInformation("开始推流...");
+
                     await proc.WaitForExitAsync(_tokenSource.Token);
                     proc.Kill();
+                    proc.Dispose();
+
                     //delay 100ms的原因是ffmpeg本身也会接收ctrl-c，但是C#的控制台要比ffmpeg慢一点。
                     //就导致ffmpeg退出要早一点
                     await Task.Delay(100);
@@ -225,6 +242,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
+                    _ffmpeg.AddLog(DateTime.UtcNow, ex.Message, ex);
                     //如果开启了自动重试
                     if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
                     {
@@ -235,6 +253,14 @@ namespace BilibiliAutoLiver.Services.PushService
                 {
                     proc?.Dispose();
                 }
+            }
+        }
+
+        private void FFMpegOutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                _ffmpeg.AddLog(DateTime.UtcNow, e.Data);
             }
         }
 

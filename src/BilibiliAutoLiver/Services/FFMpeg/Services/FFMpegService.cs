@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -117,5 +118,33 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
                 throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
             return binder;
         }
+
+        #region Log
+
+        private ConcurrentBag<FFMpegLog> _ffmegLogs = new ConcurrentBag<FFMpegLog>();
+
+        public IEnumerable<FFMpegLog> GetLogs()
+        {
+            return _ffmegLogs;
+        }
+
+        public void AddLog(DateTime time, string message)
+        {
+            AddLog(time, message, null);
+        }
+
+        public void AddLog(DateTime time, string message, Exception ex)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            _ffmegLogs.Add(new FFMpegLog(time, message, ex));
+        }
+
+        public void ClearLog()
+        {
+            _ffmegLogs.Clear();
+        }
+
+        #endregion
     }
 }

@@ -49,6 +49,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
                 //PixelFormat
                 opt.ForcePixelFormat("yuv420p");
+
+                //延迟参数
+                opt.WithCustomArgument("-reorder_queue_size 0");
+                opt.WithCustomArgument("-flags low_delay");
+                opt.WithCustomArgument("-rtbufsize 2000k");
+
                 //输出格式
                 opt.ForceFormat("flv");
 
@@ -89,8 +95,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
-                        opt.WithCustomArgument("-g 30");
-                        opt.WithConstantRateFactor(25);
+                        opt.WithCustomArgument("-g 10");
+                        opt.WithConstantRateFactor(23);
                     }
                     break;
                 default:
@@ -108,8 +114,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
-                        opt.WithCustomArgument("-g 30");
-                        opt.WithConstantRateFactor(20);
+                        opt.WithCustomArgument("-g 20");
+                        opt.WithConstantRateFactor(28);
                     }
                     break;
                 case OutputQualityEnum.Low:
@@ -127,7 +133,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
-                        opt.WithConstantRateFactor(15);
+                        opt.WithConstantRateFactor(33);
                     }
                     break;
                 case OutputQualityEnum.Original:

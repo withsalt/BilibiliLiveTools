@@ -129,8 +129,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                 if (!item.StartsWith("[dshow", StringComparison.OrdinalIgnoreCase)) continue;
                 if (item.Contains("(pc")) continue;
 
-                string format = GetFormatFromLine(item);
-                if (string.IsNullOrWhiteSpace(format)) continue;
+                (string type, string format) = GetFormatFromLine(item);
+                if (string.IsNullOrWhiteSpace(type) || string.IsNullOrWhiteSpace(format)) continue;
 
                 if (item.Contains("min s="))
                 {
@@ -141,7 +141,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                         string resolution = item.Substring(firstIndex, endIndex - firstIndex);
                         if (!string.IsNullOrWhiteSpace(resolution) && ResolutionHelper.TryParse(resolution, out int width, out int height))
                         {
-                            resolutions.Add(new DeviceResolution(format, width, height));
+                            resolutions.Add(new DeviceResolution(type, format, width, height));
                             continue;
                         }
                     }
@@ -155,7 +155,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                         string resolution = item.Substring(firstIndex, endIndex - firstIndex);
                         if (!string.IsNullOrWhiteSpace(resolution) && ResolutionHelper.TryParse(resolution, out int width, out int height))
                         {
-                            resolutions.Add(new DeviceResolution(format, width, height));
+                            resolutions.Add(new DeviceResolution(type, format, width, height));
                             continue;
                         }
                     }
@@ -166,24 +166,48 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                 return new List<DeviceResolution>();
             }
             List<DeviceResolution> result = resolutions
-                .OrderBy(p => p.Width)
+                .OrderBy(p => p.Format)
+                .ThenBy(p => p.Width)
                 .ThenBy(p => p.Height)
                 .ToList();
             return result;
         }
 
-        private string GetFormatFromLine(string line)
+        private (string type, string format) GetFormatFromLine(string line)
         {
-            if (string.IsNullOrWhiteSpace(line))
-                return null;
-            int vcodecIndex = line.IndexOf("vcodec=");
-            int pixel_format = line.IndexOf("pixel_format=");
-            if (vcodecIndex < 0 && pixel_format < 0)
+            try
             {
-                return null;
+                if (string.IsNullOrWhiteSpace(line))
+                    return (null, null);
+                int vcodecIndex = line.IndexOf("vcodec=");
+                int pixelFormatIndex = line.IndexOf("pixel_format=");
+                if (vcodecIndex < 0 && pixelFormatIndex < 0)
+                {
+                    return (null, null);
+                }
+                int firstIndex = vcodecIndex >= 0 ? vcodecIndex : pixelFormatIndex;
+                int nextSpaceCharIndex = line.IndexOf(' ', firstIndex);
+                if (firstIndex >= 0 && nextSpaceCharIndex > 0 && nextSpaceCharIndex > firstIndex && nextSpaceCharIndex - firstIndex > 7)
+                {
+                    string formatLine = line.Substring(firstIndex, nextSpaceCharIndex - firstIndex)?.Trim(' ');
+                    if (string.IsNullOrWhiteSpace(formatLine))
+                    {
+                        return (null, null);
+                    }
+                    string[] args = formatLine.Split('=');
+                    if (args.Length != 2)
+                    {
+                        return (null, null);
+                    }
+                    return (args[0], args[1]);
+                }
+
+                return (null, null);
             }
-            string format = line.Substring(vcodecIndex, vcodecIndex);
-            return format;
+            catch
+            {
+                return (null, null);
+            }
         }
     }
 }

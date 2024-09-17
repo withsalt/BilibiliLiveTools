@@ -73,6 +73,7 @@ namespace BilibiliAutoLiver.Services.PushService
             }
             Status = PushStatus.Starting;
             _tokenSource = new CancellationTokenSource();
+            _ffmpeg.ClearLog();
             _mainTask = Task.Run(PushStream);
             return true;
         }
@@ -121,6 +122,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 _mainTask = null;
                 _tokenSource = null;
                 _cancel = null;
+                _ffmpeg.ClearLog();
 
                 Status = PushStatus.Stopped;
             }
@@ -170,6 +172,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
+                    _ffmpeg.AddLog(DateTime.UtcNow, ex.Message, ex);
                     SourceReaderDispose(sourceReader);
                     //如果开启了自动重试
                     if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)

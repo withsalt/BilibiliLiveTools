@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.FFMpeg;
@@ -21,5 +22,17 @@ namespace BilibiliAutoLiver.Services.Interface
         IReadOnlyList<Codec> GetVideoCodecs();
 
         Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName);
+
+        #region Log
+
+        IEnumerable<FFMpegLog> GetLogs();
+
+        void AddLog(DateTime time, string message);
+
+        void AddLog(DateTime time, string message, Exception ex);
+
+        void ClearLog();
+
+        #endregion
     }
 }

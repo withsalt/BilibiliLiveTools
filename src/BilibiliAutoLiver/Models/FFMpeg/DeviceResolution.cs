@@ -2,12 +2,15 @@
 {
     public class DeviceResolution
     {
-        public DeviceResolution(string format, int width, int height)
+        public DeviceResolution(string type, string format, int width, int height)
         {
+            this.Type = type;
             this.Format = format;
             this.Width = width;
             this.Height = height;
         }
+
+        public string Type {  get; set; }
 
         public string Format {  get; set; }
 

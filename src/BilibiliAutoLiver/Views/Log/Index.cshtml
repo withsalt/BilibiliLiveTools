@@ -1,0 +1,53 @@
+﻿@model RoomInfoIndexPageViewModel;
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "推流日志";
+}
+
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">推流日志</div>
+            <div class="layui-card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+
+}
+
+@section Scripts {
+    <script>
+        layui.config({
+            base: '@Url.Content("~/layuiadmin/")'
+        }).use(['form', 'layer', 'jquery'], function () {
+            $ = layui.jquery;
+            var layer = layui.layer,
+                form = layui.form;
+
+        });
+
+        function update() {
+            $.ajax({
+                type: "get",
+                url: "@Url.Action("GetLogs", "Log")",
+                cache: false,
+                dataType: 'json', // 返回对象
+                success: function (data) {
+                    if (!data) {
+                        console.log("返回参数为空！");
+                    }
+                    console.log(data.data);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        }
+
+        setInterval(update, 1000);
+    </script>
+}
