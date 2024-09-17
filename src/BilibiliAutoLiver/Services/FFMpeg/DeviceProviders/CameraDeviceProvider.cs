@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Utils;
 using FlashCap;
 using SkiaSharp;
 
@@ -35,20 +36,21 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
             {
                 throw new Exception($"找不到视频输入设备！");
             }
-            if (!string.IsNullOrEmpty(pushSetting.DeviceName))
+            (string format, string deviceName) = CommonHelper.GetDeviceFormatAndName(pushSetting.DeviceName);
+            if (!string.IsNullOrEmpty(deviceName))
             {
-                _captureDeviceDescriptor = devices.Where(p => p.Name == pushSetting.DeviceName).FirstOrDefault();
+                _captureDeviceDescriptor = devices.Where(p => p.Name == deviceName).FirstOrDefault();
             }
-            if (int.TryParse(pushSetting.DeviceName, out int index)
+            if (int.TryParse(deviceName, out int index)
                 && index >= 0
                 && _captureDeviceDescriptor == null
                 && index < devices.Count)
             {
                 _captureDeviceDescriptor = devices[index];
             }
-            if (_captureDeviceDescriptor == null && !string.IsNullOrEmpty(pushSetting.DeviceName))
+            if (_captureDeviceDescriptor == null && !string.IsNullOrEmpty(deviceName))
             {
-                throw new Exception($"找不到名称为{pushSetting.DeviceName}的视频输入设备！");
+                throw new Exception($"找不到名称为{deviceName}的视频输入设备！");
             }
             if (pushSetting.InputWidth == 0 || pushSetting.InputHeight == 0)
             {

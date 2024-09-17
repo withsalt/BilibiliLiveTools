@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Models.FFMpeg;
 using BilibiliAutoLiver.Utils;
 using CliWrap;
 using CliWrap.Buffered;
@@ -32,7 +33,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             return devices;
         }
 
-        public override async Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName)
+        public override async Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName)
         {
             if (string.IsNullOrWhiteSpace(deviceName))
             {
@@ -41,7 +42,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             string argStr = $"-f dshow -list_options true -i video=\"{deviceName}\"";
             int type = argStr.GetHashCode();
             string output = await GetExcuteResult(type, argStr);
-            List<string> devices = ExtractResolutions(output, deviceName);
+            List<DeviceResolution> devices = ExtractResolutions(output, deviceName);
             return devices;
         }
 
@@ -104,7 +105,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             return devices;
         }
 
-        private List<string> ExtractResolutions(string ffmpegOutput, string deviceName)
+        private List<DeviceResolution> ExtractResolutions(string ffmpegOutput, string deviceName)
         {
             if (string.IsNullOrEmpty(ffmpegOutput))
             {
@@ -120,14 +121,17 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                 throw new ArgumentException($"没有找到设备【{deviceName}】，或设备无法访问");
             }
             string[] lines = ffmpegOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            List<(int width, int height)> resolutions = new List<(int width, int height)>();
+            List<DeviceResolution> resolutions = new List<DeviceResolution>();
 
             foreach (var item in lines)
             {
                 if (string.IsNullOrWhiteSpace(item)) continue;
                 if (!item.StartsWith("[dshow", StringComparison.OrdinalIgnoreCase)) continue;
-                if (!item.Contains("vcodec=mjpeg")) continue;
                 if (item.Contains("(pc")) continue;
+
+                string format = GetFormatFromLine(item);
+                if (string.IsNullOrWhiteSpace(format)) continue;
+
                 if (item.Contains("min s="))
                 {
                     int firstIndex = item.IndexOf("min s=") + 6;
@@ -137,7 +141,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                         string resolution = item.Substring(firstIndex, endIndex - firstIndex);
                         if (!string.IsNullOrWhiteSpace(resolution) && ResolutionHelper.TryParse(resolution, out int width, out int height))
                         {
-                            resolutions.Add((width, height));
+                            resolutions.Add(new DeviceResolution(format, width, height));
                             continue;
                         }
                     }
@@ -151,7 +155,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                         string resolution = item.Substring(firstIndex, endIndex - firstIndex);
                         if (!string.IsNullOrWhiteSpace(resolution) && ResolutionHelper.TryParse(resolution, out int width, out int height))
                         {
-                            resolutions.Add((width, height));
+                            resolutions.Add(new DeviceResolution(format, width, height));
                             continue;
                         }
                     }
@@ -159,14 +163,27 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             }
             if (resolutions.Count == 0)
             {
-                return new List<string>();
+                return new List<DeviceResolution>();
             }
-            List<string> result = resolutions
-                .OrderBy(p => p.width)
-                .ThenBy(p => p.height)
-                .Select(p => $"{p.width}x{p.height}")
+            List<DeviceResolution> result = resolutions
+                .OrderBy(p => p.Width)
+                .ThenBy(p => p.Height)
                 .ToList();
             return result;
+        }
+
+        private string GetFormatFromLine(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                return null;
+            int vcodecIndex = line.IndexOf("vcodec=");
+            int pixel_format = line.IndexOf("pixel_format=");
+            if (vcodecIndex < 0 && pixel_format < 0)
+            {
+                return null;
+            }
+            string format = line.Substring(vcodecIndex, vcodecIndex);
+            return format;
         }
     }
 }

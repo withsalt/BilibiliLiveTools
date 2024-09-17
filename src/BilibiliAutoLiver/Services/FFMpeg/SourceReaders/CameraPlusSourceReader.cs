@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
 using BilibiliAutoLiver.Services.FFMpeg.Pipe;
+using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
@@ -123,14 +125,46 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 //opt.WithCustomArgument("-thread_queue_size 1024");
                 opt.ForceFormat("rawvideo");
                 opt.ForcePixelFormat(streamFormat);
-                opt.WithFramerate(_frameRate);
+                //opt.WithFramerate(_frameRate);
                 opt.Resize(this.DeviceProvider.Size.Width, this.DeviceProvider.Size.Height);
             });
         }
 
         protected override void GetAudioInputArg()
         {
-            
+            if (!HasAudioStream())
+            {
+                return;
+            }
+            if (!string.IsNullOrEmpty(this.Settings.PushSetting.AudioDevice))
+            {
+                (string format, string deviceName) = CommonHelper.GetDeviceFormatAndName(this.Settings.PushSetting.AudioDevice);
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    FFMpegArguments = FFMpegArguments.AddDeviceInput($"audio=\"{deviceName}\"", opt =>
+                    {
+                        opt.ForceFormat(format);
+                    });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+
+                }
+                else
+                {
+                    throw new NotSupportedException("不支持的系统类型");
+                }
+                return;
+            }
+            else if (this.Settings.PushSetting.AudioMaterial != null && !string.IsNullOrWhiteSpace(this.Settings.PushSetting.AudioMaterial.FullPath))
+            {
+                this.FFMpegArguments.AddFileInput(this.Settings.PushSetting.AudioMaterial.FullPath, true, opt =>
+                {
+                    opt.WithCustomArgument("-stream_loop -1");
+                });
+                return;
+            }
+            throw new NotSupportedException("未知的音频输入类型");
         }
 
         protected override bool HasAudioStream()

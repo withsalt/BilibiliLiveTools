@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Models.FFMpeg;
 using CliWrap;
 using CliWrap.Buffered;
 
@@ -27,13 +28,13 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             return devices;
         }
 
-        public override async Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName)
+        public override async Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName)
         {
             if (string.IsNullOrWhiteSpace(deviceName))
             {
                 throw new ArgumentNullException("deviceName", "设备名称不能为空");
             }
-            return new List<string>();
+            return new List<DeviceResolution>();
         }
 
         private async Task<string> GetExcuteResult()

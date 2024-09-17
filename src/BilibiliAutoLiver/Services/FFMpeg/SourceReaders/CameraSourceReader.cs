@@ -18,7 +18,39 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override void GetAudioInputArg()
         {
-            
+            if (!HasAudioStream())
+            {
+                return;
+            }
+            if (!string.IsNullOrEmpty(this.Settings.PushSetting.AudioDevice))
+            {
+                (string format, string deviceName) = CommonHelper.GetDeviceFormatAndName(this.Settings.PushSetting.AudioDevice);
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    FFMpegArguments = FFMpegArguments.AddDeviceInput($"audio=\"{deviceName}\"", opt =>
+                    {
+                        opt.ForceFormat(format);
+                    });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+
+                }
+                else
+                {
+                    throw new NotSupportedException("不支持的系统类型");
+                }
+                return;
+            }
+            else if (this.Settings.PushSetting.AudioMaterial != null && !string.IsNullOrWhiteSpace(this.Settings.PushSetting.AudioMaterial.FullPath))
+            {
+                this.FFMpegArguments.AddFileInput(this.Settings.PushSetting.AudioMaterial.FullPath, true, opt =>
+                {
+                    opt.WithCustomArgument("-stream_loop -1");
+                });
+                return;
+            }
+            throw new NotSupportedException("未知的音频输入类型");
         }
 
         protected override void GetVideoInputArg()

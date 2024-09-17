@@ -37,10 +37,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 {
 
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-
-                }
                 else
                 {
                     throw new NotSupportedException("不支持的系统类型");
@@ -102,24 +98,24 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     }
                 });
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                string path = rectangle != null ? $"1:{rectangle.Value.X},{rectangle.Value.Y}" : "1";
-                FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
-                {
-                    opt.ForceFormat("avfoundation");
-                    opt.WithFramerate(30);
-                    if (rectangle != null)
-                    {
-                        opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
-                    }
-                    //没有音频的情况下静音视频
-                    if (!HasAudioStream())
-                    {
-                        opt.DisableChannel(Channel.Audio);
-                    }
-                });
-            }
+            //else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            //{
+            //    string path = rectangle != null ? $"1:{rectangle.Value.X},{rectangle.Value.Y}" : "1";
+            //    FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
+            //    {
+            //        opt.ForceFormat("avfoundation");
+            //        opt.WithFramerate(30);
+            //        if (rectangle != null)
+            //        {
+            //            opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
+            //        }
+            //        //没有音频的情况下静音视频
+            //        if (!HasAudioStream())
+            //        {
+            //            opt.DisableChannel(Channel.Audio);
+            //        }
+            //    });
+            //}
             else
             {
                 throw new NotSupportedException("不支持的系统类型");

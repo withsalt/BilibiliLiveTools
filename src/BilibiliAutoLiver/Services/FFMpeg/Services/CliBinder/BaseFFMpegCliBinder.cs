@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.FFMpeg;
 using CliWrap;
 using CliWrap.Buffered;
 
@@ -24,7 +25,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 
         public abstract Task<List<string>> GetAudioDevices();
 
-        public abstract Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName);
+        public abstract Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName);
 
         public async Task<LibVersion> GetVersion()
         {

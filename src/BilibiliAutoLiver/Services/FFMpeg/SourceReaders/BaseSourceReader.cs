@@ -83,10 +83,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
                         if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
                         {
-                            opt.WithSpeedPreset(Speed.Medium);
+                            opt.WithSpeedPreset(Speed.UltraFast);
                         }
                         //帧同步，可变帧率
-                        opt.WithCustomArgument("-vsync vfr");
+                        opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
@@ -102,10 +102,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
                         if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
                         {
-                            opt.WithSpeedPreset(Speed.Faster);
+                            opt.WithSpeedPreset(Speed.UltraFast);
                         }
                         //帧同步，可变帧率
-                        opt.WithCustomArgument("-vsync vfr");
+                        opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");
@@ -120,10 +120,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
                         if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
                         {
-                            opt.WithSpeedPreset(Speed.SuperFast);
+                            opt.WithSpeedPreset(Speed.UltraFast);
                         }
                         //帧同步，可变帧率
-                        opt.WithCustomArgument("-vsync vfr");
+                        opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
                         opt.WithCustomArgument("-tune zerolatency");
                         opt.WithCustomArgument("-g 30");

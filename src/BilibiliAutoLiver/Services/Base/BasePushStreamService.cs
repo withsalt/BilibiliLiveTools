@@ -120,13 +120,23 @@ namespace BilibiliAutoLiver.Services.Base
             {
                 materialIds.Add(pushSetting.AudioId.Value);
             }
-            List<Material> materials = await provider.GetRequiredService<IMaterialRepository>().Where(p => materialIds.Contains(p.Id)).ToListAsync();
-            Material videoMaterial = materials.Where(p => p.FileType == FileType.Video).FirstOrDefault();
-            if (videoMaterial == null)
+            List<Material> materials = null;
+            Material videoMaterial = null;
+            Material audioMaterial = null;
+            if (materialIds.Any())
             {
-                throw new FileNotFoundException($"Id为{pushSetting.VideoId}视频素材不存在！");
+                materials = await provider.GetRequiredService<IMaterialRepository>().Where(p => materialIds.Contains(p.Id)).ToListAsync();
+                videoMaterial = materials.Where(p => p.FileType == FileType.Video).FirstOrDefault();
+                if (videoMaterial == null && pushSetting.VideoId > 0)
+                {
+                    throw new FileNotFoundException($"Id为{pushSetting.VideoId}视频素材不存在！");
+                }
+                audioMaterial = materials.Where(p => p.FileType == FileType.Music).FirstOrDefault();
+                if (audioMaterial == null && pushSetting.AudioId > 0)
+                {
+                    throw new FileNotFoundException($"Id为{pushSetting.AudioId}音频素材不存在！");
+                }
             }
-            Material audioMaterial = materials.Where(p => p.FileType == FileType.Music).FirstOrDefault();
             PushSettingDto pushSettingDto = new PushSettingDto()
             {
                 Key = pushSetting.Key,
@@ -155,7 +165,7 @@ namespace BilibiliAutoLiver.Services.Base
                 OutputHeight = outputHeight,
                 InputWidth = inputWidth,
                 InputHeight = inputHeight,
-                VideoMaterial = videoMaterial.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
+                VideoMaterial = videoMaterial?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
                 AudioMaterial = audioMaterial?.ToDto(Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory)),
                 VideoCodecs = _ffmpeg.GetVideoCodecs(),
             };

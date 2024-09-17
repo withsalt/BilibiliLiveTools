@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.FFMpeg;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 {
@@ -12,6 +13,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 
         Task<List<string>> GetAudioDevices();
 
-        Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName);
+        Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName);
     }
 }

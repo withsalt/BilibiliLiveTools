@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.FFMpeg;
 using FFMpegCore.Enums;
 
 namespace BilibiliAutoLiver.Services.Interface
@@ -19,6 +20,6 @@ namespace BilibiliAutoLiver.Services.Interface
 
         IReadOnlyList<Codec> GetVideoCodecs();
 
-        Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName);
+        Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName);
     }
 }

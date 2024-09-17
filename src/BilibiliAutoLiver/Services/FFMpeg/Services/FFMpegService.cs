@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.FFMpeg;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder;
 using BilibiliAutoLiver.Services.Interface;
@@ -95,7 +96,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
             return await GetCliBinder().GetAudioDevices();
         }
 
-        public async Task<List<string>> ListVideoDeviceSupportResolutions(string deviceName)
+        public async Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName)
         {
             return await GetCliBinder().ListVideoDeviceSupportResolutions(deviceName);
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models.Entities;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Models.FFMpeg;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
 
@@ -35,12 +36,12 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
                 throw new Exception("输入帧数不能为空或参数错误");
             }
             (string format, string deviceName) = CommonHelper.GetDeviceFormatAndName(request.InputDeviceName);
-            List<string> supportResolutions = await FFMpegService.ListVideoDeviceSupportResolutions(deviceName);
+            List<DeviceResolution> supportResolutions = await FFMpegService.ListVideoDeviceSupportResolutions(deviceName);
             if (supportResolutions?.Any() != true)
             {
                 throw new Exception($"视频输入设备{request.InputDeviceName}未获取到受支持的输入分辨率");
             }
-            if (!supportResolutions.Any(p => ResolutionHelper.Equal(p, request.InputDeviceResolution)))
+            if (!supportResolutions.Any(p => ResolutionHelper.Equal(p.ToString(), request.InputDeviceResolution)))
             {
                 throw new Exception($"视频输入设备{request.InputDeviceName}不支持输入分辨率：{request.InputDeviceResolution}，受支持的最大分辨率：{supportResolutions.Last()}");
             }
