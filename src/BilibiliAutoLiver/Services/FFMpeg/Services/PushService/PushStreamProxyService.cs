@@ -7,7 +7,7 @@ using BilibiliAutoLiver.Services.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace BilibiliAutoLiver.Services.PushService
+namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
 {
     public class PushStreamProxyService : IPushStreamProxyService
     {

@@ -6,11 +6,12 @@ using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services;
+using BilibiliAutoLiver.Services.FFMpeg.Services.PushService;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Services.PushService;
 using BilibiliAutoLiver.Utils;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -76,7 +77,13 @@ namespace BilibiliAutoLiver
                     options.ReturnUrlParameter = "";
                 });
 
-            // Add services to the container.
+            //使用一个默认参数
+            var urls = builder.Configuration["ASPNETCORE_URLS"] ?? builder.Configuration["urls"];
+            if (string.IsNullOrWhiteSpace(urls))
+            {
+                builder.WebHost.UseUrls("http://*:18686");
+            }
+
 #if DEBUG
             builder.Services.AddControllersWithViews()
                 .AddNewtonsoftJson(options => {

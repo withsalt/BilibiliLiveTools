@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 {
     public class FFMpegWindowsCliBinder : BaseFFMpegCliBinder
     {
-        private Dictionary<int, string> _excuteResultCache = new Dictionary<int, string>();
-
         public FFMpegWindowsCliBinder(string ffmpegPath, string workingDirectory) : base(ffmpegPath, workingDirectory)
         {
 
@@ -48,10 +47,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 
         private async Task<string> GetExcuteResult(int type, string args)
         {
-            if (_excuteResultCache.TryGetValue(type, out string excuteResult) && !string.IsNullOrWhiteSpace(excuteResult))
-            {
-                return excuteResult;
-            }
             var result = await Cli.Wrap(this.FFMpegPath)
                 .WithArguments(args)
                 .WithWorkingDirectory(this.WorkingDirectory)
@@ -59,13 +54,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                 .ExecuteBufferedAsync(Encoding.UTF8);
             if (!string.IsNullOrWhiteSpace(result.StandardOutput))
             {
-                _excuteResultCache[type] = result.StandardOutput;
-                return _excuteResultCache[type];
+                return result.StandardOutput;
             }
             if (!string.IsNullOrWhiteSpace(result.StandardError))
             {
-                _excuteResultCache[type] = result.StandardError;
-                return _excuteResultCache[type];
+                return result.StandardError;
             }
             return null;
         }

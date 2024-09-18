@@ -55,6 +55,7 @@ namespace BilibiliAutoLiver.Controllers
             }
             var logs = allLogs.OrderBy(p => p.Time).Select(p => new LogItemResponse()
             {
+                LogType = p.LogType,
                 Time = p.Time,
                 Message = p.Message,
                 StackTrace = p.Exception?.StackTrace ?? string.Empty,

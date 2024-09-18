@@ -143,7 +143,7 @@ namespace BilibiliAutoLiver.Controllers
         public BilibiliAccountLoginStatus Status()
         {
             //第一次开启应用，正在尝试通过Cookie登录
-            if (_cache.Get<bool>(CacheKeyConstant.LOGING_STATUS_CACHE_KEY) == true)
+            if (_lockService.IsLocked(CacheKeyConstant.LOGING_STATUS_CACHE_KEY))
             {
                 return new BilibiliAccountLoginStatus()
                 {

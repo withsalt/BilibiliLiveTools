@@ -2,8 +2,8 @@
 using BilibiliAutoLiver.DependencyInjection;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services;
+using BilibiliAutoLiver.Services.FFMpeg.Services.PushService;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Services.PushService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

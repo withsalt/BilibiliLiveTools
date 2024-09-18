@@ -1,48 +1,56 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
-using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
+using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
+using BilibiliAutoLiver.Services.FFMpeg.SourceReaders;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
+using FFMpegCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace BilibiliAutoLiver.Services.PushService
+namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
 {
-    public class AdvancePushStreamService : BasePushStreamService, IAdvancePushStreamService
+    public class NormalPushStreamService : BasePushStreamService, INormalPushStreamService
     {
         private readonly ILogger<AdvancePushStreamService> _logger;
         private readonly IBilibiliAccountApiService _account;
         private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
+        private readonly IPipeContainer _pipeContainer;
         private readonly AppSettings _appSettings;
+        private readonly FFMpegPresetParams _presetParams;
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
+        private Action _cancel = null;
         private readonly static object _locker = new object();
 
-        public AdvancePushStreamService(ILogger<AdvancePushStreamService> logger
+        public NormalPushStreamService(ILogger<AdvancePushStreamService> logger
             , IBilibiliAccountApiService account
             , IBilibiliLiveApiService api
             , IFFMpegService ffmpeg
+            , IPipeContainer pipeContainer
+            , IMemoryCache cache
             , IServiceProvider serviceProvider
-            , IOptions<AppSettings> settingOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)
+            , IOptions<AppSettings> settingOptions
+            , IOptions<FFMpegPresetParams> presetParamsOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
+            _pipeContainer = pipeContainer ?? throw new ArgumentNullException(nameof(pipeContainer));
             _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
+            _presetParams = presetParamsOptions?.Value ?? throw new ArgumentNullException(nameof(presetParamsOptions));
         }
 
         /// <summary>
@@ -93,6 +101,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 {
                     _logger.LogWarning("结束推流中...");
                     _tokenSource.Cancel();
+                    _cancel?.Invoke();
                     Stopwatch sw = Stopwatch.StartNew();
                     //3s等待下线
                     while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation || _mainTask.Status == TaskStatus.WaitingToRun))
@@ -115,6 +124,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 _tokenSource?.Dispose();
                 _mainTask = null;
                 _tokenSource = null;
+                _cancel = null;
                 _ffmpeg.ClearLog();
 
                 Status = PushStatus.Stopped;
@@ -122,10 +132,116 @@ namespace BilibiliAutoLiver.Services.PushService
         }
 
         /// <summary>
+        /// 开启推流
+        /// </summary>
+        /// <returns></returns>
+        private async Task PushStream()
+        {
+            Guid infoLogGuiid = Guid.NewGuid();
+            Guid errorLogGuiid = Guid.NewGuid();
+
+            while (!_tokenSource.IsCancellationRequested)
+            {
+                Status = PushStatus.Starting;
+                SettingDto setting = await GetSetting();
+                ISourceReader sourceReader = null;
+                try
+                {
+                    //check network
+                    await CheckNetwork(_tokenSource);
+                    //start live
+                    string rtmpAddr = await GetRtmpAddress();
+                    sourceReader = await GetSourceReader(rtmpAddr);
+                    FFMpegArgumentProcessor processor = sourceReader
+                        .WithInputArg()
+                        .WithOutputArg()
+                        .CancellableThrough(out _cancel);
+
+                    processor.NotifyOnOutput(p =>
+                    {
+                        _ffmpeg.AddLog(LogType.Info, p);
+                    });
+                    processor.NotifyOnError(p =>
+                    {
+                        _ffmpeg.AddLog(LogType.Error, p);
+                    });
+
+                    _logger.LogInformation($"FFMpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
+                    _logger.LogInformation("推流参数初始化完成");
+
+                    _ffmpeg.AddLog(LogType.Info, $"======================={DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} 开始推流====================");
+                    _ffmpeg.AddLog(LogType.Info, $"FFMpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
+
+                    //启动
+                    Status = PushStatus.Running;
+                    _logger.LogInformation("开始推流...");
+                    await processor.ProcessAsynchronously();
+
+                    //如果开启了自动重试
+                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
+                    {
+                        Status = PushStatus.Waiting;
+                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
+                    _ffmpeg.AddLog(LogType.Error, ex.Message, ex);
+                    SourceReaderDispose(sourceReader);
+                    //如果开启了自动重试
+                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
+                    {
+                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                    }
+                }
+                finally
+                {
+                    SourceReaderDispose(sourceReader);
+                }
+            }
+        }
+
+        private void SourceReaderDispose(ISourceReader sourceReader)
+        {
+            try
+            {
+                if (sourceReader != null)
+                    sourceReader.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"终止{sourceReader.GetType().Name}失败。");
+            }
+        }
+
+        private async Task<ISourceReader> GetSourceReader(string rtmpAddr)
+        {
+            SettingDto setting = await GetSetting();
+            switch (setting.PushSetting.InputType)
+            {
+                case InputType.Video:
+                    return new VideoSourceReader(setting, rtmpAddr, _logger);
+                case InputType.Desktop:
+                    return new DesktopSourceReader(setting, rtmpAddr, _logger);
+                case InputType.Camera:
+                    return new CameraSourceReader(setting, rtmpAddr, _logger);
+                case InputType.CameraPlus:
+                    return new CameraPlusSourceReader(setting, rtmpAddr, _logger, _pipeContainer);
+                default:
+                    throw new NotImplementedException($"不支持的输入类型：{setting.PushSetting.InputType}");
+            }
+        }
+
+        /// <summary>
         /// 初始化推流
         /// </summary>
         /// <returns></returns>
-        private async Task<(string cmdName, string cmdArg)> BuildFFMpegCommand()
+        private async Task<string> GetRtmpAddress()
         {
             SettingDto setting = await GetSetting();
             //检查Cookie是否有效
@@ -135,8 +251,8 @@ namespace BilibiliAutoLiver.Services.PushService
                 throw new Exception("登录失败，Cookie已失效");
             }
             //获取直播间信息
-            var liveRoomInfo = await _api.GetMyLiveRoomInfo();
-            if (liveRoomInfo.title != setting.LiveSetting.RoomName || liveRoomInfo.area_v2_id != setting.LiveSetting.AreaId)
+            MyLiveRoomInfo liveRoomInfo = await _api.GetMyLiveRoomInfo();
+            if (liveRoomInfo.area_v2_id != setting.LiveSetting.AreaId || liveRoomInfo.title != setting.LiveSetting.RoomName)
             {
                 await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, setting.LiveSetting.RoomName, setting.LiveSetting.AreaId);
             }
@@ -148,120 +264,7 @@ namespace BilibiliAutoLiver.Services.PushService
                 throw new Exception("获取推流地址失败，请重试！");
             }
             _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
-
-            if (!CmdAnalyzer.TryParse(setting.PushSetting.FFmpegCommand, _appSettings.AdvanceStrictMode, Path.Combine(_appSettings.DataDirectory, GlobalConfigConstant.DefaultMediaDirectory), url, out string message, out string newCmd, out string cmdName, out string cmdArgs))
-            {
-                throw new Exception(message);
-            }
-            if (cmdName.Equals("ffmpeg", StringComparison.OrdinalIgnoreCase) || cmdName.Equals("ffmpeg.exe", StringComparison.OrdinalIgnoreCase))
-            {
-                cmdName = _ffmpeg.GetBinaryPath();
-            }
-            return (cmdName, cmdArgs);
-        }
-
-        /// <summary>
-        /// 开启推流
-        /// </summary>
-        /// <returns></returns>
-        private async Task PushStream()
-        {
-            while (!_tokenSource.IsCancellationRequested)
-            {
-                Status = PushStatus.Starting;
-                Process proc = null;
-                SettingDto setting = await GetSetting();
-                try
-                {
-                    //check network
-                    await CheckNetwork(_tokenSource);
-                    //start live
-                    (string cmdName, string cmdArg) = await BuildFFMpegCommand();
-
-                    _logger.LogInformation($"ffmpeg推流命令：{cmdName} {cmdArg}");
-                    _logger.LogInformation("推流参数初始化完成");
-
-                    //启动
-                    proc = new Process();
-                    proc.StartInfo.FileName = cmdName;
-                    proc.StartInfo.Arguments = cmdArg;
-                    proc.StartInfo.RedirectStandardOutput = true;
-                    proc.StartInfo.RedirectStandardError = true;
-                    proc.StartInfo.UseShellExecute = false;
-                    proc.StartInfo.CreateNoWindow = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-                    proc.StartInfo.StandardErrorEncoding = Encoding.UTF8;
-                    proc.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-
-                    //接受输出
-                    proc.OutputDataReceived += FFMpegOutputDataReceived;
-                    proc.ErrorDataReceived += FFMpegOutputDataReceived;
-
-                    bool isStart = proc.Start();
-                    if (!isStart)
-                    {
-                        throw new Exception("无法执行指定的推流指令，请检查FFmpegCmd是否填写正确。");
-                    }
-                    // 开始异步读取输出
-                    proc.BeginOutputReadLine();
-                    proc.BeginErrorReadLine();
-
-                    Status = PushStatus.Running;
-                    _logger.LogInformation("开始推流...");
-
-                    await proc.WaitForExitAsync(_tokenSource.Token);
-                    proc.Kill();
-                    proc.Dispose();
-
-                    //delay 100ms的原因是ffmpeg本身也会接收ctrl-c，但是C#的控制台要比ffmpeg慢一点。
-                    //就导致ffmpeg退出要早一点
-                    await Task.Delay(100);
-                    if (!_tokenSource.IsCancellationRequested)
-                    {
-                        _logger.LogWarning($"FFmpeg异常退出。");
-                    }
-
-                    //如果开启了自动重试
-                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
-                    {
-                        Status = PushStatus.Waiting;
-                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    try
-                    {
-                        if (proc != null && !proc.HasExited)
-                        {
-                            proc.Kill();
-                        }
-                    }
-                    catch { }
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
-                    _ffmpeg.AddLog(DateTime.UtcNow, ex.Message, ex);
-                    //如果开启了自动重试
-                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
-                    {
-                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
-                    }
-                }
-                finally
-                {
-                    proc?.Dispose();
-                }
-            }
-        }
-
-        private void FFMpegOutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            if (!string.IsNullOrEmpty(e.Data))
-            {
-                _ffmpeg.AddLog(DateTime.UtcNow, e.Data);
-            }
+            return url;
         }
 
         private readonly static object _disposeLock = new object();
@@ -276,7 +279,7 @@ namespace BilibiliAutoLiver.Services.PushService
                     if (!_disposed)
                     {
                         _disposed = true;
-                        this.Stop();
+                        Stop();
                     }
                 }
             }

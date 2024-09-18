@@ -53,7 +53,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 //延迟参数
                 opt.WithCustomArgument("-reorder_queue_size 0");
                 opt.WithCustomArgument("-flags low_delay");
-                opt.WithCustomArgument("-rtbufsize 2000k");
+
+                //自定义参数
+                if (!string.IsNullOrWhiteSpace(this.Settings.PushSetting.CustumOutputParams))
+                {
+                    opt.WithCustomArgument(this.Settings.PushSetting.CustumOutputParams);
+                }
 
                 //输出格式
                 opt.ForceFormat("flv");

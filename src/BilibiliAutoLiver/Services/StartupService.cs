@@ -19,13 +19,15 @@ namespace BilibiliAutoLiver.Services
         private readonly IPushStreamProxyService _pushProxyService;
         private readonly IMemoryCache _cache;
         private readonly ILocalLockService _lockService;
+        private readonly IFFMpegService _ffmpeg;
 
         public StartupService(ILogger<StartupService> logger
             , IBilibiliAccountApiService accountService
             , IJobSchedulerService jobScheduler
             , IPushStreamProxyService pushProxyService
             , IMemoryCache cache
-            , ILocalLockService lockService)
+            , ILocalLockService lockService
+            , IFFMpegService ffmpeg)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
@@ -33,6 +35,7 @@ namespace BilibiliAutoLiver.Services
             _pushProxyService = pushProxyService ?? throw new ArgumentNullException(nameof(pushProxyService));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             _lockService = lockService ?? throw new ArgumentNullException(nameof(lockService));
+            _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
         }
 
         public async Task Start(CancellationToken token)
@@ -50,10 +53,12 @@ namespace BilibiliAutoLiver.Services
                 //开始推流
 #if DEBUG
                 _logger.LogWarning($"开发，不推流");
+                _ = Preheat();
                 return;
 #endif
 
                 await _pushProxyService.Start();
+                _ = Preheat();
             }
             catch (Exception ex)
             {
@@ -61,14 +66,22 @@ namespace BilibiliAutoLiver.Services
             }
         }
 
-        public async Task<UserInfo> Login()
+        private async Task<UserInfo> Login()
         {
             try
             {
-                _lockService.Lock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300));
+                UserInfo userInfo = null;
                 //通过保存的Cookie登录
-                UserInfo userInfo = await _accountService.LoginByCookie();
-                _lockService.UnLock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
+                try
+                {
+                    _lockService.Lock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300));
+                    userInfo = await _accountService.LoginByCookie();
+                }
+                finally
+                {
+                    _lockService.UnLock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
+                }
+                
                 if (userInfo == null)
                 {
                     if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300)))
@@ -109,10 +122,18 @@ namespace BilibiliAutoLiver.Services
                 _logger.LogError(ex, $"用户登录失败");
                 return null;
             }
-            finally
-            {
-                _cache.Remove(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
-            }
+        }
+
+        /// <summary>
+        /// 预热ffmpeg
+        /// </summary>
+        /// <returns></returns>
+        private async Task Preheat()
+        {
+            await _ffmpeg.GetVersion();
+            await _ffmpeg.GetVideoDevices();
+            await _ffmpeg.GetAudioDevices();
+            _ffmpeg.GetVideoCodecs();
         }
     }
 }

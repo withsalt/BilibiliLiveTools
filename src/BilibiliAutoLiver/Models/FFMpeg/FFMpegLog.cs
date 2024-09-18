@@ -1,15 +1,19 @@
 ﻿using System;
+using BilibiliAutoLiver.Models.Enums;
 
 namespace BilibiliAutoLiver.Models.FFMpeg
 {
     public class FFMpegLog
     {
-        public FFMpegLog(DateTime time, string message, Exception exception)
+        public FFMpegLog(LogType logType, string message, Exception exception)
         {
-            this.Time = time;
+            this.LogType = logType;
+            this.Time = DateTime.UtcNow;
             this.Message = message;
-            Exception = exception;
+            this.Exception = exception;
         }
+
+        public LogType LogType { get; set; }
 
         public DateTime Time { get; set; }
 

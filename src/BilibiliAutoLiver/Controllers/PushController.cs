@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -81,7 +82,6 @@ namespace BilibiliAutoLiver.Controllers
             //列出支持设备的命令
             vm.AudioDevices = await _ffmpeg.GetAudioDevices();
             vm.VideoDevices = await _ffmpeg.GetVideoDevices();
-
             //列出支持的编码器
             IReadOnlyList<Codec> allCodecs = _ffmpeg.GetVideoCodecs();
             if (allCodecs == null)

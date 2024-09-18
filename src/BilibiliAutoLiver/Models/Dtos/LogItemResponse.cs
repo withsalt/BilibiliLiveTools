@@ -5,6 +5,8 @@ namespace BilibiliAutoLiver.Models.Dtos
 {
     public class LogItemResponse
     {
+        public LogType LogType { get; set; }
+
         public DateTime Time { get; set; }
 
         public string Message { get; set; }

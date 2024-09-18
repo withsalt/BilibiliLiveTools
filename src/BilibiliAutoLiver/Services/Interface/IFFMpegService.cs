@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.FFMpeg;
 using FFMpegCore.Enums;
 
@@ -27,9 +28,7 @@ namespace BilibiliAutoLiver.Services.Interface
 
         IEnumerable<FFMpegLog> GetLogs();
 
-        void AddLog(DateTime time, string message);
-
-        void AddLog(DateTime time, string message, Exception ex);
+        void AddLog(LogType logType, string message, Exception ex = null);
 
         void ClearLog();
 
