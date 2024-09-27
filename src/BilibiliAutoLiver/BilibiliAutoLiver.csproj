@@ -26,7 +26,7 @@
 		<PackageReference Include="MailKit" Version="4.7.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.8" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.13" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.14" />
 		<PackageReference Include="Quartz.AspNetCore" Version="3.13.0" />
 		<PackageReference Include="Quartz.Plugins" Version="3.13.0" />
 		<PackageReference Include="Quartz.Plugins.TimeZoneConverter" Version="3.13.0" />

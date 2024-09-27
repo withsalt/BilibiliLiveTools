@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Services.FFMpeg.Ext;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
@@ -51,8 +52,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 opt.ForcePixelFormat("yuv420p");
 
                 //延迟参数
-                opt.WithCustomArgument("-reorder_queue_size 0");
-                opt.WithCustomArgument("-flags low_delay");
+                opt.WithLowDelayArgument();
 
                 //自定义参数
                 if (!string.IsNullOrWhiteSpace(this.Settings.PushSetting.CustumOutputParams))
@@ -83,7 +83,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         /// <param name="opt"></param>
         protected virtual void GetVideoOutputArg(FFMpegArgumentOptions opt)
         {
-            var codec = GetVideoCodec();
+            Codec codec = GetVideoCodec();
             switch (this.Settings.PushSetting.Quality)
             {
                 case OutputQualityEnum.High:
@@ -92,10 +92,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithVideoCodec(codec);
                         opt.WithVideoBitrate(8000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
-                        {
-                            opt.WithSpeedPreset(Speed.UltraFast);
-                        }
+                        opt.Withx264Orx265SpeedPreset(codec);
                         //帧同步，可变帧率
                         opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
@@ -111,10 +108,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithVideoCodec(codec);
                         opt.WithVideoBitrate(4000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
-                        {
-                            opt.WithSpeedPreset(Speed.UltraFast);
-                        }
+                        opt.Withx264Orx265SpeedPreset(codec);
                         //帧同步，可变帧率
                         opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
@@ -129,10 +123,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.WithVideoCodec(codec);
                         opt.WithVideoBitrate(2000);
                         //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        if (codec.Name.Equals("libx264") || codec.Name.Equals("libx265"))
-                        {
-                            opt.WithSpeedPreset(Speed.UltraFast);
-                        }
+                        opt.Withx264Orx265SpeedPreset(codec);
                         //帧同步，可变帧率
                         opt.WithCustomArgument("-fps_mode vfr");
                         //指定 x264 编码器的调整参数，以优化特定类型的输入视频。

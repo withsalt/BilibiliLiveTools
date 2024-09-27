@@ -71,7 +71,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     {
                         opt.WithCustomArgument($"-offset_x {rectangle.Value.X}");
                         opt.WithCustomArgument($"-offset_y {rectangle.Value.Y}");
-                        opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
+                        if (rectangle.Value.Width > 0 && rectangle.Value.Height > 0)
+                        {
+                            opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
+                        }
                     }
                     //没有音频的情况下静音视频
                     if (!HasAudioStream())
@@ -89,7 +92,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     opt.WithFramerate(30);
                     if (rectangle != null)
                     {
-                        opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
+                        if (rectangle.Value.Width > 0 && rectangle.Value.Height > 0)
+                        {
+                            opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
+                        }
                     }
                     //没有音频的情况下静音视频
                     if (!HasAudioStream())

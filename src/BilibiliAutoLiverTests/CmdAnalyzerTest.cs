@@ -1,4 +1,5 @@
-﻿using BilibiliAutoLiver.Utils;
+﻿using System.Drawing;
+using BilibiliAutoLiver.Utils;
 
 namespace BilibiliLiverTests
 {
@@ -26,6 +27,15 @@ namespace BilibiliLiverTests
                     Console.WriteLine(ffmpegCmd);
                     Console.WriteLine();
                 }
+            }
+        }
+
+        [TestMethod()]
+        public void ScreenParamsHelperTest()
+        {
+            if (!ScreenParamsHelper.TryParse("0,0", out string message, out Rectangle? rectangle))
+            {
+                throw new Exception(message);
             }
         }
     }
