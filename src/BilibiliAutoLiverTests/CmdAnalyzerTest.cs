@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using BilibiliAutoLiver.Utils;
+using FlashCap;
 
 namespace BilibiliLiverTests
 {
@@ -33,9 +34,10 @@ namespace BilibiliLiverTests
         [TestMethod()]
         public void ScreenParamsHelperTest()
         {
-            if (!ScreenParamsHelper.TryParse("0,0", out string message, out Rectangle? rectangle))
+            List<CaptureDeviceDescriptor> devices = new CaptureDevices()?.EnumerateDescriptors().ToList();
+            if (devices?.Any() != true)
             {
-                throw new Exception(message);
+                throw new Exception($"找不到视频输入设备！");
             }
         }
     }

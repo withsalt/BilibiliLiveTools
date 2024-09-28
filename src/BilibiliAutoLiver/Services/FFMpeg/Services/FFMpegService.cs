@@ -8,12 +8,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.FFMpeg;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder;
 using BilibiliAutoLiver.Services.Interface;
 using FFMpegCore.Enums;
+using FlashCap;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -84,12 +86,52 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
             return path;
         }
 
-        public async Task<List<string>> GetVideoDevices()
+        public Task<List<VideoDeviceInfo>> GetVideoDevices()
         {
-            return await _cache.GetOrCreateAsync("FFMPEG_MACHINE_VIDEO_DEVICES", async (entry) =>
+            return Task.FromResult(_cache.GetOrCreate("FFMPEG_MACHINE_VIDEO_DEVICES", (entry) =>
             {
-                return await GetCliBinder().GetVideoDevices();
-            });
+                List<VideoDeviceInfo> result = new List<VideoDeviceInfo>();
+                List<CaptureDeviceDescriptor> devices = new CaptureDevices()?.EnumerateDescriptors().ToList();
+                if (devices?.Any() != true)
+                {
+                    return result;
+                }
+                foreach (var item in devices)
+                {
+                    if (item.DeviceType != DeviceTypes.DirectShow && item.DeviceType != DeviceTypes.V4L2)
+                    {
+                        continue;
+                    }
+                    if (item.Characteristics?.Any() != true)
+                    {
+                        continue;
+                    }
+                    VideoDeviceInfo deviceInfo = new VideoDeviceInfo()
+                    {
+                        Name = item.Name,
+                        Identity = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? item.Name : (item.Identity != null ? item.Identity.ToString() : item.Name),
+                        DeviceType = item.DeviceType,
+                        Characteristics = item.Characteristics.Select(p => new Characteristics()
+                        {
+                            Width = p.Width,
+                            Height = p.Height,
+                            Format = p.PixelFormat,
+                        }).ToList()
+                    };
+                    result.Add(deviceInfo);
+                }
+                return result;
+            }));
+        }
+
+        private string GetVideoDeviceIdentity(CaptureDeviceDescriptor captureDevice)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return captureDevice.Name;
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return captureDevice.Identity.ToString();
+            else
+                throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
         }
 
         public async Task<List<string>> GetAudioDevices()

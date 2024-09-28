@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BilibiliAutoLiver.Models;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.FFMpeg;
 using FFMpegCore.Enums;
@@ -16,7 +17,7 @@ namespace BilibiliAutoLiver.Services.Interface
 
         Task<LibVersion> GetVersion();
 
-        Task<List<string>> GetVideoDevices();
+        Task<List<VideoDeviceInfo>> GetVideoDevices();
 
         Task<List<string>> GetAudioDevices();
 

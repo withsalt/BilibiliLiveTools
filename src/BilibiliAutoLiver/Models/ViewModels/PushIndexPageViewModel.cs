@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Entities;
 
 namespace BilibiliAutoLiver.Models.ViewModels
@@ -12,7 +14,7 @@ namespace BilibiliAutoLiver.Models.ViewModels
         /// <summary>
         /// 支持的视频设备
         /// </summary>
-        public List<string> VideoDevices { get; set; }
+        public List<VideoDeviceInfo> VideoDevices { get; set; }
 
         /// <summary>
         /// 支持的音频设备
@@ -22,7 +24,7 @@ namespace BilibiliAutoLiver.Models.ViewModels
         /// <summary>
         /// 支持的视频编码器
         /// </summary>
-        public List<string> VideoCodecs {  get; set; }
+        public List<string> VideoCodecs { get; set; }
 
         /// <summary>
         /// 视频素材
