@@ -368,7 +368,7 @@
                             <br />
                             示例：
                             <br />
-                            <code>ffmpeg -f @(Model.VideoDevices?.Any() != true ? "如dshow、v4l2" : Model.VideoDevices[0].DeviceTypeName) -video_size 1280x720 -i video="@(Model.VideoDevices?.Any() != true ? "你的摄像头名称" : Model.VideoDevices[0].Name)" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}</code>
+                            <code>ffmpeg -f @(Model.VideoDevices?.Any() != true ? "如dshow、v4l2" : Model.VideoDevices[0].DeviceTypeName) -video_size 1280x720 -i video="@(Model.VideoDevices?.Any() != true ? "你的摄像头名称" : Model.VideoDevices[0].Identity)" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}</code>
                             <br />
                             使用1280x720的分辨率，推流摄像头设备“HD Pro Webcam C920”到B站直播，编码方式为H264、帧数30。
                         </div>
