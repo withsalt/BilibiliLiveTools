@@ -125,7 +125,9 @@
                                 @if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                                 {
                                     <blockquote class="layui-elem-quote">
-                                        推流Linux桌面时，仅支持Xorg显示服务。<br />以Ubuntu为例（默认显示服务为Wayland）。在登录界面，单击用户名后会出现密码输入框。在这个界面中的右下角有一个小齿轮图标，可以在此选择 “Ubuntu on Xorg”。其它发行版请自行探索。
+                                        推流Linux桌面时，仅支持Xorg显示服务。当前操作系统：@(RuntimeInformation.RuntimeIdentifier)
+                                        <br />
+                                        以Ubuntu为例（默认显示服务为Wayland）。在登录界面，单击用户名后会出现密码输入框。在这个界面中的右下角有一个小齿轮图标，可以在此选择 “Ubuntu on Xorg”。其它发行版请自行探索。
                                     </blockquote>
                                 }
                                 <div class="layui-form-item">
