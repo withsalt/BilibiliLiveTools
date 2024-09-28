@@ -19,7 +19,7 @@ namespace BilibiliAutoLiver.Models.ViewModels
         /// <summary>
         /// 支持的音频设备
         /// </summary>
-        public List<string> AudioDevices { get; set; }
+        public List<AudioDeviceInfo> AudioDevices { get; set; }
 
         /// <summary>
         /// 支持的视频编码器

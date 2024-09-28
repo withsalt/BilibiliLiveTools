@@ -19,7 +19,7 @@ namespace BilibiliAutoLiver.Services.Interface
 
         Task<List<VideoDeviceInfo>> GetVideoDevices();
 
-        Task<List<string>> GetAudioDevices();
+        Task<List<AudioDeviceInfo>> GetAudioDevices();
 
         IReadOnlyList<Codec> GetVideoCodecs();
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.FFMpeg;
 using CliWrap;
 using CliWrap.Buffered;
@@ -16,15 +18,58 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 
         }
 
-        public override async Task<List<string>> GetVideoDevices()
+        public override Task<List<VideoDeviceInfo>> GetVideoDevices()
         {
-            List<string> devices = new List<string>();
-            return devices;
+            throw new NotSupportedException("暂不支持在Linux操作系统上面，通过FFMpeg获取视频输入设备。");
         }
 
-        public override async Task<List<string>> GetAudioDevices()
+        public override async Task<List<AudioDeviceInfo>> GetAudioDevices()
         {
-            List<string> devices = new List<string>();
+            List<AudioDeviceInfo> devices = new List<AudioDeviceInfo>();
+
+            string output = await GetExcuteResult("arecord", "-l");
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                return devices;
+            }
+
+            string[] outputArgs = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            List<string> cardLines = new List<string>();
+            foreach (var outputItem in outputArgs)
+            {
+                string outputItemNew = outputItem.Trim('\r', '\n', ' ');
+                if (!string.IsNullOrWhiteSpace(outputItemNew) && outputItemNew.StartsWith("card"))
+                {
+                    cardLines.Add(outputItemNew);
+                }
+            }
+            if (cardLines.Count == 0)
+            {
+                return devices;
+            }
+
+            string pattern = @"card (\d+): ([^]]+) \[([^]]+)\], device (\d+): ([^]]+) \[([^]]+)\]";
+            foreach (var cardLine in cardLines)
+            {
+                var match = Regex.Match(cardLine, pattern);
+                if (match.Success
+                    && match.Groups.Count > 6
+                    && int.TryParse(match.Groups[1].Value, out int cardIndex)
+                    && int.TryParse(match.Groups[4].Value, out int deviceIndex)
+                    && cardIndex >= 0
+                    && deviceIndex >= 0)
+                {
+                    AudioDeviceInfo deviceInfo = new AudioDeviceInfo
+                    {
+                        CardIndex = cardIndex,
+                        Name = match.Groups[3].Value,
+                        DeviceIndex = deviceIndex,
+                        DeviceName = match.Groups[6].Value,
+                        DeviceType = AudioDeviceType.Alsa,
+                    };
+                    devices.Add(deviceInfo);
+                }
+            }
             return devices;
         }
 
@@ -37,14 +82,14 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             return new List<DeviceResolution>();
         }
 
-        private async Task<string> GetExcuteResult()
+        private async Task<string> GetExcuteResult(string name, string args)
         {
             if (!string.IsNullOrWhiteSpace(_excuteResult))
             {
                 return _excuteResult;
             }
-            var result = await Cli.Wrap(this.FFMpegPath)
-                .WithArguments("-list_devices true -f dshow -i dummy")
+            var result = await Cli.Wrap(name)
+                .WithArguments(args)
                 .WithWorkingDirectory(this.WorkingDirectory)
                 .WithValidation(CommandResultValidation.None)
                 .ExecuteBufferedAsync();

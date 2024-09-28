@@ -150,7 +150,7 @@
                                             <option value="">请选择</option>
                                             @foreach (var item in Model.AudioDevices)
                                             {
-                                                <option value="@item">@item</option>
+                                                <option value="@(item.DeviceTypeName + "," + item.Identity)">@item.Name</option>
                                             }
                                         </select>
                                     </div>
@@ -228,7 +228,7 @@
                                             <option value="">请选择</option>
                                             @foreach (var item in Model.AudioDevices)
                                             {
-                                                <option value="@item">@item</option>
+                                                <option value="@(item.DeviceTypeName + "," + item.Identity)">@item.Name</option>
                                             }
                                         </select>
                                     </div>
@@ -306,7 +306,7 @@
                                             <option value="">请选择</option>
                                             @foreach (var item in Model.AudioDevices)
                                             {
-                                                <option value="@item">@item</option>
+                                                <option value="@(item.DeviceTypeName + "," + item.Identity)">@item.Name</option>
                                             }
                                         </select>
                                     </div>
@@ -363,7 +363,7 @@
                             </code>
                             ，音频设备：
                             <code>
-                                @(Model.AudioDevices?.Any() != true ? "无" : string.Join("、", Model.VideoDevices.Select(p => p.Description)))
+                                @(Model.AudioDevices?.Any() != true ? "无" : string.Join("、", Model.AudioDevices.Select(p => p.Description)))
                             </code>
                             <br />
                             示例：

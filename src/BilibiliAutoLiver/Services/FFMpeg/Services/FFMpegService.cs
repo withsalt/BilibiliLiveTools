@@ -124,17 +124,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
             }));
         }
 
-        private string GetVideoDeviceIdentity(CaptureDeviceDescriptor captureDevice)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return captureDevice.Name;
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                return captureDevice.Identity.ToString();
-            else
-                throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
-        }
-
-        public async Task<List<string>> GetAudioDevices()
+        public async Task<List<AudioDeviceInfo>> GetAudioDevices()
         {
             return await _cache.GetOrCreateAsync("FFMPEG_MACHINE_AUDIO_DEVICES", async (entry) =>
             {
@@ -168,6 +158,16 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
             else
                 throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
             return binder;
+        }
+
+        private string GetVideoDeviceIdentity(CaptureDeviceDescriptor captureDevice)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return captureDevice.Name;
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return captureDevice.Identity.ToString();
+            else
+                throw new PlatformNotSupportedException($"Unsupported system type: {RuntimeInformation.OSDescription}");
         }
 
         #region Log

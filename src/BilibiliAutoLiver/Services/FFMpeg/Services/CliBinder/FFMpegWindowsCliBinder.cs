@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.FFMpeg;
 using BilibiliAutoLiver.Utils;
 using CliWrap;
 using CliWrap.Buffered;
+using FlashCap;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 {
@@ -18,18 +20,47 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
 
         }
 
-        public override async Task<List<string>> GetVideoDevices()
+        public override async Task<List<VideoDeviceInfo>> GetVideoDevices()
         {
-            string output = await GetExcuteResult("-list_devices true -f dshow -i dummy".GetHashCode(), "-list_devices true -f dshow -i dummy");
-            List<string> devices = ExtractDevices(output, "video");
-            return devices;
+            string output = await GetExcuteResult("-list_devices true -f dshow -i dummy");
+            List<(string type, string name)> devices = ExtractDevices(output, "video");
+            List<VideoDeviceInfo> deviceInfos = new List<VideoDeviceInfo>();
+            if (devices?.Any() != true)
+            {
+                return deviceInfos;
+            }
+            foreach (var item in devices)
+            {
+                deviceInfos.Add(new VideoDeviceInfo()
+                {
+                    Name = item.name,
+                    DeviceType = DeviceTypes.DirectShow,
+                    Identity = item.name
+                });
+            }
+            return deviceInfos;
         }
 
-        public override async Task<List<string>> GetAudioDevices()
+        public override async Task<List<AudioDeviceInfo>> GetAudioDevices()
         {
-            string output = await GetExcuteResult("-list_devices true -f dshow -i dummy".GetHashCode(), "-list_devices true -f dshow -i dummy");
-            List<string> devices = ExtractDevices(output, "audio");
-            return devices;
+            string output = await GetExcuteResult("-list_devices true -f dshow -i dummy");
+            List<(string type, string name)> devices = ExtractDevices(output, "audio");
+            List<AudioDeviceInfo> deviceInfos = new List<AudioDeviceInfo>();
+            if (devices?.Any() != true)
+            {
+                return deviceInfos;
+            }
+            foreach (var item in devices)
+            {
+                deviceInfos.Add(new AudioDeviceInfo()
+                {
+                    Name = item.name,
+                    DeviceType = AudioDeviceType.DirectShow,
+                    CardIndex = -1,
+                    DeviceIndex = -1,
+                });
+            }
+            return deviceInfos;
         }
 
         public override async Task<List<DeviceResolution>> ListVideoDeviceSupportResolutions(string deviceName)
@@ -39,13 +70,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                 throw new ArgumentNullException("deviceName", "设备名称不能为空");
             }
             string argStr = $"-f dshow -list_options true -i video=\"{deviceName}\"";
-            int type = argStr.GetHashCode();
-            string output = await GetExcuteResult(type, argStr);
+            string output = await GetExcuteResult(argStr);
             List<DeviceResolution> devices = ExtractResolutions(output, deviceName);
             return devices;
         }
 
-        private async Task<string> GetExcuteResult(int type, string args)
+        private async Task<string> GetExcuteResult(string args)
         {
             var result = await Cli.Wrap(this.FFMpegPath)
                 .WithArguments(args)
@@ -69,14 +99,14 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
         /// <param name="ffmpegOutput"></param>
         /// <param name="type">audio/video</param>
         /// <returns></returns>
-        private List<string> ExtractDevices(string ffmpegOutput, string type)
+        private List<(string type, string name)> ExtractDevices(string ffmpegOutput, string type)
         {
             if (string.IsNullOrEmpty(ffmpegOutput))
             {
                 throw new ArgumentNullException(nameof(ffmpegOutput), "FFMpeg输出内容为空");
             }
             string[] lines = ffmpegOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            List<string> devices = new List<string>();
+            List<(string, string)> devices = new List<(string, string)>();
 
             foreach (var line in lines)
             {
@@ -91,7 +121,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                     if (firstQuote != lastQuote)
                     {
                         string deviceName = line.Substring(firstQuote + 1, lastQuote - firstQuote - 1).Trim(' ');
-                        devices.Add("dshow," + deviceName);
+                        devices.Add(("dshow", deviceName));
                     }
                 }
             }
