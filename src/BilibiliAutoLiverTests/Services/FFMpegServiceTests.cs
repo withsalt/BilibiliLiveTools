@@ -43,7 +43,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task ListVideoDeviceSupportResolutions()
         {
-            await _ffmpeg.ListVideoDeviceSupportResolutions("Logi C270 HD WebCam");
+            await _ffmpeg.ListVideoDeviceSupportResolutions("/dev/video0");
         }
 
         [TestMethod()]

@@ -105,7 +105,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             {
                 throw new ArgumentNullException(nameof(ffmpegOutput), "FFMpeg输出内容为空");
             }
-            string[] lines = ffmpegOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = ffmpegOutput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             List<(string, string)> devices = new List<(string, string)>();
 
             foreach (var line in lines)
@@ -143,7 +143,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             {
                 throw new ArgumentException($"没有找到设备【{deviceName}】，或设备无法访问");
             }
-            string[] lines = ffmpegOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = ffmpegOutput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             List<DeviceResolution> resolutions = new List<DeviceResolution>();
 
             foreach (var item in lines)
