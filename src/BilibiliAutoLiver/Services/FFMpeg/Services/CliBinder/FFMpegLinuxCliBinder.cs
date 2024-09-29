@@ -81,7 +81,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             {
                 throw new ArgumentNullException("deviceName", "设备名称不能为空");
             }
-            string argStr = $"f v4l2 -list_formats all -i \"/{deviceName}\"";
+            string argStr = $"-f v4l2 -list_formats all -i \"/{deviceName}\"";
             string output = await GetExcuteResult(this.FFMpegPath, argStr);
             List<DeviceResolution> devices = ExtractResolutions(output, deviceName);
             return devices;
