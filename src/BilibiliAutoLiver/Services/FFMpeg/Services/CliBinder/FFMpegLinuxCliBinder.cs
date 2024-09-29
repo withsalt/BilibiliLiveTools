@@ -98,7 +98,9 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
                 .WithWorkingDirectory(this.WorkingDirectory)
                 .WithValidation(CommandResultValidation.None)
                 .ExecuteBufferedAsync();
-            _excuteResult = result.StandardOutput;
+            _excuteResult = !string.IsNullOrWhiteSpace(result.StandardOutput)
+                ? result.StandardOutput
+                : result.StandardError;
             return _excuteResult;
         }
 

@@ -34,7 +34,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-
+                    FFMpegArguments = FFMpegArguments.AddDeviceInput($"audio=\"{deviceName}\"", opt =>
+                    {
+                        opt.ForceFormat(format);
+                    });
                 }
                 else
                 {
@@ -74,9 +77,9 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                FFMpegArguments = FFMpegArguments.FromDeviceInput($"video=\"{pushSetting.DeviceName}\"", opt =>
+                FFMpegArguments = FFMpegArguments.FromDeviceInput($"video=\"{deviceName}\"", opt =>
                 {
-                    opt.ForceFormat("v4l2");
+                    opt.ForceFormat(format);
                     opt.WithFramerate(pushSetting.InputFramerate);
                     opt.WithCustomArgument($"-video_size {pushSetting.InputWidth}x{pushSetting.InputHeight}");
                     //没有音频的情况下静音视频
