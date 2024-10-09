@@ -49,7 +49,7 @@ namespace BilibiliAutoLiver.Jobs.Job
             {
                 _logger.LogInformation("定时刷新Cookie开始。");
                 //刷新cookie
-                if (!_cookie.HasCookie())
+                if (!await _cookie.HasCookie())
                 {
                     _logger.LogInformation("定时刷新Cookie失败，未登录。");
                     return;
@@ -60,7 +60,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                 }
                 else
                 {
-                    var cookieWillExpired = _cookie.WillExpired();
+                    var cookieWillExpired = await _cookie.WillExpired();
                     if (!cookieWillExpired.Item1)
                     {
                         updateStatus = true;

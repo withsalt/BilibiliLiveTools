@@ -33,12 +33,12 @@ namespace BilibiliLiverTests.Services
         }
 
         [TestMethod()]
-        public Task AllTest()
+        public async Task AllTest()
         {
             var cookies = _cookieService.GetCookies();
             var cookieString = _cookieService.GetString();
 
-            bool hasCookie = _cookieService.HasCookie();
+            bool hasCookie = await _cookieService.HasCookie();
             Assert.IsTrue(hasCookie);
 
 
@@ -49,10 +49,8 @@ namespace BilibiliLiverTests.Services
             var csrf = _cookieService.GetCsrf();
             var userId = _cookieService.GetUserId();
 
-            string token = _cookieService.GetRefreshToken();
+            string token = await _cookieService.GetRefreshToken();
             Assert.IsNotNull(token);
-
-            return Task.CompletedTask;
         }
 
         public async Task<ResultModel<QrCodeScanResult>> GetQrCodeResult()
@@ -95,23 +93,23 @@ namespace BilibiliLiverTests.Services
 
 
         [TestMethod()]
-        public void GetTest()
+        public async Task GetTest()
         {
-            string cookieText = _cookieService.GetString();
+            string cookieText = await _cookieService.GetString();
             Assert.IsTrue(!string.IsNullOrEmpty(cookieText));
         }
 
         [TestMethod()]
-        public void GetCsrfTest()
+        public async Task GetCsrfTest()
         {
-            string csrf = _cookieService.GetCsrf();
+            string csrf = await _cookieService.GetCsrf();
             Assert.IsNotNull(csrf);
         }
 
         [TestMethod()]
-        public void GetUserIdTest()
+        public async Task GetUserIdTest()
         {
-            string userid = _cookieService.GetUserId();
+            string userid = await _cookieService.GetUserId();
             Assert.IsNotNull(userid);
         }
     }

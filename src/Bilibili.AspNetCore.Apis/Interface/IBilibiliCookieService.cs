@@ -8,40 +8,40 @@ namespace Bilibili.AspNetCore.Apis.Interface
 {
     public interface IBilibiliCookieService
     {
-        bool HasCookie();
+        Task<bool> HasCookie();
 
         Task SaveCookie(IEnumerable<CookieHeaderValue> cookies, string refreshToken);
 
         Task RemoveCookie();
 
-        string GetString(bool force = false);
+        Task<string> GetString(bool force = false);
 
-        CookiesData GetCookies(bool force = false);
+        Task<CookiesData> GetCookies(bool force = false);
 
         /// <summary>
         /// 是否要过期了
         /// </summary>
         /// <param name="minHours"></param>
         /// <returns></returns>
-        (bool, DateTimeOffset) WillExpired(int minHours = 24);
+        Task<(bool, DateTimeOffset)> WillExpired(int minHours = 24);
 
         /// <summary>
         /// 获取Csrf
         /// </summary>
         /// <returns></returns>
-        string GetCsrf();
+        Task<string> GetCsrf();
 
         /// <summary>
         /// 获取Userid
         /// </summary>
         /// <returns></returns>
-        string GetUserId();
+        Task<string> GetUserId();
 
         /// <summary>
         /// 获取刷新token
         /// </summary>
         /// <returns></returns>
-        string GetRefreshToken();
+        Task<string> GetRefreshToken();
 
         /// <summary>
         /// 刷新Cookie

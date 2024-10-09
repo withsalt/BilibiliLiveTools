@@ -108,11 +108,11 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task<UserInfo> LoginByCookie()
         {
-            if (!_cookie.HasCookie())
+            if (!await _cookie.HasCookie())
             {
                 return null;
             }
-            var willExpired = _cookie.WillExpired();
+            var willExpired = await _cookie.WillExpired();
             if (willExpired.Item1)
             {
                 _logger.LogInformation($"Cookie即将过期，过期时间：{willExpired.Item2}，刷新Cookie。");
@@ -210,7 +210,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                     }
 
                     qrCodeExp.Stop();
-                    hasCookie = _cookie.HasCookie();
+                    hasCookie = await _cookie.HasCookie();
                     genIndex++;
                 }
 
@@ -272,7 +272,7 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task HeartBeat()
         {
-            if (!IsLogged())
+            if (!await IsLogged())
             {
                 _logger.LogWarning($"心跳请求失败，未登录");
                 return;
@@ -288,9 +288,9 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// 获取登录状态
         /// </summary>
         /// <returns></returns>
-        public bool IsLogged()
+        public async Task<bool> IsLogged()
         {
-            return _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && _cookie.HasCookie();
+            return  _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && (await _cookie.HasCookie());
         }
 
         public void Logout()

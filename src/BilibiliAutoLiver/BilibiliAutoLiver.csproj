@@ -9,17 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Models\Dtos\Common\**" />
-	  <Content Remove="Models\Dtos\Common\**" />
-	  <EmbeddedResource Remove="Models\Dtos\Common\**" />
-	  <None Remove="Models\Dtos\Common\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Remove="cookies.json" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
@@ -46,33 +35,13 @@
 		<ProjectReference Include="..\BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj" />
 	</ItemGroup>
 
-	<PropertyGroup>
-		<DebugType>embedded</DebugType>
-	</PropertyGroup>
-
 	<ItemGroup>
-		<None Update="runtimes\linux-arm\bin\ffmpeg">
+		<None Update="runtimes\win-x64\bin\ffmpeg.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="runtimes\linux-arm\bin\ffprobe">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="runtimes\linux-x64\bin\ffmpeg">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="runtimes\linux-x64\bin\ffprobe">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="runtimes\win-x64\bin\ffmpeg.exe">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="runtimes\win-x64\bin\ffprobe.exe">
+		<None Update="runtimes\win-x64\bin\ffprobe.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="if not exist &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot; mkdir &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;&#xD;&#xA;xcopy /y /r &quot;$(SolutionDir)BilibiliAutoLiver.Plugin.YoloAI\bin\$(ConfigurationName)\$(TargetFramework)\*.*&quot; &quot;$(TargetDir)Plugins\BilibiliAutoLiver.Plugin.YoloAI\&quot;" />
-	</Target>
 
 </Project>

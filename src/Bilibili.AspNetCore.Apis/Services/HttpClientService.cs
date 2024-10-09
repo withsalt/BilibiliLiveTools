@@ -52,7 +52,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                     if (!string.IsNullOrWhiteSpace(cookie))
                         httpClient.DefaultRequestHeaders.Add("cookie", cookie);
                     else
-                        httpClient.DefaultRequestHeaders.Add("cookie", _cookie.GetString());
+                        httpClient.DefaultRequestHeaders.Add("cookie", await _cookie.GetString());
                 }
 
                 HttpResponseMessage response = null;

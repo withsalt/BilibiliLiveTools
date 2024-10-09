@@ -15,11 +15,6 @@ namespace BilibiliAutoLiver.Plugin.Base
         /// </summary>
         string Name { get; }
 
-        /// <summary>
-        /// 是否启用
-        /// </summary>
-        bool IsEnabled { get; set; }
-
         SKBitmap Process(SKBitmap bitmap);
     }
 }

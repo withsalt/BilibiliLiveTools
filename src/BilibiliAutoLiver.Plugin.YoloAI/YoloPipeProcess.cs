@@ -15,11 +15,6 @@ namespace BilibiliAutoLiver.Plugin.YoloAI
         /// </summary>
         public string Name { get; } = "YoloV8检测";
 
-        /// <summary>
-        /// 是否默认启用
-        /// </summary>
-        public bool IsEnabled { get; set; } = true;
-
         public YoloPipeProcess()
         {
             this.Index = 99;

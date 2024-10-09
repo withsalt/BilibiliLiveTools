@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Constants;
+using Bilibili.AspNetCore.Apis.Exceptions;
 using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
@@ -86,11 +87,11 @@ namespace Bilibili.AspNetCore.Apis.Services
             _cache.Remove(CacheKeyConstant.COOKIE_KEY);
         }
 
-        public bool HasCookie()
+        public async Task<bool> HasCookie()
         {
             try
             {
-                CookiesData cookiesConfig = GetCookies();
+                CookiesData cookiesConfig = await GetCookies();
                 if (cookiesConfig != null && !cookiesConfig.IsExpired)
                 {
                     return true;
@@ -109,9 +110,9 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// </summary>
         /// <param name="minHours"></param>
         /// <returns></returns>
-        public (bool, DateTimeOffset) WillExpired(int minHours = 24)
+        public async Task<(bool, DateTimeOffset)> WillExpired(int minHours = 24)
         {
-            CookiesData cookiesConfig = GetCookies();
+            CookiesData cookiesConfig = await GetCookies();
             var cookie = cookiesConfig?.Cookies?.FirstOrDefault(p => p.Cookies.Any(q => q.Name == "bili_jct") && p.Expires >= DateTime.UtcNow);
             if (cookie == null)
             {
@@ -129,9 +130,9 @@ namespace Bilibili.AspNetCore.Apis.Services
             return (true, cookie.Expires.Value.ToLocalTime());
         }
 
-        public string GetString(bool force = false)
+        public async Task<string> GetString(bool force = false)
         {
-            CookiesData cookiesConfig = GetCookies(force);
+            CookiesData cookiesConfig = await GetCookies(force);
             if (cookiesConfig != null)
             {
                 return cookiesConfig.GetCookieString();
@@ -139,7 +140,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             return null;
         }
 
-        public CookiesData GetCookies(bool force = false)
+        public async Task<CookiesData> GetCookies(bool force = false)
         {
             if (force)
             {
@@ -155,13 +156,11 @@ namespace Bilibili.AspNetCore.Apis.Services
                     _logger.LogWarning("获取Cookie时加锁失败");
                     return null;
                 }
-                CookiesData cookiesConfig = _cache.GetOrCreate(CacheKeyConstant.COOKIE_KEY, entry =>
+                CookiesData cookiesConfig = await _cache.GetOrCreateAsync(CacheKeyConstant.COOKIE_KEY, async entry =>
                 {
                     try
                     {
-                        string cookieStr = _cookieRepository.Read()
-                            .ConfigureAwait(false).GetAwaiter().GetResult();
-
+                        string cookieStr = await _cookieRepository.Read().ConfigureAwait(false);
                         if (!AES.TryDecrypt(cookieStr, _key, _vector, out cookieStr))
                         {
                             return null;
@@ -179,10 +178,14 @@ namespace Bilibili.AspNetCore.Apis.Services
                         entry.AbsoluteExpirationRelativeToNow = cookies.HasTicket ? (cookies.TicketExpireIn - DateTime.UtcNow.AddMinutes(60)) : TimeSpan.FromMinutes(10);
                         return cookies;
                     }
+                    catch (CookieException ex)
+                    {
+                        _logger.LogWarning($"获取Cookie失败，{ex.Message}");
+                        return null;
+                    }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, $"获取Cookie失败，{ex.Message}");
-
                         return null;
                     }
                 });
@@ -195,9 +198,9 @@ namespace Bilibili.AspNetCore.Apis.Services
             }
         }
 
-        public string GetCsrf()
+        public async Task<string> GetCsrf()
         {
-            CookiesData cookies = GetCookies();
+            CookiesData cookies = await GetCookies();
             if (cookies?.TryGetValue("bili_jct", out string jct) == true)
             {
                 return jct;
@@ -205,9 +208,9 @@ namespace Bilibili.AspNetCore.Apis.Services
             throw new Exception("Get csrf from cookie failed.");
         }
 
-        public string GetUserId()
+        public async Task<string> GetUserId()
         {
-            CookiesData cookies = GetCookies();
+            CookiesData cookies = await GetCookies();
             if (cookies?.TryGetValue("DedeUserID", out string jct) == true)
             {
                 return jct;
@@ -215,9 +218,9 @@ namespace Bilibili.AspNetCore.Apis.Services
             throw new Exception("Get userid from cookie failed.");
         }
 
-        public string GetRefreshToken()
+        public async Task<string> GetRefreshToken()
         {
-            CookiesData cookies = GetCookies();
+            CookiesData cookies = await GetCookies();
             return cookies?.RefreshToken;
         }
 
@@ -225,7 +228,7 @@ namespace Bilibili.AspNetCore.Apis.Services
         {
             try
             {
-                if (!HasCookie())
+                if (!await HasCookie())
                 {
                     throw new Exception("未登录，请先登录！");
                 }
@@ -250,9 +253,9 @@ namespace Bilibili.AspNetCore.Apis.Services
                 //刷新cookie
                 RefreshCookieModel refreshCookieModel = new RefreshCookieModel()
                 {
-                    csrf = GetCsrf(),
+                    csrf = await GetCsrf(),
                     refresh_csrf = refreshCsrf,
-                    refresh_token = GetRefreshToken()
+                    refresh_token = await GetRefreshToken()
                 };
                 ResultModel<RefreshCookieResult> refreshCookieResult = await _httpClient.Execute<RefreshCookieResult>(_refreshCookie, HttpMethod.Post, refreshCookieModel, BodyFormat.Form_UrlEncoded);
                 if (refreshCookieResult == null)
@@ -271,7 +274,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                 //确认刷新cookie
                 ConfirmRefreshModel confirmRefreshModel = new ConfirmRefreshModel()
                 {
-                    csrf = GetCsrf(),
+                    csrf = await GetCsrf(),
                     refresh_token = refreshCookieModel.refresh_token,
                 };
                 ResultModel<object> confirmRefreshResult = await _httpClient.Execute<object>(_confirmRefresh, HttpMethod.Post, confirmRefreshModel, BodyFormat.Form_UrlEncoded);

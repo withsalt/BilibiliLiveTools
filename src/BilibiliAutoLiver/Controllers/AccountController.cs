@@ -43,7 +43,7 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public async Task<IActionResult> Login()
         {
-            if (_accountService.IsLogged())
+            if (await _accountService.IsLogged())
             {
                 UserInfo userInfo = await _accountService.GetUserInfo();
                 if (userInfo == null)
@@ -140,7 +140,7 @@ namespace BilibiliAutoLiver.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public BilibiliAccountLoginStatus Status()
+        public async Task<BilibiliAccountLoginStatus> Status()
         {
             //第一次开启应用，正在尝试通过Cookie登录
             if (_lockService.IsLocked(CacheKeyConstant.LOGING_STATUS_CACHE_KEY))
@@ -151,7 +151,7 @@ namespace BilibiliAutoLiver.Controllers
                 };
             }
 
-            if (_accountService.IsLogged())
+            if (await _accountService.IsLogged())
             {
                 return new BilibiliAccountLoginStatus()
                 {
