@@ -22,17 +22,7 @@ namespace BilibiliAutoLiver.Utils
             }
             int x, y, width, height;
             int[] paramVal = param.Select(p => int.TryParse(p, out int oVal) ? oVal : -1).ToArray();
-            if (paramVal[0] < 0)
-            {
-                message = "x参数不正确，x坐标不能小于0，示例：0,0,800,800（x, y, width, height）";
-                return false;
-            }
             x = paramVal[0];
-            if (paramVal[1] < 0)
-            {
-                message = "y参数不正确，y坐标不能小于0，示例：0,0,800,800（x, y, width, height）";
-                return false;
-            }
             y = paramVal[1];
             if (paramVal.Length > 2)
             {
@@ -49,14 +39,14 @@ namespace BilibiliAutoLiver.Utils
                 }
                 height = paramVal[3];
 
-                if (x >= height)
+                if (x >= width || x < -width)
                 {
-                    message = "x参数不正确，x坐标不能大于或等于height，示例：0,0,800,800（x, y, width, height）";
+                    message = "x参数不正确，x坐标不能大于、等于width或小于-width，示例：0,0,800,800（x, y, width, height）";
                     return false;
                 }
-                if(y >= width)
+                if (y >= height || y < -height)
                 {
-                    message = "y参数不正确，y坐标不能大于或等于width，示例：0,0,800,800（x, y, width, height）";
+                    message = "y参数不正确，y坐标不能大于、等于height或小于-height，示例：0,0,800,800（x, y, width, height）";
                     return false;
                 }
             }
