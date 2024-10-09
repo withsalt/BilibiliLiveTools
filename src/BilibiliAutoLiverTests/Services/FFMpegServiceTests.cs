@@ -37,7 +37,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task GetAudioDevices()
         {
-            await _ffmpeg.GetAudioDevices();
+            var rt = await _ffmpeg.GetAudioDevices();
         }
 
         [TestMethod()]
