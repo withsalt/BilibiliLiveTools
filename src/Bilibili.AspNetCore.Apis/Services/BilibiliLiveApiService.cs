@@ -155,8 +155,8 @@ namespace Bilibili.AspNetCore.Apis.Services
                 room_id = roomId,
                 area_id = areaId,
                 title = title,
-                csrf_token = _cookie.GetCsrf(),
-                csrf = _cookie.GetCsrf(),
+                csrf_token = await _cookie.GetCsrf(),
+                csrf = await _cookie.GetCsrf(),
             };
             try
             {
@@ -190,10 +190,10 @@ namespace Bilibili.AspNetCore.Apis.Services
             var postData = new
             {
                 room_id = roomId,
-                uid = _cookie.GetUserId(),
+                uid = await _cookie.GetUserId(),
                 content = content,
-                csrf_token = _cookie.GetCsrf(),
-                csrf = _cookie.GetCsrf(),
+                csrf_token = await _cookie.GetCsrf(),
+                csrf = await _cookie.GetCsrf(),
             };
             try
             {
@@ -223,8 +223,8 @@ namespace Bilibili.AspNetCore.Apis.Services
                 platform = "pc",
                 area_v2 = areaItem.id,
                 backup_stream = 0,
-                csrf_token = _cookie.GetCsrf(),
-                csrf = _cookie.GetCsrf(),
+                csrf_token = await _cookie.GetCsrf(),
+                csrf = await _cookie.GetCsrf(),
             };
             try
             {
@@ -255,8 +255,8 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 room_id = roomId,
                 platform = "pc",
-                csrf_token = _cookie.GetCsrf(),
-                csrf = _cookie.GetCsrf(),
+                csrf_token = await _cookie.GetCsrf(),
+                csrf = await _cookie.GetCsrf(),
             };
             try
             {

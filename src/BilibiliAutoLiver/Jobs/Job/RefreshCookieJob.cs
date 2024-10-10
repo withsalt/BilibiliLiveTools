@@ -60,7 +60,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                 }
                 else
                 {
-                    var cookieWillExpired = await _cookie.WillExpired();
+                    var cookieWillExpired = await _cookie.IsExpired();
                     if (!cookieWillExpired.Item1)
                     {
                         updateStatus = true;

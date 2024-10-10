@@ -78,7 +78,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             string json = JsonUtil.SerializeObject(new CookiesJson(cookiesConfig), true);
             string data = AES.Encrypt(json, _key, _vector);
             await _cookieRepository.Write(data);
-            _ = GetCookies(true);
+            _ = await GetCookies(true);
         }
 
         public async Task RemoveCookie()
@@ -110,7 +110,7 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// </summary>
         /// <param name="minHours"></param>
         /// <returns></returns>
-        public async Task<(bool, DateTimeOffset)> WillExpired(int minHours = 24)
+        public async Task<(bool, DateTimeOffset)> IsExpired(int minHours = 24)
         {
             CookiesData cookiesConfig = await GetCookies();
             var cookie = cookiesConfig?.Cookies?.FirstOrDefault(p => p.Cookies.Any(q => q.Name == "bili_jct") && p.Expires >= DateTime.UtcNow);

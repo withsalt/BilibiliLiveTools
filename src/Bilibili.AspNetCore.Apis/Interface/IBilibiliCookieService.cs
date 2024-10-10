@@ -23,7 +23,7 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// </summary>
         /// <param name="minHours"></param>
         /// <returns></returns>
-        Task<(bool, DateTimeOffset)> WillExpired(int minHours = 24);
+        Task<(bool, DateTimeOffset)> IsExpired(int minHours = 24);
 
         /// <summary>
         /// 获取Csrf

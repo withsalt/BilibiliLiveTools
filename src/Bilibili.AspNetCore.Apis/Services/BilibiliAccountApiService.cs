@@ -112,7 +112,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 return null;
             }
-            var willExpired = await _cookie.WillExpired();
+            var willExpired = await _cookie.IsExpired();
             if (willExpired.Item1)
             {
                 _logger.LogInformation($"Cookie即将过期，过期时间：{willExpired.Item2}，刷新Cookie。");

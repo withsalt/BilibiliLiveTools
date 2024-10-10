@@ -35,19 +35,19 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task AllTest()
         {
-            var cookies = _cookieService.GetCookies();
-            var cookieString = _cookieService.GetString();
+            var cookies = await _cookieService.GetCookies();
+            var cookieString = await _cookieService.GetString();
 
             bool hasCookie = await _cookieService.HasCookie();
             Assert.IsTrue(hasCookie);
 
 
 
-            cookies = _cookieService.GetCookies(true);
-            cookieString = _cookieService.GetString(true);
+            cookies = await _cookieService.GetCookies(true);
+            cookieString = await _cookieService.GetString(true);
 
-            var csrf = _cookieService.GetCsrf();
-            var userId = _cookieService.GetUserId();
+            var csrf = await _cookieService.GetCsrf();
+            var userId = await _cookieService.GetUserId();
 
             string token = await _cookieService.GetRefreshToken();
             Assert.IsNotNull(token);
