@@ -107,6 +107,9 @@ Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/not_install_ffmpeg.jpg)
 未安装ffmpeg。
 
+4. ffmpeg cannot set channel count to 2 (Invalid argument)
+一般情况该报错是在Linux环境中使用USB声卡。应该是声卡不支持2声道，建议换个声卡？
+
 ### 题外话
 项目中所用的API都是各处扒拉来的野生API，非官方提供的API。因为B站随时在更新API，所以工具有随时挂掉的风险。当发现工具非配置原因导致不可用时，请提交issue。所以在未来遇到无法解决问题且无人接收情况下，此项目将会被废弃。  
 还有种情况是，我本人也不用了。也就不更新了.....  

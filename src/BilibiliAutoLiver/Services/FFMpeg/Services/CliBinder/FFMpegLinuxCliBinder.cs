@@ -104,46 +104,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.CliBinder
             return _excuteResult;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ffmpegOutput"></param>
-        /// <param name="type">audio/video</param>
-        /// <returns></returns>
-        private List<string> ExtractDevices(string ffmpegOutput, string type)
-        {
-            string[] lines = ffmpegOutput.Split('\n');
-            bool audioSection = false;
-
-            List<string> devices = new List<string>();
-
-            foreach (var line in lines)
-            {
-                if (line.Contains($"({type})") && line.Contains("\""))
-                {
-                    int firstQuote = line.IndexOf("\"");
-                    int lastQuote = line.LastIndexOf("\"");
-                    if (firstQuote != lastQuote)
-                    {
-                        string deviceName = line.Substring(firstQuote + 1, lastQuote - firstQuote - 1);
-                        devices.Add(deviceName);
-                    }
-                }
-                else if (audioSection)
-                {
-                    // 提取设备名称，假设它总是跟在 '(audio)' 后面
-                    int start = line.IndexOf(" \"") + 2;
-                    int end = line.IndexOf("\" (audio)");
-                    if (start >= 0 && end > start)
-                    {
-                        string deviceName = line.Substring(start, end - start);
-                        devices.Add(deviceName);
-                    }
-                }
-            }
-            return devices;
-        }
-
         private List<DeviceResolution> ExtractResolutions(string ffmpegOutput, string deviceName)
         {
             if (string.IsNullOrEmpty(ffmpegOutput))

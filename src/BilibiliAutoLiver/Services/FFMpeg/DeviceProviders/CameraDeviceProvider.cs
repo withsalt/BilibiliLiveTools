@@ -39,7 +39,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
             (string format, string deviceName) = CommonHelper.GetDeviceFormatAndName(pushSetting.DeviceName);
             if (!string.IsNullOrEmpty(deviceName))
             {
-                _captureDeviceDescriptor = devices.Where(p => p.Name == deviceName).FirstOrDefault();
+                _captureDeviceDescriptor = devices.FirstOrDefault(p => (p.Name == deviceName || p.Identity.ToString() == deviceName) && p.Characteristics?.Any() == true);
             }
             if (int.TryParse(deviceName, out int index)
                 && index >= 0
@@ -139,6 +139,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
                 long frameIndex = bufferScope.Buffer.FrameIndex;
                 TimeSpan timestamp = bufferScope.Buffer.Timestamp;
                 SKBitmap bitmap = SKBitmap.Decode(image);
+                if (bitmap == null)
+                {
+                    return;
+                }
                 BufferFrame frame = new BufferFrame(bitmap, countFrames, frameIndex, timestamp);
                 _onBuffer(frame);
             }

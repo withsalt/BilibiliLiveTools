@@ -34,7 +34,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    FFMpegArguments = FFMpegArguments.AddDeviceInput($"audio=\"{deviceName}\"", opt =>
+                    FFMpegArguments = FFMpegArguments.AddDeviceInput($"\"{deviceName}\"", opt =>
                     {
                         opt.ForceFormat(format);
                     });
@@ -77,7 +77,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                FFMpegArguments = FFMpegArguments.FromDeviceInput($"video=\"{deviceName}\"", opt =>
+                FFMpegArguments = FFMpegArguments.FromDeviceInput($"\"{deviceName}\"", opt =>
                 {
                     opt.ForceFormat(format);
                     opt.WithFramerate(pushSetting.InputFramerate);

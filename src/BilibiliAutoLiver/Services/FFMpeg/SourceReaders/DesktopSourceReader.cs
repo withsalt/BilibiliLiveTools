@@ -35,7 +35,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-
+                    FFMpegArguments = FFMpegArguments.AddDeviceInput($"\"{deviceName}\"", opt =>
+                    {
+                        opt.ForceFormat(format);
+                    });
                 }
                 else
                 {
