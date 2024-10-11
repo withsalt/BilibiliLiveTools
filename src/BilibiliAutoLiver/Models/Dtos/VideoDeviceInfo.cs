@@ -61,5 +61,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         public int Height { get; set; }
 
         public PixelFormats Format { get; set; }
+
+        public int Frame {  get; set; }
     }
 }

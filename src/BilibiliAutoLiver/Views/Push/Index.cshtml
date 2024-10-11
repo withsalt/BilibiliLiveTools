@@ -201,21 +201,6 @@
                                     </div>
                                 </div>
                                 <div class="layui-form-item">
-                                    <label class="layui-form-label">输入帧速<label style="color:red">*</label></label>
-                                    <div class="layui-input-inline">
-                                        <select id="inputFramerateType3" name="inputFramerateType3" lay-verify="required">
-                                            <option value="">请选择</option>
-                                            <option value="5">5</option>
-                                            <option value="10">10</option>
-                                            <option value="15">15</option>
-                                            <option value="30">30</option>
-                                            <option value="60">60</option>
-                                            <option value="90">90</option>
-                                            <option value="120">120</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="layui-form-item">
                                     <label class="layui-form-label">推流音频（来自设备）</label>
                                     <div class="layui-input-inline">
                                         <input id="audioDeviceNameType3From" name="audioDeviceNameType3From" lay-filter="audioDeviceNameType3From" type="checkbox" lay-skin="switch" lay-text="是|否">
@@ -275,21 +260,6 @@
                                             <option value="2560x1440">2560×1440</option>
                                             <option value="3840x2160">3840×2160</option>
                                             <option value="7680x4320">7680×4320</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="layui-form-item">
-                                    <label class="layui-form-label">输入帧速<label style="color:red">*</label></label>
-                                    <div class="layui-input-inline">
-                                        <select id="inputFramerateType4" name="inputFramerateType4" lay-verify="required">
-                                            <option value="">请选择</option>
-                                            <option value="5">5</option>
-                                            <option value="10">10</option>
-                                            <option value="15">15</option>
-                                            <option value="30">30</option>
-                                            <option value="60">60</option>
-                                            <option value="90">90</option>
-                                            <option value="120">120</option>
                                         </select>
                                     </div>
                                 </div>
@@ -533,10 +503,8 @@
                         let audioDevice = "@Html.Raw(Model.PushSetting.AudioDevice)";
                         let audioId = "@Html.Raw(Model.PushSetting.AudioId)";
                         let inputResolution = "@Model.PushSetting.InputResolution";
-                        let inputFramerate = "@Model.PushSetting.InputFramerate";
                         $("#videoDeviceNameType3").val(deviceName);
                         $("#inputResolutionType3").val(inputResolution);
-                        $("#inputFramerateType3").val(inputFramerate);
 
                         let isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
                         if (isFromFile == "true") {
@@ -557,11 +525,9 @@
                         let audioDevice = "@Html.Raw(Model.PushSetting.AudioDevice)";
                         let audioId = "@Html.Raw(Model.PushSetting.AudioId)";
                         let inputResolution = "@Model.PushSetting.InputResolution";
-                        let inputFramerate = "@Model.PushSetting.InputFramerate";
                         let plugins = "@Html.Raw(Model.PushSetting.Plugins)";
                         $("#videoDeviceNameType4").val(deviceName);
                         $("#inputResolutionType4").val(inputResolution);
-                        $("#inputFramerateType4").val(inputFramerate);
 
                         let isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
                         if (isFromFile == "true") {
@@ -806,7 +772,6 @@
                             obj = Object.assign({}, inputTypeParams, baseOutputParams, advanceOutputParams, inputType3Params);
                             obj.inputDeviceName = obj.videoDeviceNameType3;
                             obj.inputDeviceResolution = obj.inputResolutionType3;
-                            obj.inputDeviceFramerate = obj.inputFramerateType3;
                             obj.inputDeviceAudioDeviceName = obj.audioDeviceNameType3;
                             obj.inputDeviceAudioFrom = obj.audioDeviceNameType3From == "on" ? true : false;
                             obj.inputDeviceAudioId = safeParseInt(obj.audioDeviceIdType3);
@@ -816,7 +781,6 @@
                             obj = Object.assign({}, inputTypeParams, baseOutputParams, advanceOutputParams, inputType4Params);
                             obj.inputDeviceName = obj.videoDeviceNameType4;
                             obj.inputDeviceResolution = obj.inputResolutionType4;
-                            obj.inputDeviceFramerate = obj.inputFramerateType4;
                             obj.inputDeviceAudioDeviceName = obj.audioDeviceNameType4;
                             obj.inputDevicePlugins = obj.pluginType4;
                             obj.inputDeviceAudioFrom = obj.audioDeviceNameType4From == "on" ? true : false;
