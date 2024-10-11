@@ -34,7 +34,7 @@ namespace BilibiliAutoLiver.Services
             try
             {
                 MonitorSetting setting = await _settingRepository.GetCacheAsync();
-                if (setting == null || !setting.IsEnabled)
+                if (setting == null)
                 {
                     return (SendStatus.Failed, "获取发送配置失败，或未启用直播监控");
                 }

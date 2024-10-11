@@ -107,8 +107,9 @@ namespace BilibiliAutoLiver.Controllers
                 if (request.IsEnabled)
                 {
                     if (!setting.IsEnableEmailNotice
+                        || string.IsNullOrEmpty(setting.SmtpServer)
                         || string.IsNullOrEmpty(setting.MailAddress)
-                        || string.IsNullOrEmpty(setting.MailAddress)
+                        || string.IsNullOrEmpty(setting.MailName)
                         || string.IsNullOrEmpty(setting.Receivers))
                     {
                         return new ResultModel<string>(-1, "开启直播监控需要先配置邮箱设置");
@@ -138,7 +139,9 @@ namespace BilibiliAutoLiver.Controllers
                 MonitorSetting setting = await _repository.GetCacheAsync();
                 if (setting == null
                     || string.IsNullOrWhiteSpace(setting.SmtpServer)
-                    || string.IsNullOrWhiteSpace(setting.MailAddress))
+                    || string.IsNullOrWhiteSpace(setting.MailAddress)
+                    || string.IsNullOrWhiteSpace(setting.MailName)
+                    || string.IsNullOrWhiteSpace(setting.Receivers))
                 {
                     return new ResultModel<string>(-1, "请先配置发信设置");
                 }

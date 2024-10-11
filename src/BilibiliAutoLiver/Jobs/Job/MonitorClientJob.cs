@@ -110,8 +110,8 @@ namespace BilibiliAutoLiver.Jobs.Job
             try
             {
                 _logger.LogInformation($"直播间{info.title}({info.room_id})直播状态发生改变，发送通知邮件");
-                string reason = info.is_living ? $"开播提醒：\r\n您订阅的直播间{info.title}(https://live.bilibili.com/{info.room_id})开始直播啦。"
-                    : $"关闭提醒：\r\n您订阅的直播间{info.title}(https://live.bilibili.com/{info.room_id})已经停止直播。";
+                string reason = info.is_living ? $"开播提醒：\r\n您订阅的直播间【{info.title}(https://live.bilibili.com/{info.room_id})】开始直播啦。"
+                    : $"关播提醒：\r\n您订阅的直播间【{info.title}(https://live.bilibili.com/{info.room_id})】已经停止直播。";
                 string cacheKey = string.Format(CacheKeyConstant.MAIL_SEND_CACHE_KEY, info.live_status);
                 long lastSendTime = _cache.Get<long>(cacheKey);
                 if (TimeUtil.Timestamp() - lastSendTime < 600)

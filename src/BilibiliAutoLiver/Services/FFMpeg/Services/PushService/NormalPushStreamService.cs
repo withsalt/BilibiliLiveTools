@@ -183,6 +183,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
                         Status = PushStatus.Waiting;
                         Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
+                    else
+                    {
+                        _logger.LogInformation("未开启不间断直播，直播停止");
+                        _ffmpeg.AddLog(LogType.Info, $"未开启不间断直播，直播停止");
+                        break;
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -198,12 +204,20 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
                     {
                         Delay(setting.PushSetting.RetryInterval, _tokenSource);
                     }
+                    else
+                    {
+                        _logger.LogInformation("未开启不间断直播，直播停止");
+                        _ffmpeg.AddLog(LogType.Info, $"未开启不间断直播，直播停止");
+                        break;
+                    }
                 }
                 finally
                 {
                     SourceReaderDispose(sourceReader);
                 }
             }
+            //终止后设置状态为终止
+            Status = PushStatus.Stopped;
         }
 
         private void SourceReaderDispose(ISourceReader sourceReader)
