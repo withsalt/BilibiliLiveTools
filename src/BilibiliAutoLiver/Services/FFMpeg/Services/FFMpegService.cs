@@ -90,6 +90,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
         {
             return Task.FromResult(_cache.GetOrCreate("FFMPEG_MACHINE_VIDEO_DEVICES", (entry) =>
             {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
                 List<VideoDeviceInfo> result = new List<VideoDeviceInfo>();
                 List<CaptureDeviceDescriptor> devices = new CaptureDevices()?.EnumerateDescriptors().ToList();
                 if (devices?.Any() != true)
@@ -128,6 +129,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
         {
             return await _cache.GetOrCreateAsync("FFMPEG_MACHINE_AUDIO_DEVICES", async (entry) =>
             {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
                 return await GetCliBinder().GetAudioDevices();
             });
         }
@@ -136,6 +138,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
         {
             return await _cache.GetOrCreateAsync($"FFMPEG_{deviceName}_SUPPORT_RESOLUTIONS", async (entry) =>
             {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
                 return await GetCliBinder().ListVideoDeviceSupportResolutions(deviceName);
             });
         }
