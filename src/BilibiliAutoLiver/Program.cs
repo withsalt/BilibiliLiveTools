@@ -86,22 +86,11 @@ namespace BilibiliAutoLiver
 
 #if DEBUG
             builder.Services.AddControllersWithViews()
-                .AddNewtonsoftJson(options => {
-                    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
-                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                }).AddRazorRuntimeCompilation();
+                .AddJsonConfig()
+                .AddRazorRuntimeCompilation();
 #else
             builder.Services.AddControllersWithViews()
-                .AddNewtonsoftJson(options => {
-                    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
-                    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                });
+                .AddJsonConfig();
 #endif
 
             var app = builder.Build();
