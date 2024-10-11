@@ -202,15 +202,19 @@ namespace BilibiliAutoLiver.Services.Base
             var setting = await GetSetting();
             if (setting.LiveSetting == null)
             {
-                _logger.ThrowLogError("请先配置直播间信息");
+                _logger.ThrowLogWarning("请先配置直播间信息");
             }
             if (setting.PushSetting == null)
             {
-                _logger.ThrowLogError("请先配置推流信息");
+                _logger.ThrowLogWarning("请先配置推流信息");
+            }
+            if (!setting.PushSetting.IsAutoRetry)
+            {
+                _logger.ThrowLogWarning("请先配置推流信息");
             }
             if (!setting.PushSetting.IsUpdate)
             {
-                _logger.ThrowLogError("还未配置推流信息，请先完善推流配置");
+                _logger.ThrowLogWarning("还未配置推流信息，请先完善推流配置");
             }
             if (setting.LiveSetting.AreaId <= 0)
             {

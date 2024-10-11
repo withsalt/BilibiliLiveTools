@@ -48,21 +48,19 @@ namespace BilibiliAutoLiver.Services
                     _logger.LogWarning("用户未登录！");
                     return;
                 }
+                Preheat();
                 //登录成功之后，启动定时任务
                 await _jobScheduler.Start(token);
                 //开始推流
-#if DEBUG
-                _logger.LogWarning($"开发，不推流");
-                _ = Preheat();
-                return;
-#endif
-
                 await _pushProxyService.Start();
-                _ = Preheat();
+            }
+            catch (NotSupportedException ex)
+            {
+                _logger.LogWarning($"自动开启推流失败！{ex.Message}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "初始化失败！");
+                _logger.LogError(ex, $"自动开启推流失败！{ex.Message}");
             }
         }
 
@@ -81,7 +79,7 @@ namespace BilibiliAutoLiver.Services
                 {
                     _lockService.UnLock(CacheKeyConstant.LOGING_STATUS_CACHE_KEY);
                 }
-                
+
                 if (userInfo == null)
                 {
                     if (_lockService.Lock(CacheKeyConstant.QRCODE_LOGIN_STATUS_CACHE_KEY, TimeSpan.FromSeconds(300)))
@@ -128,12 +126,19 @@ namespace BilibiliAutoLiver.Services
         /// 预热ffmpeg
         /// </summary>
         /// <returns></returns>
-        private async Task Preheat()
+        private void Preheat()
         {
-            await _ffmpeg.GetVersion();
-            await _ffmpeg.GetVideoDevices();
-            await _ffmpeg.GetAudioDevices();
-            _ffmpeg.GetVideoCodecs();
+            try
+            {
+                _ffmpeg.GetVersion();
+                _ffmpeg.GetVideoDevices();
+                _ffmpeg.GetAudioDevices();
+                _ffmpeg.GetVideoCodecs();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"预加载设备信息失败");
+            }
         }
     }
 }

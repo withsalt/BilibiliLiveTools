@@ -16,5 +16,17 @@ namespace BilibiliAutoLiver.Extensions
             logger.LogError(message);
             throw new Exception(message, ex);
         }
+
+        public static void ThrowLogWarning(this ILogger logger, string message)
+        {
+            logger.LogWarning(message);
+            throw new NotSupportedException(message);
+        }
+
+        public static void ThrowLogWarning(this ILogger logger, string message, Exception ex)
+        {
+            logger.LogWarning(message);
+            throw new NotSupportedException(message, ex);
+        }
     }
 }

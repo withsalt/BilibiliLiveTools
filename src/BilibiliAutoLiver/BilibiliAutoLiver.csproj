@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>disable</Nullable>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>4.1.1</Version>
+		<Version>4.2.0</Version>
 		<Description>哔哩哔哩（B站）无人值守直播工具。</Description>
 	</PropertyGroup>
 
