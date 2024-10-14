@@ -1,4 +1,5 @@
 ﻿using BilibiliAutoLiver.Models.Entities;
+using BilibiliAutoLiver.Models.Settings;
 
 namespace BilibiliAutoLiver.Models.Dtos
 {
@@ -7,5 +8,7 @@ namespace BilibiliAutoLiver.Models.Dtos
         public LiveSetting LiveSetting { get; set; }
 
         public PushSettingDto PushSetting { get; set; }
+
+        public AppSettings AppSettings { get; set; }
     }
 }

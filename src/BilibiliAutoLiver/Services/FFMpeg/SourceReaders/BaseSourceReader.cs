@@ -49,24 +49,27 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 GetVideoOutputArg(opt);
 
                 //PixelFormat
-                opt.ForcePixelFormat("yuv420p");
+                opt.ForcePixelFormat(!string.IsNullOrWhiteSpace(this.Settings.AppSettings.FFmpegPresetParams.PixelFormat) ? this.Settings.AppSettings.FFmpegPresetParams.PixelFormat : "yuv420p");
 
                 //延迟参数
-                opt.WithLowDelayArgument();
-
-                //自定义参数
-                if (!string.IsNullOrWhiteSpace(this.Settings.PushSetting.CustumOutputParams))
+                if (this.Settings.AppSettings.FFmpegPresetParams.LowDelayFlags)
                 {
-                    opt.WithCustomArgument(this.Settings.PushSetting.CustumOutputParams);
+                    opt.WithLowDelayArgument();
                 }
-
-                //输出格式
-                opt.ForceFormat("flv");
 
                 //推流分辨率
                 if (this.Settings.PushSetting.OutputWidth > 0 && this.Settings.PushSetting.OutputHeight > 0)
                 {
                     opt.Resize(this.Settings.PushSetting.OutputWidth, this.Settings.PushSetting.OutputHeight);
+                }
+
+                //输出格式
+                opt.ForceFormat(!string.IsNullOrWhiteSpace(this.Settings.AppSettings.FFmpegPresetParams.Format) ? this.Settings.AppSettings.FFmpegPresetParams.Format : "flv");
+
+                //自定义参数
+                if (!string.IsNullOrWhiteSpace(this.Settings.PushSetting.CustumOutputParams))
+                {
+                    opt.WithCustomArgument(this.Settings.PushSetting.CustumOutputParams);
                 }
             });
             return rt;

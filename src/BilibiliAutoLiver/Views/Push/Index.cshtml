@@ -442,7 +442,7 @@
                 const deviceObjs = JSON.parse(videoDeviceInfo);
                 const [deviceTypeName, deviceName] = selectDevice.split(',');
                 const targetDevice = deviceObjs.find(device =>
-                  device.Name === deviceName && device.DeviceTypeName === deviceTypeName
+                  device.Identity === deviceName && device.DeviceTypeName === deviceTypeName
                 );
 
                 if(!targetDevice){

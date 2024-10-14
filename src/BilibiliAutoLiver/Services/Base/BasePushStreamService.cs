@@ -70,6 +70,7 @@ namespace BilibiliAutoLiver.Services.Base
                 {
                     LiveSetting = liveSetting,
                     PushSetting = await ConvertPushSettingToDto(scope.ServiceProvider, pushSetting),
+                    AppSettings = _appSettings
                 };
             }
         }

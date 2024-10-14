@@ -9,7 +9,6 @@ namespace BilibiliAutoLiver.DependencyInjection
         public static IServiceCollection ConfigureSettings(this IServiceCollection services, IHostApplicationBuilder builder)
         {
             services.Configure<AppSettings>(builder.Configuration.GetSection(AppSettings.Position));
-            services.Configure<FFMpegPresetParams>(builder.Configuration.GetSection(FFMpegPresetParams.Position));
             return services;
         }
     }

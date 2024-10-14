@@ -27,7 +27,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
         private readonly IFFMpegService _ffmpeg;
         private readonly IPipeContainer _pipeContainer;
         private readonly AppSettings _appSettings;
-        private readonly FFMpegPresetParams _presetParams;
 
         private CancellationTokenSource _tokenSource;
         private Task _mainTask;
@@ -41,8 +40,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
             , IPipeContainer pipeContainer
             , IMemoryCache cache
             , IServiceProvider serviceProvider
-            , IOptions<AppSettings> settingOptions
-            , IOptions<FFMpegPresetParams> presetParamsOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)
+            , IOptions<AppSettings> settingOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _account = account ?? throw new ArgumentNullException(nameof(account));
@@ -50,7 +48,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
             _pipeContainer = pipeContainer ?? throw new ArgumentNullException(nameof(pipeContainer));
             _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
-            _presetParams = presetParamsOptions?.Value ?? throw new ArgumentNullException(nameof(presetParamsOptions));
         }
 
         /// <summary>
