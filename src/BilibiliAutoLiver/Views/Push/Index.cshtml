@@ -174,7 +174,7 @@
                                 <div class="layui-form-item" id="videoDeviceNameType3Item">
                                     <label class="layui-form-label">视频设备<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
-                                        <select id="videoDeviceNameType3" name="videoDeviceNameType3">
+                                        <select id="videoDeviceNameType3" name="videoDeviceNameType3" lay-filter="videoDeviceNameType3">
                                             <option value="">请选择</option>
                                             @foreach (var item in Model.VideoDevices)
                                             {
@@ -187,16 +187,7 @@
                                     <label class="layui-form-label">输入分辨率<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
                                         <select id="inputResolutionType3" name="inputResolutionType3" lay-verify="required">
-                                            <option value="480x320">480×320</option>
-                                            <option value="640x480">640×480</option>
-                                            <option value="800x600">800×600</option>
-                                            <option value="1280x720" selected>1280×720</option>
-                                            <option value="1366x768">1366×768</option>
-                                            <option value="1440x900">1440×900</option>
-                                            <option value="1920x1080">1920×1080</option>
-                                            <option value="2560x1440">2560×1440</option>
-                                            <option value="3840x2160">3840×2160</option>
-                                            <option value="7680x4320">7680×4320</option>
+                                            <option value="">请选择</option>
                                         </select>
                                     </div>
                                 </div>
@@ -237,7 +228,7 @@
                                 <div class="layui-form-item" id="videoDeviceNameType4Item">
                                     <label class="layui-form-label">视频设备<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
-                                        <select id="videoDeviceNameType4" name="videoDeviceNameType4">
+                                        <select id="videoDeviceNameType4" name="videoDeviceNameType4" lay-filter="videoDeviceNameType4">
                                             <option value="">请选择</option>
                                             @foreach (var item in Model.VideoDevices)
                                             {
@@ -250,16 +241,7 @@
                                     <label class="layui-form-label">输入分辨率<label style="color:red">*</label></label>
                                     <div class="layui-input-inline">
                                         <select id="inputResolutionType4" name="inputResolutionType4" lay-verify="required">
-                                            <option value="480x320">480×320</option>
-                                            <option value="640x480">640×480</option>
-                                            <option value="800x600">800×600</option>
-                                            <option value="1280x720" selected>1280×720</option>
-                                            <option value="1366x768">1366×768</option>
-                                            <option value="1440x900">1440×900</option>
-                                            <option value="1920x1080">1920×1080</option>
-                                            <option value="2560x1440">2560×1440</option>
-                                            <option value="3840x2160">3840×2160</option>
-                                            <option value="7680x4320">7680×4320</option>
+                                            <option value="">请选择</option>
                                         </select>
                                     </div>
                                 </div>
@@ -432,6 +414,8 @@
                 layer = layui.layer,
                 form = layui.form;
 
+            var videoDeviceInfo = '@Html.Raw(Model.VideoDeivceJson)';
+
             // 执行渲染
             var codeInst = layui.code({
                 elem: '#ffmpegCommand',
@@ -446,6 +430,38 @@
                 name: "pluginType4",
                 data: @Html.Raw(Model.PluginsToJsArray()),
             });
+
+            function loadDeviceResolution(name, selectDevice, defaultVal){
+                name = "#" + name;
+                if(!selectDevice){
+                    $(name).html("");
+                    $(name).append("<option value=''>请选择</option>");
+                    form.render("select");
+                    return false;
+                }
+                const deviceObjs = JSON.parse(videoDeviceInfo);
+                const [deviceTypeName, deviceName] = selectDevice.split(',');
+                const targetDevice = deviceObjs.find(device =>
+                  device.Name === deviceName && device.DeviceTypeName === deviceTypeName
+                );
+
+                if(!targetDevice){
+                    $(name).html("");
+                    $(name).append("<option value=''>请选择</option>");
+                    form.render("select");
+                    return false;
+                }
+
+                for(var i = 0; i < targetDevice.Characteristics.length; i++){
+                    if(defaultVal && defaultVal === targetDevice.Characteristics[i].Description){
+                        $(name).append(new Option(targetDevice.Characteristics[i].Description, targetDevice.Characteristics[i].Description, true, true));
+                    }
+                    else{
+                        $(name).append(new Option(targetDevice.Characteristics[i].Description, targetDevice.Characteristics[i].Description));
+                    }
+                }
+                form.render("select");
+            }
 
             function init() {
                 let resolution = "@Model.PushSetting.OutputResolution";
@@ -502,9 +518,9 @@
                         let deviceName = "@Html.Raw(Model.PushSetting.DeviceName)";
                         let audioDevice = "@Html.Raw(Model.PushSetting.AudioDevice)";
                         let audioId = "@Html.Raw(Model.PushSetting.AudioId)";
-                        let inputResolution = "@Model.PushSetting.InputResolution";
+                        let inputResolution = "@(Model.PushSetting.InputFormat.ToString() + "," + Model.PushSetting.InputResolution + "@" + Model.PushSetting.InputFramerate)";
                         $("#videoDeviceNameType3").val(deviceName);
-                        $("#inputResolutionType3").val(inputResolution);
+                        loadDeviceResolution("inputResolutionType3", deviceName, inputResolution);
 
                         let isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
                         if (isFromFile == "true") {
@@ -524,10 +540,10 @@
                         let deviceName = "@Html.Raw(Model.PushSetting.DeviceName)";
                         let audioDevice = "@Html.Raw(Model.PushSetting.AudioDevice)";
                         let audioId = "@Html.Raw(Model.PushSetting.AudioId)";
-                        let inputResolution = "@Model.PushSetting.InputResolution";
+                        let inputResolution = "@(Model.PushSetting.InputFormat.ToString() + "," + Model.PushSetting.InputResolution + "@" + Model.PushSetting.InputFramerate)";
                         let plugins = "@Html.Raw(Model.PushSetting.Plugins)";
                         $("#videoDeviceNameType4").val(deviceName);
-                        $("#inputResolutionType4").val(inputResolution);
+                        loadDeviceResolution("inputResolutionType4", deviceName, inputResolution);
 
                         let isFromFile = "@((Model.PushSetting.InputAudioSource == InputAudioSource.File).ToString().ToLower())";
                         if (isFromFile == "true") {
@@ -872,6 +888,14 @@
                     }
                 });
                 return false;
+            });
+
+            form.on('select(videoDeviceNameType3)', function(data){
+                loadDeviceResolution("inputResolutionType3", data.value);
+            });
+
+            form.on('select(videoDeviceNameType4)', function(data){
+                loadDeviceResolution("inputResolutionType4", data.value);
             });
 
             // 切换事件

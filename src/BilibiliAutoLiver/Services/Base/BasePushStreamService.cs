@@ -154,6 +154,7 @@ namespace BilibiliAutoLiver.Services.Base
                 DeviceName = pushSetting.DeviceName,
                 Plugins = pushSetting.Plugins,
                 InputResolution = pushSetting.InputResolution,
+                InputFormat = pushSetting.InputFormat,
                 InputFramerate = pushSetting.InputFramerate,
                 InputScreen = pushSetting.InputScreen,
                 InputAudioSource = pushSetting.InputAudioSource,
@@ -205,10 +206,6 @@ namespace BilibiliAutoLiver.Services.Base
                 _logger.ThrowLogWarning("请先配置直播间信息");
             }
             if (setting.PushSetting == null)
-            {
-                _logger.ThrowLogWarning("请先配置推流信息");
-            }
-            if (!setting.PushSetting.IsAutoRetry)
             {
                 _logger.ThrowLogWarning("请先配置推流信息");
             }

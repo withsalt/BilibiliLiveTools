@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Entities;
+using Newtonsoft.Json;
 
 namespace BilibiliAutoLiver.Models.ViewModels
 {
@@ -15,6 +16,17 @@ namespace BilibiliAutoLiver.Models.ViewModels
         /// 支持的视频设备
         /// </summary>
         public List<VideoDeviceInfo> VideoDevices { get; set; }
+
+        /// <summary>
+        /// 设备JSON数据
+        /// </summary>
+        public string VideoDeivceJson
+        {
+            get
+            {
+                return JsonConvert.SerializeObject(VideoDevices);
+            }
+        }
 
         /// <summary>
         /// 支持的音频设备

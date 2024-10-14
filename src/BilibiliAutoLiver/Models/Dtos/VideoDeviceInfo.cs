@@ -62,6 +62,19 @@ namespace BilibiliAutoLiver.Models.Dtos
 
         public PixelFormats Format { get; set; }
 
-        public int Frame {  get; set; }
+        public int Frame { get; set; }
+
+        public string Description
+        {
+            get
+            {
+                return this.ToString();
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{Format},{Width}x{Height}@{Frame}";
+        }
     }
 }

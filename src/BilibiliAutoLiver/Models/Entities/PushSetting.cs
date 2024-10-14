@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using BilibiliAutoLiver.Models.Enums;
+using FlashCap;
 using FreeSql.DataAnnotations;
 
 namespace BilibiliAutoLiver.Models.Entities
@@ -99,6 +100,11 @@ namespace BilibiliAutoLiver.Models.Entities
         [MaxLength(64)]
         [Column(IsNullable = true)]
         public string InputResolution { get; set; }
+
+        /// <summary>
+        /// 输入图像格式
+        /// </summary>
+        public PixelFormats InputFormat {  get; set; }
 
         /// <summary>
         /// 帧数

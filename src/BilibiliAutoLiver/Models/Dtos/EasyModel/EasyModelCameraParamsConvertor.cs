@@ -7,6 +7,7 @@ using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.FFMpeg;
 using BilibiliAutoLiver.Services.Interface;
 using BilibiliAutoLiver.Utils;
+using FlashCap;
 
 namespace BilibiliAutoLiver.Models.Dtos.EasyModel
 {
@@ -23,7 +24,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception("输入设备不能为空");
             }
-            if (!ResolutionHelper.TryParse(request.InputDeviceResolution, out int width, out int height))
+            if (!ResolutionHelper.TryParse(request.InputDeviceResolution, out PixelFormats pixelFormats, out int width, out int height, out int frame))
             {
                 throw new Exception("输入分辨率不能为空或参数错误");
             }
@@ -31,6 +32,7 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception("当选择推流音频来源于设备时，音频设备不能为空");
             }
+            request.InputDeviceFramerate = frame;
             if (request.InputDeviceFramerate <= 0)
             {
                 throw new Exception("输入帧数不能为空或参数错误");
@@ -41,13 +43,14 @@ namespace BilibiliAutoLiver.Models.Dtos.EasyModel
             {
                 throw new Exception($"视频输入设备{request.InputDeviceName}未获取到受支持的输入分辨率");
             }
-            if (!supportResolutions.Any(p => ResolutionHelper.Equal(p.ToString(), request.InputDeviceResolution)))
+            if (!supportResolutions.Any(p => ResolutionHelper.Equal(p.Width, p.Height, width, height)))
             {
                 throw new Exception($"视频输入设备{request.InputDeviceName}不支持输入分辨率：{request.InputDeviceResolution}，受支持的最大分辨率：{supportResolutions.Last()}");
             }
 
             this.Setting.DeviceName = request.InputDeviceName;
-            this.Setting.InputResolution = request.InputDeviceResolution;
+            this.Setting.InputFormat = pixelFormats;
+            this.Setting.InputResolution = $"{width}x{height}";
             this.Setting.InputFramerate = request.InputDeviceFramerate;
             this.Setting.InputAudioSource = request.InputDeviceAudioFrom ? InputAudioSource.Device : InputAudioSource.File;
             this.Setting.AudioId = !request.InputDeviceAudioFrom && request.InputDeviceAudioId.HasValue && request.InputDeviceAudioId.Value > 0 ? request.InputDeviceAudioId.Value : null;

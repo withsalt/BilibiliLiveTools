@@ -113,14 +113,17 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services
                         Identity = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? item.Name : (item.Identity != null ? item.Identity.ToString() : item.Name),
                         DeviceType = item.DeviceType,
                         Characteristics = item.Characteristics
-                            .Where(p => p.FramesPerSecond.Denominator != 0)
+                            .Where(p => p.FramesPerSecond.Denominator != 0 && p.PixelFormat != PixelFormats.Unknown)
                             .Select(p => new Characteristics()
                             {
                                 Width = p.Width,
                                 Height = p.Height,
                                 Format = p.PixelFormat,
                                 Frame = p.FramesPerSecond.Denominator == 0 ? 0 : p.FramesPerSecond.Numerator / p.FramesPerSecond.Denominator,
-                            }).ToList()
+                            })
+                            .OrderBy(p => p.Format)
+                            .ThenByDescending(p => p.Width)
+                            .ToList()
                     };
                     result.Add(deviceInfo);
                 }
