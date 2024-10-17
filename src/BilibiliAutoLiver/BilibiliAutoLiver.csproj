@@ -12,9 +12,9 @@
 		<PackageReference Include="FFMpegCore" Version="5.1.0" />
 		<PackageReference Include="FlashCap" Version="1.10.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
-		<PackageReference Include="MailKit" Version="4.7.1.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.8" />
+		<PackageReference Include="MailKit" Version="4.8.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.10" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.10" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.14" />
 		<PackageReference Include="Quartz.AspNetCore" Version="3.13.0" />
 		<PackageReference Include="Quartz.Plugins" Version="3.13.0" />
