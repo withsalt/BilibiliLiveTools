@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Services.FFMpeg.Ext;
 using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using FFMpegCore.Enums;
@@ -29,6 +30,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 {
                     FFMpegArguments = FFMpegArguments.AddDeviceInput($"audio=\"{deviceName}\"", opt =>
                     {
+                        opt.WithSettingsAudioInputArgument(this.Settings);
                         opt.ForceFormat(format);
                     });
                 }
@@ -36,6 +38,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 {
                     FFMpegArguments = FFMpegArguments.AddDeviceInput($"\"{deviceName}\"", opt =>
                     {
+                        opt.WithSettingsAudioInputArgument(this.Settings);
                         opt.ForceFormat(format);
                     });
                 }
@@ -49,6 +52,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 this.FFMpegArguments.AddFileInput(this.Settings.PushSetting.AudioMaterial.FullPath, true, opt =>
                 {
+                    opt.WithSettingsAudioInputArgument(this.Settings);
                     opt.WithCustomArgument("-stream_loop -1");
                 });
                 return;
@@ -65,6 +69,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 FFMpegArguments = FFMpegArguments.FromDeviceInput($"video=\"{deviceName}\"", opt =>
                 {
+                    opt.WithSettingsVideoInputArgument(this.Settings);
                     opt.ForceFormat(format);
                     opt.WithFramerate(pushSetting.InputFramerate);
                     opt.WithCustomArgument($"-video_size {pushSetting.InputWidth}x{pushSetting.InputHeight}");
@@ -79,6 +84,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 FFMpegArguments = FFMpegArguments.FromDeviceInput($"\"{deviceName}\"", opt =>
                 {
+                    opt.WithSettingsVideoInputArgument(this.Settings);
                     opt.ForceFormat(format);
                     opt.WithFramerate(pushSetting.InputFramerate);
                     opt.WithCustomArgument($"-video_size {pushSetting.InputWidth}x{pushSetting.InputHeight}");

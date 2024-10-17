@@ -109,7 +109,26 @@ namespace BilibiliAutoLiver.Models.Settings
         /// 获取或设置输出质量配置
         /// </summary>
         public OutputQuality OutputQuality { get; set; }
+
+        /// <summary>
+        /// 获取或者设置输入配置质量
+        /// </summary>
+        public InputQuality InputQuality { get; set; }
     }
+
+    public class InputQuality
+    {
+        /// <summary>
+        /// 视频输入源自定义参数
+        /// </summary>
+        public string VideoCustomArgument { get; set; }
+
+        /// <summary>
+        /// 音频输入源自定义参数
+        /// </summary>
+        public string AudioCustomArgument { get; set; }
+    }
+
     /// <summary>
     /// 输出质量设置类
     /// </summary>
@@ -137,14 +156,19 @@ namespace BilibiliAutoLiver.Models.Settings
     public class QualitySettings
     {
         /// <summary>
+        /// 缓冲区大小
+        /// </summary>
+        public string BufferSize { get; set; }
+
+        /// <summary>
         /// 获取或设置比特率
         /// </summary>
         public int Bitrate { get; set; }
 
         /// <summary>
-        /// 获取或设置速度预设
+        /// 编码器预设
         /// </summary>
-        public int SpeedPreset { get; set; }
+        public string SpeedPreset { get; set; }
 
         /// <summary>
         /// 获取或设置帧率模式
@@ -159,11 +183,16 @@ namespace BilibiliAutoLiver.Models.Settings
         /// <summary>
         /// 获取或设置关键帧间隔
         /// </summary>
-        public int IntraFrame { get; set; }
+        public int GOP { get; set; }
 
         /// <summary>
         /// 获取或设置恒定码率因子
         /// </summary>
         public int ConstantRateFactor { get; set; }
+
+        /// <summary>
+        /// 额外的自定义参数
+        /// </summary>
+        public string CustomArgument {  get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
+using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Services.FFMpeg.Ext;
 using FFMpegCore;
 using FFMpegCore.Enums;
@@ -42,35 +43,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
             var rt = FFMpegArguments.OutputToUrl(RtmpAddr, opt =>
             {
-                //音频
                 GetAudioOutputArg(opt);
-
-                //视频编码
                 GetVideoOutputArg(opt);
-
-                //PixelFormat
-                opt.ForcePixelFormat(!string.IsNullOrWhiteSpace(this.Settings.AppSettings.FFmpegPresetParams.PixelFormat) ? this.Settings.AppSettings.FFmpegPresetParams.PixelFormat : "yuv420p");
-
-                //延迟参数
-                if (this.Settings.AppSettings.FFmpegPresetParams.LowDelayFlags)
-                {
-                    opt.WithLowDelayArgument();
-                }
-
-                //推流分辨率
-                if (this.Settings.PushSetting.OutputWidth > 0 && this.Settings.PushSetting.OutputHeight > 0)
-                {
-                    opt.Resize(this.Settings.PushSetting.OutputWidth, this.Settings.PushSetting.OutputHeight);
-                }
-
-                //输出格式
-                opt.ForceFormat(!string.IsNullOrWhiteSpace(this.Settings.AppSettings.FFmpegPresetParams.Format) ? this.Settings.AppSettings.FFmpegPresetParams.Format : "flv");
-
-                //自定义参数
-                if (!string.IsNullOrWhiteSpace(this.Settings.PushSetting.CustumOutputParams))
-                {
-                    opt.WithCustomArgument(this.Settings.PushSetting.CustumOutputParams);
-                }
             });
             return rt;
         }
@@ -87,52 +61,23 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         protected virtual void GetVideoOutputArg(FFMpegArgumentOptions opt)
         {
             Codec codec = GetVideoCodec();
+            QualitySettings qualitySettings = null;
             switch (this.Settings.PushSetting.Quality)
             {
                 case OutputQualityEnum.High:
                     {
-                        //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(codec);
-                        opt.WithVideoBitrate(8000);
-                        //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        opt.Withx264Orx265SpeedPreset(codec);
-                        //帧同步，可变帧率
-                        opt.WithCustomArgument("-fps_mode vfr");
-                        //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
-                        opt.WithCustomArgument("-tune zerolatency");
-                        opt.WithCustomArgument("-g 10");
-                        opt.WithConstantRateFactor(23);
+                        qualitySettings = this.Settings.AppSettings.FFmpegPresetParams.OutputQuality.High;
                     }
                     break;
                 default:
                 case OutputQualityEnum.Medium:
                     {
-                        //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(codec);
-                        opt.WithVideoBitrate(4000);
-                        //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        opt.Withx264Orx265SpeedPreset(codec);
-                        //帧同步，可变帧率
-                        opt.WithCustomArgument("-fps_mode vfr");
-                        //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
-                        opt.WithCustomArgument("-tune zerolatency");
-                        opt.WithCustomArgument("-g 20");
-                        opt.WithConstantRateFactor(28);
+                        qualitySettings = this.Settings.AppSettings.FFmpegPresetParams.OutputQuality.Medium;
                     }
                     break;
                 case OutputQualityEnum.Low:
                     {
-                        //opt.WithCustomArgument("-bufsize 10M");
-                        opt.WithVideoCodec(codec);
-                        opt.WithVideoBitrate(2000);
-                        //用于设置 x264 编码器的编码速度和质量之间的权衡。
-                        opt.Withx264Orx265SpeedPreset(codec);
-                        //帧同步，可变帧率
-                        opt.WithCustomArgument("-fps_mode vfr");
-                        //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
-                        opt.WithCustomArgument("-tune zerolatency");
-                        opt.WithCustomArgument("-g 30");
-                        opt.WithConstantRateFactor(33);
+                        qualitySettings = this.Settings.AppSettings.FFmpegPresetParams.OutputQuality.Low;
                     }
                     break;
                 case OutputQualityEnum.Original:
@@ -140,6 +85,62 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                         opt.CopyChannel(Channel.Video);
                     }
                     break;
+            }
+            if (qualitySettings != null)
+            {
+                if (!string.IsNullOrWhiteSpace(qualitySettings.BufferSize))
+                {
+                    opt.WithCustomArgument($"-bufsize {qualitySettings.BufferSize}");
+                }
+                opt.WithVideoCodec(codec);
+                opt.WithVideoBitrate(qualitySettings.Bitrate);
+                //用于设置 x264 编码器的编码速度和质量之间的权衡。
+                opt.Withx264Orx265SpeedPreset(codec, qualitySettings.SpeedPreset);
+                if (!string.IsNullOrWhiteSpace(qualitySettings.FpsMode))
+                {
+                    //帧同步，可变帧率
+                    opt.WithCustomArgument($"-fps_mode {qualitySettings.FpsMode}");
+                }
+                if (qualitySettings.ZeroLatency)
+                {
+                    //指定 x264 编码器的调整参数，以优化特定类型的输入视频。
+                    opt.WithCustomArgument("-tune zerolatency");
+                }
+                if (qualitySettings.GOP > 0)
+                {
+                    //用于设置视频编码时的关键帧间隔（GOP, Group of Pictures）。这个参数定义了两个关键帧之间的帧数。
+                    opt.WithCustomArgument($"-g {qualitySettings.GOP}");
+                }
+                opt.WithConstantRateFactor(qualitySettings.ConstantRateFactor);
+                //额外的自定义参数
+                if (!string.IsNullOrWhiteSpace(qualitySettings.CustomArgument))
+                {
+                    opt.WithCustomArgument(qualitySettings.CustomArgument);
+                }
+            }
+
+            //PixelFormat
+            opt.ForcePixelFormat(!string.IsNullOrWhiteSpace(this.Settings.AppSettings.FFmpegPresetParams.PixelFormat) ? this.Settings.AppSettings.FFmpegPresetParams.PixelFormat : "yuv420p");
+
+            //延迟参数
+            if (this.Settings.AppSettings.FFmpegPresetParams.LowDelayFlags)
+            {
+                opt.WithLowDelayArgument();
+            }
+
+            //推流分辨率
+            if (this.Settings.PushSetting.OutputWidth > 0 && this.Settings.PushSetting.OutputHeight > 0)
+            {
+                opt.Resize(this.Settings.PushSetting.OutputWidth, this.Settings.PushSetting.OutputHeight);
+            }
+
+            //输出格式
+            opt.ForceFormat(!string.IsNullOrWhiteSpace(this.Settings.AppSettings.FFmpegPresetParams.Format) ? this.Settings.AppSettings.FFmpegPresetParams.Format : "flv");
+
+            //自定义参数
+            if (!string.IsNullOrWhiteSpace(this.Settings.PushSetting.CustumOutputParams))
+            {
+                opt.WithCustomArgument(this.Settings.PushSetting.CustumOutputParams);
             }
         }
 

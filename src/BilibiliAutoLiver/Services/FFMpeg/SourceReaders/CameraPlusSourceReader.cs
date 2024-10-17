@@ -8,6 +8,7 @@ using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
+using BilibiliAutoLiver.Services.FFMpeg.Ext;
 using BilibiliAutoLiver.Services.FFMpeg.Pipe;
 using BilibiliAutoLiver.Utils;
 using FFMpegCore;
@@ -122,10 +123,9 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             this.FFMpegArguments = FFMpegArguments.FromPipeInput(this.PipeSource, opt =>
             {
-                //opt.WithCustomArgument("-thread_queue_size 1024");
+                opt.WithSettingsVideoInputArgument(this.Settings);
                 opt.ForceFormat("rawvideo");
                 opt.ForcePixelFormat(streamFormat);
-                //opt.WithFramerate(_frameRate);
                 opt.Resize(this.DeviceProvider.Size.Width, this.DeviceProvider.Size.Height);
             });
         }
@@ -143,6 +143,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 {
                     FFMpegArguments = FFMpegArguments.AddDeviceInput($"audio=\"{deviceName}\"", opt =>
                     {
+                        opt.WithSettingsAudioInputArgument(this.Settings);
                         opt.ForceFormat(format);
                     });
                 }
@@ -150,6 +151,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 {
                     FFMpegArguments = FFMpegArguments.AddDeviceInput($"\"{deviceName}\"", opt =>
                     {
+                        opt.WithSettingsAudioInputArgument(this.Settings);
                         opt.ForceFormat(format);
                     });
                 }
@@ -163,6 +165,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 this.FFMpegArguments.AddFileInput(this.Settings.PushSetting.AudioMaterial.FullPath, true, opt =>
                 {
+                    opt.WithSettingsAudioInputArgument(this.Settings);
                     opt.WithCustomArgument("-stream_loop -1");
                 });
                 return;

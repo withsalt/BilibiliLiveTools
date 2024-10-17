@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Services.FFMpeg.Ext;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
@@ -52,6 +53,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
                 FFMpegArguments = FFMpegArguments.FromDemuxConcatInput(allFiles, opt =>
                 {
+                    opt.WithSettingsVideoInputArgument(this.Settings);
                     opt.WithCustomArgument("-re");
                     opt.WithCustomArgument("-stream_loop -1");
 
@@ -66,6 +68,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 FFMpegArguments = FFMpegArguments.FromFileInput(this.Settings.PushSetting.VideoMaterial.FullPath, true, opt =>
                 {
+                    opt.WithSettingsVideoInputArgument(this.Settings);
                     opt.WithCustomArgument("-re");
                     opt.WithCustomArgument("-stream_loop -1");
 
@@ -86,6 +89,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             this.FFMpegArguments.AddFileInput(this.Settings.PushSetting.AudioMaterial.FullPath, true, opt =>
             {
+                opt.WithSettingsAudioInputArgument(this.Settings);
                 opt.WithCustomArgument("-stream_loop -1");
             });
         }

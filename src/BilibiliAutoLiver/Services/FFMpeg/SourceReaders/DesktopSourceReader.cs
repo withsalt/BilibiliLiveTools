@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Dtos;
+using BilibiliAutoLiver.Services.FFMpeg.Ext;
 using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using FFMpegCore.Enums;
@@ -30,6 +31,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 {
                     FFMpegArguments = FFMpegArguments.AddDeviceInput($"audio=\"{deviceName}\"", opt =>
                     {
+                        opt.WithSettingsAudioInputArgument(this.Settings);
                         opt.ForceFormat(format);
                     });
                 }
@@ -37,6 +39,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 {
                     FFMpegArguments = FFMpegArguments.AddDeviceInput($"\"{deviceName}\"", opt =>
                     {
+                        opt.WithSettingsAudioInputArgument(this.Settings);
                         opt.ForceFormat(format);
                     });
                 }
@@ -50,6 +53,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 this.FFMpegArguments.AddFileInput(this.Settings.PushSetting.AudioMaterial.FullPath, true, opt =>
                 {
+                    opt.WithSettingsAudioInputArgument(this.Settings);
                     opt.WithCustomArgument("-stream_loop -1");
                 });
                 return;
@@ -68,6 +72,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 FFMpegArguments = FFMpegArguments.FromFileInput("desktop", false, opt =>
                 {
+                    opt.WithSettingsVideoInputArgument(this.Settings);
                     opt.ForceFormat("gdigrab");
                     opt.WithFramerate(30);
                     if (rectangle != null)
@@ -91,6 +96,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 string path = rectangle != null ? $":0.0+{rectangle.Value.X},{rectangle.Value.Y}" : ":0.0";
                 FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
                 {
+                    opt.WithSettingsVideoInputArgument(this.Settings);
                     opt.ForceFormat("x11grab");
                     opt.WithFramerate(30);
                     if (rectangle != null)
