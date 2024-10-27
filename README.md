@@ -27,7 +27,7 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
 ### 教程
 
 #### 开始推流
-1. 获取程序
+1. 获取程序  
    Linux(树莓派 64位操作系统):  
    ```shell
    wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Linux_ARM64.zip --no-check-certificate
