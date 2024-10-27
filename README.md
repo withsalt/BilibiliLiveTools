@@ -16,8 +16,6 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
 4. BilibiliLiverTests  
 单元测试神马的。  
 
-Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进制发行版本。如有需要，可以提交Issue或者自行下载编译。  
-
 ### Demo
 扫描二维码登录：
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/demo_qrcode_login.jpg)
@@ -29,8 +27,8 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
 ### 教程
 
 #### 开始推流
-1. 获取程序  
-   树莓派 64位操作系统：  
+1. 获取程序
+   Linux(树莓派 64位操作系统):  
    ```shell
    wget https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Linux_ARM64.zip --no-check-certificate
    ```
@@ -46,7 +44,7 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
 4. 运行  
    在Linux上面运行：  
    ```shell
-   ./BilibiliAutoLiver --urls="http://*:18686"  
+   ./BilibiliAutoLiver 
    ```
    这行命令的意思是运行程序，并监听18686端口。  
 
@@ -59,7 +57,12 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
 
 5. 编辑直播设置  
    默认情况下，是没有推流配置的。只有配置推流信息之后，才能进行推流。  
-   扫码登录之后，进入**直播设置->推流设置**，按照说明填写推流命令（目前仅支持高级模式）。**建议填写之前先测试推流命令能否正确执行。**  
+   扫码登录之后，进入**直播设置->推流设置**。  
+   **简单模式**  
+   不做过多说明，按照提示选好就能开播。
+   
+   **高级模式**  
+   按照说明填写推流命令。 **建议填写之前先测试推流命令能否正确执行。**  
    ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/push_setting.jpg)
    高级模式推流命令中的“{URL}”，是一个配置符号，将在程序中被替换为获取到的Bilibili推流地址，所以一定要在最终命令中，把测试文件或者地址修改为 “{URL}”（URL大写） ，否则无法保存。  
    这里提供常见的两条推流命令：  
@@ -77,9 +80,9 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
    命令参数具体含义我就不解释了，建议直接问ChatGPT，或者直接让ChatGPT帮忙写推流命令。  
    ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/ffmpeg_chatgpt_desc.jpg)
 
-7. 安装FFmpeg（可选）  
-   为什么是可选？因为已经默认内置了ffmpeg，不用自行安装。但是对于一些其他的linux发行版。可能没有内置ffmpeg，所以需要用户自行安装ffmpeg。  
-   Linux（基于debian的发行版）：  
+7. 安装FFmpeg  
+   Windows平台因为已经默认内置了ffmpeg，不用自行安装。但是对于一些的linux发行版，可能没有内置ffmpeg，所以需要用户自行安装ffmpeg。  
+   安装命令（基于debian的发行版，比如Debian、Ubuntu、树莓派）：  
    ```shell
    # 安装，就这一行命令
    sudo apt install ffmpeg
@@ -88,10 +91,31 @@ Tips: 除了开播工具BilibiliAutoLiver以外，其余工具没有编译二进
    ```
 
 8. 停止推流  
-进入**直播设置->推流设置**，点击停止直播。  
+   进入**直播设置->推流设置**，点击停止直播。  
 
-9. 配置开机自启等  
-Linux上面配置系统服务，可以查看：https://www.quarkbook.com/?p=733  
+9. 配置开机自启  
+   编写一个系统服务  
+   ```shell
+   sudo nano /etc/systemd/system/bilibiliautoliver.service
+   ```
+   将下方代码中的执行路径替换为BilibiliAutoLiver程序所在的绝对路径。比如“/home/pi/BilibiliLiver_Linux_ARM64/BilibiliAutoLiver”，注意大小写。
+   ```shell
+   [Unit]
+   Description=BilibiliLiver
+   After=network.target
+   
+   [Service]
+   WorkingDirectory=应用程序所在绝对路径，比如/home/pi/BilibiliLiver_Linux_ARM64
+   ExecStart=应用程序本身绝对路径，比如/home/pi/BilibiliLiver_Linux_ARM64/BilibiliAutoLiver
+   Restart=always
+   SyslogIdentifier=BilibiliAutoLiver
+   User=root
+   Environment=ASPNETCORE_ENVIRONMENT=Production
+   
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   
 
 ### 常见问题
 
