@@ -14,7 +14,7 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
 		<PackageReference Include="SkiaSharp.QrCode" Version="0.7.0" />
-		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.9" />
 	</ItemGroup>
 
 </Project>
