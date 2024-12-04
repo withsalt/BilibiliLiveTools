@@ -83,61 +83,76 @@ namespace BilibiliAutoLiver.Services.Base
             if (!pushSetting.IsUpdate)
                 return null;
 
-            if (!ResolutionHelper.TryParse(pushSetting.OutputResolution, out int outputWidth, out int outputHeight))
-                throw new ArgumentException(pushSetting.OutputResolution, $"输出分辨率格式不正确，{pushSetting.OutputResolution}");
-
-            int inputWidth = 0, inputHeight = 0;
-
-            switch (pushSetting.InputType)
-            {
-                case InputType.Video:
-                    break;
-                case InputType.Desktop:
-                    break;
-                case InputType.Camera:
-                    if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out inputWidth, out inputHeight))
-                    {
-                        throw new ArgumentException(pushSetting.InputResolution, $"输入分辨率格式不正确，{pushSetting.OutputResolution}");
-                    }
-                    break;
-                case InputType.CameraPlus:
-                    if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out inputWidth, out inputHeight))
-                    {
-                        throw new ArgumentException(pushSetting.InputResolution, $"输入分辨率格式不正确，{pushSetting.OutputResolution}");
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            var materialRepository = provider.GetRequiredService<IMaterialRepository>();
-
-            List<long> materialIds = new List<long>(2);
-            if (pushSetting.VideoId > 0)
-            {
-                materialIds.Add(pushSetting.VideoId);
-            }
-            if (pushSetting.AudioId.HasValue && pushSetting.AudioId > 0)
-            {
-                materialIds.Add(pushSetting.AudioId.Value);
-            }
-            List<Material> materials = null;
+            int inputWidth = 0, inputHeight = 0, outputWidth = 0, outputHeight = 0;
             Material videoMaterial = null;
             Material audioMaterial = null;
-            if (materialIds.Any())
+
+            if (pushSetting.Model == ConfigModel.Normal)
             {
-                materials = await provider.GetRequiredService<IMaterialRepository>().Where(p => materialIds.Contains(p.Id)).ToListAsync();
-                videoMaterial = materials.Where(p => p.FileType == FileType.Video).FirstOrDefault();
-                if (videoMaterial == null && pushSetting.VideoId > 0)
+                //校验输入分辨率
+                if (!ResolutionHelper.TryParse(pushSetting.OutputResolution, out outputWidth, out outputHeight))
+                    throw new ArgumentException(pushSetting.OutputResolution, $"输出分辨率格式不正确，{pushSetting.OutputResolution}");
+
+                //校验输出分辨率
+                switch (pushSetting.InputType)
                 {
-                    throw new FileNotFoundException($"Id为{pushSetting.VideoId}视频素材不存在！");
+                    case InputType.Video:
+                        break;
+                    case InputType.Desktop:
+                        break;
+                    case InputType.Camera:
+                        if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out inputWidth, out inputHeight))
+                        {
+                            throw new ArgumentException(pushSetting.InputResolution,
+                                $"输入分辨率格式不正确，{pushSetting.InputResolution}");
+                        }
+
+                        break;
+                    case InputType.CameraPlus:
+                        if (!ResolutionHelper.TryParse(pushSetting.InputResolution, out inputWidth, out inputHeight))
+                        {
+                            throw new ArgumentException(pushSetting.InputResolution,
+                                $"输入分辨率格式不正确，{pushSetting.InputResolution}");
+                        }
+
+                        break;
+                    default:
+                        break;
                 }
-                audioMaterial = materials.Where(p => p.FileType == FileType.Music).FirstOrDefault();
-                if (audioMaterial == null && pushSetting.AudioId > 0)
+
+                List<long> materialIds = new List<long>(2);
+                if (pushSetting.VideoId > 0)
                 {
-                    throw new FileNotFoundException($"Id为{pushSetting.AudioId}音频素材不存在！");
+                    materialIds.Add(pushSetting.VideoId);
+                }
+
+                if (pushSetting.AudioId.HasValue && pushSetting.AudioId > 0)
+                {
+                    materialIds.Add(pushSetting.AudioId.Value);
+                }
+
+                if (materialIds.Any())
+                {
+                    var materials = await provider.GetRequiredService<IMaterialRepository>()
+                        .Where(p => materialIds.Contains(p.Id)).ToListAsync();
+                    videoMaterial = materials?.Where(p => p.FileType == FileType.Video).FirstOrDefault();
+                    if (videoMaterial == null && pushSetting.VideoId > 0)
+                    {
+                        throw new FileNotFoundException($"Id为{pushSetting.VideoId}视频素材不存在！");
+                    }
+
+                    audioMaterial = materials?.Where(p => p.FileType == FileType.Music).FirstOrDefault();
+                    if (audioMaterial == null && pushSetting.AudioId > 0)
+                    {
+                        throw new FileNotFoundException($"Id为{pushSetting.AudioId}音频素材不存在！");
+                    }
                 }
             }
+            else
+            {
+
+            }
+
             PushSettingDto pushSettingDto = new PushSettingDto()
             {
                 Key = pushSetting.Key,
