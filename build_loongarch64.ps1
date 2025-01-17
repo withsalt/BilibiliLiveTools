@@ -19,12 +19,10 @@ param (
 
 # 导入 Posh-SSH 模块，如果尚未安装则安装它
 if (!(Get-Module -ListAvailable -Name Posh-SSH)) {
-    Write-Output "安装 Posh-SSH 模块..."
+    Write-Output "安装 Posh-SSH 模块..." -NoConsole
     Install-Module -Name Posh-SSH -Force -Scope CurrentUser
 }
 Import-Module Posh-SSH
-
-
 
 # 获取脚本所在目录作为项目根目录
 $scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Definition
@@ -50,9 +48,6 @@ if ($UsePassword) {
     $credential = Get-Credential -UserName $RemoteUser -Message "使用密钥认证，请确保配置了 SSH 密钥对。"
 }
 
-# 临时压缩包路径
-$zipFilePath = Join-Path -Path $env:TEMP -ChildPath $ZipFileName
-
 # 日志文件路径
 $logFilePath = Join-Path -Path $scriptDirectory -ChildPath "build_log.txt"
 
@@ -62,25 +57,57 @@ New-Item -Path $logFilePath -ItemType File -Force | Out-Null
 function Write-Log {
     param (
         [string]$Message,
-        [string]$Level = "INFO"
+        [string]$Level = "INFO",
+        [switch]$NoConsole
     )
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logMessage = "$timestamp [$Level] : $Message"
-    Write-Output $logMessage
+    if (-not $NoConsole) {
+        Write-Output $logMessage
+    }
     Add-Content -Path $logFilePath -Value $logMessage
 }
 
 # ---------------------
+# 处理 tmp 文件夹
+# ---------------------
+
+$tmpDirectory = Join-Path -Path $scriptDirectory -ChildPath "tmp"
+
+if (Test-Path $tmpDirectory) {
+    Write-Log "检测到已存在的 tmp 文件夹，将进行删除..." "INFO"  -NoConsole
+    try {
+        Remove-Item -Path $tmpDirectory -Recurse -Force
+        Write-Log "已删除现有的 tmp 文件夹：$tmpDirectory" "INFO"  -NoConsole
+    } catch {
+        Write-Log "无法删除 tmp 文件夹：$_" "ERROR"
+        exit 1
+    }
+}
+
+# 创建 tmp 文件夹
+try {
+    New-Item -Path $tmpDirectory -ItemType Directory -Force | Out-Null
+    Write-Log "已创建 tmp 文件夹：$tmpDirectory" "INFO"  -NoConsole
+} catch {
+    Write-Log "无法创建 tmp 文件夹：$_" "ERROR"
+    exit 1
+}
+
+# 压缩包路径调整为 tmp 文件夹内
+$zipFilePath = Join-Path -Path $tmpDirectory -ChildPath $ZipFileName
+
+# ---------------------
 # 压缩本地项目
 # ---------------------
-Write-Log "开始压缩本地项目..."
+Write-Log "压缩本地项目..." -NoConsole
 try {
     if (Test-Path $zipFilePath) {
         Remove-Item $zipFilePath -Force
         Write-Log "已删除旧的压缩包：$zipFilePath"
     }
     Compress-Archive -Path "$localProjectPath\*" -DestinationPath $zipFilePath -Force
-    Write-Log "项目已成功压缩到 $zipFilePath"
+    Write-Log "项目已成功压缩到 $zipFilePath" -NoConsole
 } catch {
     Write-Log "压缩项目失败：$_" "ERROR"
     exit 1
@@ -89,10 +116,10 @@ try {
 # ---------------------
 # 建立 SSH 会话
 # ---------------------
-Write-Log "尝试建立到 $RemoteHost 的 SSH 连接..."
+Write-Log "尝试建立到 $RemoteHost 的 SSH 连接..." -NoConsole
 try {
     $session = New-SSHSession -ComputerName $RemoteHost -Port $RemotePort -Credential $credential -AcceptKey -ErrorAction Stop
-    Write-Log "SSH 会话已成功建立。"
+    Write-Log "SSH 会话已成功建立。" -NoConsole
 } catch {
     Write-Log "无法建立 SSH 会话：$_" "ERROR"
     exit 1
@@ -101,7 +128,7 @@ try {
 # ---------------------
 # 检查远程环境
 # ---------------------
-Write-Log "检查远程主机的必要工具..."
+Write-Log "检查远程主机的必要工具..." -NoConsole
 
 $requiredCommands = @("unzip", "dotnet")
 
@@ -113,14 +140,14 @@ foreach ($cmd in $requiredCommands) {
         Remove-SSHSession -SessionId $session.SessionId
         exit 1
     } else {
-        Write-Log "远程主机已安装 $cmd"
+        Write-Log "远程主机已安装 $cmd" -NoConsole
     }
 }
 
 # ---------------------
 # 创建远程目录
 # ---------------------
-Write-Log "在远程主机上创建项目目录：$RemoteProjectPath"
+Write-Log "在远程主机上创建项目目录：$RemoteProjectPath" -NoConsole
 $mkdirCommand = "mkdir -p $RemoteProjectPath"
 $mkdirResult = Invoke-SSHCommand -SessionId $session.SessionId -Command $mkdirCommand
 if ($mkdirResult.ExitStatus -ne 0) {
@@ -128,11 +155,11 @@ if ($mkdirResult.ExitStatus -ne 0) {
     Remove-SSHSession -SessionId $session.SessionId
     exit 1
 } else {
-    Write-Log "远程目录已创建或已存在。"
+    Write-Log "远程目录已创建或已存在。" -NoConsole
 }
 
 # 清理远程目录中的旧文件
-Write-Log "清理远程项目目录中的旧文件..."
+Write-Log "清理远程项目目录中的旧文件..." -NoConsole
 $cleanupCommand = "rm -rf $RemoteProjectPath/*"
 $cleanupResult = Invoke-SSHCommand -SessionId $session.SessionId -Command $cleanupCommand
 if ($cleanupResult.ExitStatus -ne 0) {
@@ -140,7 +167,7 @@ if ($cleanupResult.ExitStatus -ne 0) {
     Remove-SSHSession -SessionId $session.SessionId
     exit 1
 } else {
-    Write-Log "远程目录已清理。"
+    Write-Log "远程目录已清理。" -NoConsole
 }
 
 # ---------------------
@@ -149,7 +176,7 @@ if ($cleanupResult.ExitStatus -ne 0) {
 Write-Log "上传项目压缩包到远程主机..."
 try {
     Set-SCPItem -ComputerName $RemoteHost -Port $RemotePort -Credential $credential -AcceptKey -Path $zipFilePath -Destination $RemoteProjectPath
-    Write-Log "压缩包已成功上传。"
+    Write-Log "压缩包已成功上传。" -NoConsole
 } catch {
     Write-Log "上传压缩包失败：$_" "ERROR"
     Remove-SSHSession -SessionId $session.SessionId
@@ -159,7 +186,7 @@ try {
 # ---------------------
 # 解压缩远程文件
 # ---------------------
-Write-Log "在远程主机上解压缩项目文件..."
+Write-Log "在远程主机上解压缩项目文件..." -NoConsole
 $unzipCommand = "cd $RemoteProjectPath && unzip -o $ZipFileName && rm $ZipFileName"
 $unzipResult = Invoke-SSHCommand -SessionId $session.SessionId -Command $unzipCommand
 if ($unzipResult.ExitStatus -ne 0) {
@@ -167,13 +194,13 @@ if ($unzipResult.ExitStatus -ne 0) {
     Remove-SSHSession -SessionId $session.SessionId
     exit 1
 } else {
-    Write-Log "项目文件已成功解压缩。"
+    Write-Log "项目文件已成功解压缩。" -NoConsole
 }
 
 # ---------------------
 # 执行远程编译
 # ---------------------
-Write-Log "在远程主机上编译项目..."
+Write-Log "开始编译项目..."
 $buildCommand = "cd $RemoteProjectPath && dotnet build $SolutionPath --configuration $BuildConfiguration"
 $buildResult = Invoke-SSHCommand -SessionId $session.SessionId -Command $buildCommand
 
@@ -224,17 +251,18 @@ if ($buildResult.ExitStatus -eq 0) {
 # 关闭 SSH 会话
 # ---------------------
 Remove-SSHSession -SessionId $session.SessionId
-Write-Log "SSH 会话已关闭。"
+Write-Log "会话已关闭。"
 
 # ---------------------
 # 清理本地压缩包
 # ---------------------
 try {
     Remove-Item $zipFilePath -Force
-    Write-Log "本地压缩包已删除。"
+    Write-Log "本地压缩包已删除。" -NoConsole
+	Remove-Item -Path $tmpDirectory -Recurse -Force
+	Write-Log "已删除现有的 tmp 文件夹：$tmpDirectory" "INFO"  -NoConsole
 } catch {
     Write-Log "无法删除本地压缩包：$_" "WARN"
 }
 
-Write-Log "整个过程已完成。"
-Write-Log "详细日志请查看：$logFilePath"
+Write-Log "日志请查看：$logFilePath"
