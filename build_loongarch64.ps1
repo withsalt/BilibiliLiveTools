@@ -7,7 +7,7 @@ param (
     [string]$RemoteUser = "loong",
     [string]$RemoteHost = "192.168.188.25",
     [int]$RemotePort = 22,
-    [string]$RemoteProjectPath = "/home/loong/Projects/CSharpProject",
+    [string]$RemoteProjectPath = "/home/loong/Projects/CSharpProject/src",
     [switch]$UsePassword,  # 如果不使用密码认证，可以去掉这个开关
     [string]$ZipFileName = "CSharpProject.zip",
     [string]$BuildConfiguration = "Release"
@@ -19,7 +19,7 @@ param (
 
 # 导入 Posh-SSH 模块，如果尚未安装则安装它
 if (!(Get-Module -ListAvailable -Name Posh-SSH)) {
-    Write-Output "安装 Posh-SSH 模块..." -NoConsole
+    Write-Output "安装 Posh-SSH 模块..."
     Install-Module -Name Posh-SSH -Force -Scope CurrentUser
 }
 Import-Module Posh-SSH
@@ -106,7 +106,7 @@ try {
         Remove-Item $zipFilePath -Force
         Write-Log "已删除旧的压缩包：$zipFilePath"
     }
-    Compress-Archive -Path "$localProjectPath\*" -DestinationPath $zipFilePath -Force
+    Compress-Archive -Path "$localProjectPath\src\*" -DestinationPath $zipFilePath -Force
     Write-Log "项目已成功压缩到 $zipFilePath" -NoConsole
 } catch {
     Write-Log "压缩项目失败：$_" "ERROR"
@@ -173,10 +173,10 @@ if ($cleanupResult.ExitStatus -ne 0) {
 # ---------------------
 # 上传压缩包
 # ---------------------
-Write-Log "上传项目压缩包到远程主机..."
+Write-Log "上传项目到远程主机..."
 try {
     Set-SCPItem -ComputerName $RemoteHost -Port $RemotePort -Credential $credential -AcceptKey -Path $zipFilePath -Destination $RemoteProjectPath
-    Write-Log "压缩包已成功上传。" -NoConsole
+    Write-Log "压缩包已上传。"
 } catch {
     Write-Log "上传压缩包失败：$_" "ERROR"
     Remove-SSHSession -SessionId $session.SessionId
@@ -201,7 +201,7 @@ if ($unzipResult.ExitStatus -ne 0) {
 # 执行远程编译
 # ---------------------
 Write-Log "开始编译项目..."
-$buildCommand = "cd $RemoteProjectPath && dotnet build $SolutionPath --configuration $BuildConfiguration"
+$buildCommand = "cd $RemoteProjectPath/../ && dotnet build $SolutionPath --configuration $BuildConfiguration"
 $buildResult = Invoke-SSHCommand -SessionId $session.SessionId -Command $buildCommand
 
 Write-Log "编译输出："
