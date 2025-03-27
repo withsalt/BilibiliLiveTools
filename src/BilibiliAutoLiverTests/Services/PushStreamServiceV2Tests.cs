@@ -19,7 +19,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task FFmpegTestTest()
         {
-            await _pushStream.Start();
+            await _pushStream.Start(false);
             Assert.Fail();
         }
     }

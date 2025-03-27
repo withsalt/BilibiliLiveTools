@@ -235,7 +235,7 @@ namespace BilibiliAutoLiver.Controllers
                 {
                     return new ResultModel<string>(0);
                 }
-                bool result = await _proxyService.Start();
+                bool result = await _proxyService.Start(false);
                 if (!result)
                 {
                     return new ResultModel<string>(-1, "开启推流失败");
@@ -265,7 +265,7 @@ namespace BilibiliAutoLiver.Controllers
                         return new ResultModel<string>(-1, "重新推流失败，停止当前正在进行中的推流失败。");
                     }
                 }
-                bool result = await _proxyService.Start();
+                bool result = await _proxyService.Start(false);
                 if (!result)
                 {
                     return new ResultModel<string>(-1, "重新推流失败，开启推流失败");

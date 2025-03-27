@@ -10,7 +10,7 @@ namespace BilibiliAutoLiver.Services.Interface
         /// 开启推流
         /// </summary>
         /// <returns></returns>
-        Task<bool> Start();
+        Task<bool> Start(bool isStartup);
 
         /// <summary>
         /// 结束推流

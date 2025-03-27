@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
+using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models.Dtos;
@@ -29,6 +30,11 @@ namespace BilibiliAutoLiver.Services.Base
         private readonly IServiceProvider _serviceProvider;
         private readonly AppSettings _appSettings;
 
+        protected CancellationTokenSource _tokenSource;
+        private Task _mainTask;
+        protected Action _cancel = null;
+        private readonly static object _locker = new object();
+
         protected PushStatus Status { get; set; } = PushStatus.Stopped;
 
         public BasePushStreamService(ILogger logger
@@ -46,9 +52,85 @@ namespace BilibiliAutoLiver.Services.Base
             _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
         }
 
-        public abstract Task<bool> Start();
+        /// <summary>
+        /// 开始推流
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public virtual async Task<bool> Start(bool isStartup)
+        {
+            if (_mainTask != null)
+            {
+                if (!await Stop())
+                {
+                    throw new Exception("停止推流失败！");
+                }
+            }
+            if (_tokenSource != null)
+            {
+                _tokenSource.Cancel();
+                _tokenSource.Dispose();
+                _tokenSource = null;
+            }
+            Status = PushStatus.Starting;
+            _tokenSource = new CancellationTokenSource();
+            _ffmpeg.ClearLog();
+            _mainTask = Task.Run(PushStream);
+            return true;
+        }
 
-        public abstract Task<bool> Stop();
+        /// <summary>
+        /// 停止推流
+        /// </summary>
+        /// <returns></returns>
+        public virtual Task<bool> Stop()
+        {
+            try
+            {
+                if (_mainTask == null)
+                {
+                    return Task.FromResult(true);
+                }
+                if (_tokenSource == null || _tokenSource.IsCancellationRequested)
+                {
+                    return Task.FromResult(true);
+                }
+                lock (_locker)
+                {
+                    _logger.LogWarning("结束推流中...");
+                    _tokenSource.Cancel();
+                    _cancel?.Invoke();
+                    Stopwatch sw = Stopwatch.StartNew();
+                    //3s等待下线
+                    while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation || _mainTask.Status == TaskStatus.WaitingToRun))
+                    {
+                        Thread.Sleep(0);
+                    }
+                    sw.Stop();
+                    if (_mainTask.Status != TaskStatus.RanToCompletion)
+                    {
+                        return Task.FromResult(false);
+                    }
+                    _logger.LogWarning("推流已停止。");
+                }
+                return Task.FromResult(true);
+            }
+            finally
+            {
+                //Dispose
+                _mainTask?.Dispose();
+                _tokenSource?.Dispose();
+                _mainTask = null;
+                _tokenSource = null;
+                _cancel = null;
+                _ffmpeg.ClearLog();
+
+                Status = PushStatus.Stopped;
+            }
+        }
+
+        protected abstract Task PushStream();
 
         public virtual PushStatus GetStatus()
         {
@@ -312,6 +394,52 @@ namespace BilibiliAutoLiver.Services.Base
             }
         }
 
-        public abstract void Dispose();
+        /// <summary>
+        /// 获取推流地址
+        /// </summary>
+        /// <returns></returns>
+        protected async Task<string> GetRtmpAddress()
+        {
+            SettingDto setting = await GetSetting();
+            //检查Cookie是否有效
+            UserInfo userInfo = await _account.LoginByCookie();
+            if (userInfo == null || !userInfo.IsLogin)
+            {
+                throw new Exception("登录失败，Cookie已失效");
+            }
+            //获取直播间信息
+            MyLiveRoomInfo liveRoomInfo = await _api.GetMyLiveRoomInfo();
+            if (liveRoomInfo.area_v2_id != setting.LiveSetting.AreaId || liveRoomInfo.title != setting.LiveSetting.RoomName)
+            {
+                await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, setting.LiveSetting.RoomName, setting.LiveSetting.AreaId);
+            }
+            //开启直播
+            StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, setting.LiveSetting.AreaId);
+            string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                throw new Exception("获取推流地址失败，请重试！");
+            }
+            _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
+            return !url.StartsWith('\"') ? $"\"{url}\"" : url;
+        }
+
+        private readonly static object _disposeLock = new object();
+        private static bool _disposed = false;
+
+        public virtual void Dispose()
+        {
+            if (!_disposed)
+            {
+                lock (_disposeLock)
+                {
+                    if (!_disposed)
+                    {
+                        _disposed = true;
+                        Stop();
+                    }
+                }
+            }
+        }
     }
 }

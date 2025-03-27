@@ -24,7 +24,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         public BaseSourceReader(SettingDto setting, string rtmpAddr, ILogger logger)
         {
             this.Settings = setting;
-            this.RtmpAddr = !rtmpAddr.StartsWith('\"') ? $"\"{rtmpAddr}\"" : rtmpAddr;
+            this.RtmpAddr = rtmpAddr;
             _logger = logger;
         }
 

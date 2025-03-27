@@ -7,7 +7,7 @@ namespace BilibiliLiverTests
     public class CmdAnalyzerTest
     {
         [TestMethod()]
-        public async Task Test()
+        public void AnalyzerTest1()
         {
             List<string> cmds = new List<string>()
             {

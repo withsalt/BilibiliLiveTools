@@ -46,7 +46,7 @@ namespace BilibiliAutoLiver.Utils
                     throw new Exception("代码不规范，程序两行泪（存在无法解析的命令，建议用‘//’进行注释）");
                 }
                 string cmdLine = MaterialPathParser(ffmpegCmdLines[0], materialPath);
-                cmdLine = cmdLine.Replace("{URL}", $"\"{url}\"");
+                cmdLine = cmdLine.Replace("{URL}", (!url.StartsWith("\"") ? $"\"{url}\"" : url));
 
                 int firstNullChar = cmdLine.IndexOf(' ');
                 if (firstNullChar < 0)

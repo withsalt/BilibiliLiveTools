@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using Bilibili.AspNetCore.Apis.Interface;
-using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
@@ -21,16 +18,8 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
     public class NormalPushStreamService : BasePushStreamService, INormalPushStreamService
     {
         private readonly ILogger<AdvancePushStreamService> _logger;
-        private readonly IBilibiliAccountApiService _account;
-        private readonly IBilibiliLiveApiService _api;
         private readonly IFFMpegService _ffmpeg;
         private readonly IPipeContainer _pipeContainer;
-        private readonly AppSettings _appSettings;
-
-        private CancellationTokenSource _tokenSource;
-        private Task _mainTask;
-        private Action _cancel = null;
-        private readonly static object _locker = new object();
 
         public NormalPushStreamService(ILogger<AdvancePushStreamService> logger
             , IBilibiliAccountApiService account
@@ -42,178 +31,103 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
             , IOptions<AppSettings> settingOptions) : base(logger, account, api, serviceProvider, ffmpeg, settingOptions.Value)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _account = account ?? throw new ArgumentNullException(nameof(account));
-            _api = api ?? throw new ArgumentNullException(nameof(api));
             _ffmpeg = ffmpeg ?? throw new ArgumentNullException(nameof(ffmpeg));
             _pipeContainer = pipeContainer ?? throw new ArgumentNullException(nameof(pipeContainer));
-            _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
-        }
-
-        /// <summary>
-        /// 开始推流
-        /// </summary>
-        /// <param name="setting"></param>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public override async Task<bool> Start()
-        {
-            if (_mainTask != null)
-            {
-                if (!await Stop())
-                {
-                    throw new Exception("停止推流失败！");
-                }
-            }
-            if (_tokenSource != null)
-            {
-                _tokenSource.Cancel();
-                _tokenSource.Dispose();
-                _tokenSource = null;
-            }
-            Status = PushStatus.Starting;
-            _tokenSource = new CancellationTokenSource();
-            _ffmpeg.ClearLog();
-            _mainTask = Task.Run(PushStream);
-            return true;
-        }
-
-        /// <summary>
-        /// 停止推流
-        /// </summary>
-        /// <returns></returns>
-        public override Task<bool> Stop()
-        {
-            try
-            {
-                if (_mainTask == null)
-                {
-                    return Task.FromResult(true);
-                }
-                if (_tokenSource == null || _tokenSource.IsCancellationRequested)
-                {
-                    return Task.FromResult(true);
-                }
-                lock (_locker)
-                {
-                    _logger.LogWarning("结束推流中...");
-                    _tokenSource.Cancel();
-                    _cancel?.Invoke();
-                    Stopwatch sw = Stopwatch.StartNew();
-                    //3s等待下线
-                    while (sw.ElapsedMilliseconds < 3000 && (_mainTask.Status == TaskStatus.Running || _mainTask.Status == TaskStatus.WaitingForActivation || _mainTask.Status == TaskStatus.WaitingToRun))
-                    {
-                        Thread.Sleep(0);
-                    }
-                    sw.Stop();
-                    if (_mainTask.Status != TaskStatus.RanToCompletion)
-                    {
-                        return Task.FromResult(false);
-                    }
-                    _logger.LogWarning("推流已停止。");
-                }
-                return Task.FromResult(true);
-            }
-            finally
-            {
-                //Dispose
-                _mainTask?.Dispose();
-                _tokenSource?.Dispose();
-                _mainTask = null;
-                _tokenSource = null;
-                _cancel = null;
-                _ffmpeg.ClearLog();
-
-                Status = PushStatus.Stopped;
-            }
         }
 
         /// <summary>
         /// 开启推流
         /// </summary>
         /// <returns></returns>
-        private async Task PushStream()
+        protected override async Task PushStream()
         {
-            Guid infoLogGuiid = Guid.NewGuid();
-            Guid errorLogGuiid = Guid.NewGuid();
-
-            while (!_tokenSource.IsCancellationRequested)
+            try
             {
-                Status = PushStatus.Starting;
-                SettingDto setting = await GetSetting();
-                ISourceReader sourceReader = null;
-                try
+                Guid infoLogGuiid = Guid.NewGuid();
+                Guid errorLogGuiid = Guid.NewGuid();
+
+                while (!_tokenSource.IsCancellationRequested)
                 {
-                    //check network
-                    await CheckNetwork(_tokenSource);
-                    //start live
-                    string rtmpAddr = await GetRtmpAddress();
-                    sourceReader = await GetSourceReader(rtmpAddr);
-                    FFMpegArgumentProcessor processor = sourceReader
-                        .WithInputArg()
-                        .WithOutputArg()
-                        .CancellableThrough(out _cancel);
-
-                    processor.NotifyOnOutput(p =>
+                    Status = PushStatus.Starting;
+                    SettingDto setting = await GetSetting();
+                    ISourceReader sourceReader = null;
+                    try
                     {
-                        _ffmpeg.AddLog(LogType.Info, p);
-                    });
-                    processor.NotifyOnError(p =>
-                    {
-                        _ffmpeg.AddLog(LogType.Error, p);
-                    });
+                        //check network
+                        await CheckNetwork(_tokenSource);
+                        //start live
+                        string rtmpAddr = await GetRtmpAddress();
+                        sourceReader = await GetSourceReader(rtmpAddr);
+                        FFMpegArgumentProcessor processor = sourceReader
+                            .WithInputArg()
+                            .WithOutputArg()
+                            .CancellableThrough(out _cancel);
 
-                    _logger.LogInformation($"FFMpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
-                    _logger.LogInformation("推流参数初始化完成");
+                        processor.NotifyOnOutput(p =>
+                        {
+                            _ffmpeg.AddLog(LogType.Info, p);
+                        });
+                        processor.NotifyOnError(p =>
+                        {
+                            _ffmpeg.AddLog(LogType.Error, p);
+                        });
 
-                    _ffmpeg.AddLog(LogType.Info, $"======================={DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} 开始推流====================");
-                    _ffmpeg.AddLog(LogType.Info, $"FFMpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
+                        _logger.LogInformation($"FFMpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
+                        _logger.LogInformation("推流参数初始化完成");
 
-                    //启动
-                    Status = PushStatus.Running;
-                    _logger.LogInformation("开始推流...");
-                    await processor.ProcessAsynchronously();
+                        _ffmpeg.AddLog(LogType.Info, $"======================={DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} 开始推流====================");
+                        _ffmpeg.AddLog(LogType.Info, $"FFMpeg推流命令：{_ffmpeg.GetBinaryPath()} {processor.Arguments}");
 
-                    //如果开启了自动重试
-                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
-                    {
-                        Status = PushStatus.Waiting;
-                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                        //启动
+                        Status = PushStatus.Running;
+                        _logger.LogInformation("开始推流...");
+                        await processor.ProcessAsynchronously();
+
+                        //如果开启了自动重试
+                        if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
+                        {
+                            Status = PushStatus.Waiting;
+                            Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("未开启不间断直播，直播停止");
+                            _ffmpeg.AddLog(LogType.Info, $"未开启不间断直播，直播停止");
+                            break;
+                        }
                     }
-                    else
+                    catch (OperationCanceledException)
                     {
-                        _logger.LogInformation("未开启不间断直播，直播停止");
-                        _ffmpeg.AddLog(LogType.Info, $"未开启不间断直播，直播停止");
-                        break;
+                        return;
                     }
-                }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
-                    _ffmpeg.AddLog(LogType.Error, ex.Message, ex);
-                    SourceReaderDispose(sourceReader);
-                    //如果开启了自动重试
-                    if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
+                    catch (Exception ex)
                     {
-                        Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                        _logger.LogError(ex, $"推流过程中发生错误，{ex.Message}");
+                        _ffmpeg.AddLog(LogType.Error, ex.Message, ex);
+                        SourceReaderDispose(sourceReader);
+                        //如果开启了自动重试
+                        if (setting.PushSetting.IsAutoRetry && !_tokenSource.IsCancellationRequested)
+                        {
+                            Delay(setting.PushSetting.RetryInterval, _tokenSource);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("未开启不间断直播，直播停止");
+                            _ffmpeg.AddLog(LogType.Info, $"未开启不间断直播，直播停止");
+                            break;
+                        }
                     }
-                    else
+                    finally
                     {
-                        _logger.LogInformation("未开启不间断直播，直播停止");
-                        _ffmpeg.AddLog(LogType.Info, $"未开启不间断直播，直播停止");
-                        break;
+                        SourceReaderDispose(sourceReader);
                     }
-                }
-                finally
-                {
-                    SourceReaderDispose(sourceReader);
                 }
             }
-            //终止后设置状态为终止
-            Status = PushStatus.Stopped;
+            finally
+            {
+                //终止后设置状态为终止
+                Status = PushStatus.Stopped;
+            }
         }
 
         private void SourceReaderDispose(ISourceReader sourceReader)
@@ -244,54 +158,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
                     return new CameraPlusSourceReader(setting, rtmpAddr, _logger, _pipeContainer);
                 default:
                     throw new NotImplementedException($"不支持的输入类型：{setting.PushSetting.InputType}");
-            }
-        }
-
-        /// <summary>
-        /// 初始化推流
-        /// </summary>
-        /// <returns></returns>
-        private async Task<string> GetRtmpAddress()
-        {
-            SettingDto setting = await GetSetting();
-            //检查Cookie是否有效
-            UserInfo userInfo = await _account.LoginByCookie();
-            if (userInfo == null || !userInfo.IsLogin)
-            {
-                throw new Exception("登录失败，Cookie已失效");
-            }
-            //获取直播间信息
-            MyLiveRoomInfo liveRoomInfo = await _api.GetMyLiveRoomInfo();
-            if (liveRoomInfo.area_v2_id != setting.LiveSetting.AreaId || liveRoomInfo.title != setting.LiveSetting.RoomName)
-            {
-                await _api.UpdateLiveRoomInfo(liveRoomInfo.room_id, setting.LiveSetting.RoomName, setting.LiveSetting.AreaId);
-            }
-            //开启直播
-            StartLiveInfo startLiveInfo = await _api.StartLive(liveRoomInfo.room_id, setting.LiveSetting.AreaId);
-            string url = startLiveInfo.rtmp.addr + startLiveInfo.rtmp.code;
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                throw new Exception("获取推流地址失败，请重试！");
-            }
-            _logger.LogInformation($"获取推流地址成功，推流地址：{url}");
-            return url;
-        }
-
-        private readonly static object _disposeLock = new object();
-        private static bool _disposed = false;
-
-        public override void Dispose()
-        {
-            if (!_disposed)
-            {
-                lock (_disposeLock)
-                {
-                    if (!_disposed)
-                    {
-                        _disposed = true;
-                        Stop();
-                    }
-                }
             }
         }
     }
