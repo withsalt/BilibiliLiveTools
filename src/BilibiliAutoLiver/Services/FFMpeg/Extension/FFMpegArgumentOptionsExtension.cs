@@ -4,7 +4,7 @@ using BilibiliAutoLiver.Models.Dtos;
 using FFMpegCore;
 using FFMpegCore.Enums;
 
-namespace BilibiliAutoLiver.Services.FFMpeg.Ext
+namespace BilibiliAutoLiver.Services.FFMpeg.Extension
 {
     public static class FFMpegArgumentOptionsExtension
     {

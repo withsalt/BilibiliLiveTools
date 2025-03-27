@@ -8,7 +8,7 @@ using System.Threading.Channels;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
-using BilibiliAutoLiver.Services.FFMpeg.Ext;
+using BilibiliAutoLiver.Services.FFMpeg.Extension;
 using BilibiliAutoLiver.Services.FFMpeg.Pipe;
 using BilibiliAutoLiver.Utils;
 using FFMpegCore;

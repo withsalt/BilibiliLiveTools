@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Bilibili.AspNetCore.Apis.Models.Base;
 using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Entities;
@@ -11,7 +12,6 @@ using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
 using BilibiliAutoLiver.Repository.Base;
 using BilibiliAutoLiver.Repository.Interface;
-using DJT.Data.Model.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

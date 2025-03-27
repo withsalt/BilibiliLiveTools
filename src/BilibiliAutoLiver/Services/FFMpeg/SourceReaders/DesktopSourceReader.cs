@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Services.FFMpeg.Ext;
+using BilibiliAutoLiver.Services.FFMpeg.Extension;
 using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using FFMpegCore.Enums;

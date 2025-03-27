@@ -3,7 +3,7 @@ using System.Linq;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
 using BilibiliAutoLiver.Models.Settings;
-using BilibiliAutoLiver.Services.FFMpeg.Ext;
+using BilibiliAutoLiver.Services.FFMpeg.Extension;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;

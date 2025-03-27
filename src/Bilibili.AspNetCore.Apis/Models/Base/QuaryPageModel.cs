@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DJT.Data.Model.Common
+namespace Bilibili.AspNetCore.Apis.Models.Base
 {
     public class QuaryPageModel<T>
     {
