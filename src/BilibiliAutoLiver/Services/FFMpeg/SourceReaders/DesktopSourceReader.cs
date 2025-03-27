@@ -8,6 +8,7 @@ using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using FFMpegCore.Enums;
 using Microsoft.Extensions.Logging;
+using SkiaSharp;
 
 namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 {
@@ -63,7 +64,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
 
         protected override void GetVideoInputArg()
         {
-            if (!ScreenParamsHelper.TryParse(this.Settings.PushSetting.InputScreen, out string message, out Rectangle? rectangle))
+            if (!ScreenParamsHelper.TryParse(this.Settings.PushSetting.InputScreen, out string message, out SKRect? rectangle))
             {
                 throw new Exception(message);
             }
@@ -77,11 +78,11 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                     opt.WithFramerate(30);
                     if (rectangle != null)
                     {
-                        opt.WithCustomArgument($"-offset_x {rectangle.Value.X}");
-                        opt.WithCustomArgument($"-offset_y {rectangle.Value.Y}");
-                        if (rectangle.Value.Width > 0 && rectangle.Value.Height > 0)
+                        opt.WithCustomArgument($"-offset_x {rectangle.Value.Location.X}");
+                        opt.WithCustomArgument($"-offset_y {rectangle.Value.Location.Y}");
+                        if (rectangle.Value.Size.Width > 0 && rectangle.Value.Size.Height > 0)
                         {
-                            opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
+                            opt.WithCustomArgument($"-video_size {rectangle.Value.Size.Width}x{rectangle.Value.Size.Height}");
                         }
                     }
                     //没有音频的情况下静音视频
@@ -93,18 +94,15 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                string path = rectangle != null ? $":0.0+{rectangle.Value.X},{rectangle.Value.Y}" : ":0.0";
+                string path = rectangle != null ? $":0.0+{rectangle.Value.Location.X},{rectangle.Value.Location.Y}" : ":0.0";
                 FFMpegArguments = FFMpegArguments.FromFileInput(path, false, opt =>
                 {
                     opt.WithSettingsVideoInputArgument(this.Settings);
                     opt.ForceFormat("x11grab");
                     opt.WithFramerate(30);
-                    if (rectangle != null)
+                    if (rectangle != null && rectangle.Value.Size.Width > 0 && rectangle.Value.Size.Height > 0)
                     {
-                        if (rectangle.Value.Width > 0 && rectangle.Value.Height > 0)
-                        {
-                            opt.WithCustomArgument($"-video_size {rectangle.Value.Width}x{rectangle.Value.Height}");
-                        }
+                        opt.WithCustomArgument($"-video_size {rectangle.Value.Size.Width}x{rectangle.Value.Size.Height}");
                     }
                     //没有音频的情况下静音视频
                     if (!HasAudioStream())

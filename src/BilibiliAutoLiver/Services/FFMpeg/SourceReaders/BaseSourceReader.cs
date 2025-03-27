@@ -93,6 +93,7 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                 }
                 opt.WithVideoCodec(codec);
                 opt.WithVideoBitrate(qualitySettings.Bitrate);
+                opt.WithCustomArgument($"-maxrate {qualitySettings.Bitrate}k");
                 //用于设置 x264 编码器的编码速度和质量之间的权衡。
                 opt.Withx264Orx265SpeedPreset(codec, qualitySettings.SpeedPreset);
                 if (!string.IsNullOrWhiteSpace(qualitySettings.FpsMode))

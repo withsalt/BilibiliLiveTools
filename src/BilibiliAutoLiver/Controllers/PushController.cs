@@ -71,34 +71,42 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            PushIndexPageViewModel vm = new PushIndexPageViewModel();
-            vm.OutputQuality = EnumExtensions.GetEnumDescriptions<OutputQualityEnum>();
-            vm.PushSetting = await _pushSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
-            if (vm.PushSetting == null)
+            try
             {
-                throw new Exception("获取推流配置失败！");
+                PushIndexPageViewModel vm = new PushIndexPageViewModel();
+                vm.OutputQuality = EnumExtensions.GetEnumDescriptions<OutputQualityEnum>();
+                vm.PushSetting = await _pushSettingRepository.Where(p => !p.IsDeleted).FirstAsync();
+                if (vm.PushSetting == null)
+                {
+                    throw new Exception("获取推流配置失败！");
+                }
+                //列出支持设备的命令
+                vm.AudioDevices = await _ffmpeg.GetAudioDevices();
+                vm.VideoDevices = await _ffmpeg.GetVideoDevices();
+                //列出支持的编码器
+                IReadOnlyList<Codec> allCodecs = _ffmpeg.GetVideoCodecs();
+                if (allCodecs == null)
+                {
+                    allCodecs = new List<Codec>();
+                }
+                vm.VideoCodecs = allCodecs.Select(p => p.Name).OrderBy(p => p).ToList();
+                //素材
+                var allMaterials = await _materialRepository.Where(p => !p.IsDeleted).ToListAsync();
+                if (allMaterials?.Any() == true)
+                {
+                    var videos = allMaterials.Where(p => p.FileType == FileType.Video);
+                    var audios = allMaterials.Where(p => p.FileType == FileType.Music);
+                    vm.Videos = videos.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
+                    vm.Audios = audios.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
+                }
+                vm.Plugins = _pipeContainer.Get()?.Select(p => p.Name).ToList() ?? new List<string>();
+                return View(vm);
             }
-            //列出支持设备的命令
-            vm.AudioDevices = await _ffmpeg.GetAudioDevices();
-            vm.VideoDevices = await _ffmpeg.GetVideoDevices();
-            //列出支持的编码器
-            IReadOnlyList<Codec> allCodecs = _ffmpeg.GetVideoCodecs();
-            if (allCodecs == null)
+            catch (Exception ex)
             {
-                allCodecs = new List<Codec>();
+                _logger.LogError(ex, "加载推流配置页面失败。");
+                throw;
             }
-            vm.VideoCodecs = allCodecs.Select(p => p.Name).OrderBy(p => p).ToList();
-            //素材
-            var allMaterials = await _materialRepository.Where(p => !p.IsDeleted).ToListAsync();
-            if (allMaterials?.Any() == true)
-            {
-                var videos = allMaterials.Where(p => p.FileType == FileType.Video);
-                var audios = allMaterials.Where(p => p.FileType == FileType.Music);
-                vm.Videos = videos.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
-                vm.Audios = audios.OrderByDescending(p => p.Id).ToDictionary(p => p.Id, q => q.Name);
-            }
-            vm.Plugins = _pipeContainer.Get()?.Select(p => p.Name).ToList() ?? new List<string>();
-            return View(vm);
         }
 
         [HttpPost]
