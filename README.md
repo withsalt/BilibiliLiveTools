@@ -41,7 +41,7 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
 
 2. 解压并授权  
    ```shell
-   unzip BilibiliAutoLiver_Linux_ARM64.zip && chmod -R 755 BilibiliAutoLiver_Linux_ARM64 && chmod +x BilibiliAutoLiver_Linux_ARM64/BilibiliAutoLiver
+   unzip BilibiliAutoLiver_Linux_ARM64.zip && chmod -R 755 BilibiliAutoLiver_Linux_ARM64 && chmod +x BilibiliAutoLiver_Linux_ARM64/BilibiliAutoLiver && cd BilibiliAutoLiver_Linux_ARM64
    ```
 3. [**Linux**]安装必需组件  
    Linux环境下，需要安装ffmpeg和alsa。Windows环境下，跳过这一步。  
