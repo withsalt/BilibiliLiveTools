@@ -128,7 +128,7 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/not_install_ffmpeg.jpg)
 未安装ffmpeg。
 
-4. ffmpeg cannot set channel count to 2 (Invalid argument)
+4. ffmpeg cannot set channel count to 2 (Invalid argument)  
 一般情况该报错是在Linux环境中使用USB声卡。应该是声卡不支持2声道，建议换个声卡？
 
 ### 题外话
