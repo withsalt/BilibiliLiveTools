@@ -48,9 +48,10 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
             {
                 lock (_lock)
                 {
-                    if (_pushSetting != null)
+                    var pushSetting = GetPushSetting();
+                    if (pushSetting != null)
                     {
-                        _pushModel = _pushSetting.Model;
+                        _pushModel = pushSetting.Model;
                     }
                 }
             }
