@@ -23,6 +23,9 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
 自动化推流直播：
 ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/demo.jpg)
 
+### 注意  
+ - **请勿将端口直接暴露在公网！请勿将端口直接暴露在公网！请勿将端口直接暴露在公网！**  
+ - 高级模式命令中，请勿填写危险命令，比如shutdown等  
 
 ### 教程
 
@@ -36,11 +39,15 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
    Windows：  
    点击链接下载：[https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip](https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliAutoLiver_Windows_x64.zip "https://github.com/withsalt/BilibiliLiveTools/releases/latest/download/BilibiliLiver_Windows_x64.zip")
 
-3. 解压并授权  
+2. 解压并授权  
    ```shell
    unzip BilibiliAutoLiver_Linux_ARM64.zip && chmod -R 755 BilibiliAutoLiver_Linux_ARM64 && chmod +x BilibiliAutoLiver_Linux_ARM64/BilibiliAutoLiver
    ```
-
+3. [**Linux**]安装必需组件  
+   Linux环境下，需要安装ffmpeg和alsa。Windows环境下，跳过这一步。  
+   ```shell
+   sudo apt install ffmpeg alsa-utils
+   ```
 4. 运行  
    在Linux上面运行：  
    ```shell
@@ -48,14 +55,14 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
    ```
    这行命令的意思是运行程序，并监听18686端口。  
 
-3. 使用哔哩哔哩APP扫码登录  
+5. 使用哔哩哔哩APP扫码登录  
    程序开始运行后，找到命令行中输出的地址信息，如下图所示：  
    ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/use_qrcode_login.jpg)
    在任意浏览器中打开上述任意一个地址，将会出现二维码界面  
    ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/demo_qrcode_login.jpg)
    使用哔哩哔哩APP进行扫码登录。扫码登录成功后，只要账号不主动退出，就不用再进行扫码登录啦。  
 
-5. 编辑直播设置  
+6. 编辑直播设置  
    默认情况下，是没有推流配置的。只有配置推流信息之后，才能进行推流。  
    扫码登录之后，进入**直播设置->推流设置**。  
    **简单模式**  
@@ -78,22 +85,12 @@ Bilibili（B站）无人值守直播工具。自动登录，自动获取直播�
    ffmpeg -f dshow -video_size 1280x720 -i video=\"HD Pro Webcam C920\" -vcodec libx264 -pix_fmt yuv420p -r 30 -s 1280*720 -g 60 -b:v 5000k -an -preset:v ultrafast -tune:v zerolatency -f flv {URL}
    ```
    命令参数具体含义我就不解释了，建议直接问ChatGPT，或者直接让ChatGPT帮忙写推流命令。  
-   ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/ffmpeg_chatgpt_desc.jpg)
+   ![](https://raw.githubusercontent.com/withsalt/BilibiliLiveTools/master/docs/images/ffmpeg_chatgpt_desc.jpg)  
 
-7. 安装FFmpeg  
-   Windows平台因为已经默认内置了ffmpeg，不用自行安装。但是对于一些的linux发行版，可能没有内置ffmpeg，所以需要用户自行安装ffmpeg。  
-   安装命令（基于debian的发行版，比如Debian、Ubuntu、树莓派）：  
-   ```shell
-   # 安装，就这一行命令
-   sudo apt install ffmpeg
-   # 测试是否安装，有输出表示安装完成
-   ffmpeg -version
-   ```
-
-8. 停止推流  
+7. 停止推流  
    进入**直播设置->推流设置**，点击停止直播。  
 
-9. 配置开机自启  
+8. 配置开机自启  
    编写一个系统服务  
    ```shell
    sudo nano /etc/systemd/system/bilibiliautoliver.service
