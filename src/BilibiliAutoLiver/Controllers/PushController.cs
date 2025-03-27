@@ -36,6 +36,7 @@ namespace BilibiliAutoLiver.Controllers
         private readonly IBilibiliCookieService _cookieService;
         private readonly IBilibiliLiveApiService _liveApiService;
         private readonly IPushSettingRepository _pushSettingRepository;
+        private readonly ILiveSettingRepository _liveSettingRepository;
         private readonly IPushStreamProxyService _proxyService;
         private readonly IMaterialRepository _materialRepository;
         private readonly AppSettings _appSettings;
@@ -47,7 +48,7 @@ namespace BilibiliAutoLiver.Controllers
             , IBilibiliAccountApiService accountService
             , IBilibiliCookieService cookieService
             , IBilibiliLiveApiService liveApiService
-            , ILiveSettingRepository liveSettingRepos
+            , ILiveSettingRepository liveSettingRepository
             , IPushSettingRepository pushSettingRepository
             , IPushStreamProxyService proxyService
             , IMaterialRepository materialRepository
@@ -61,6 +62,7 @@ namespace BilibiliAutoLiver.Controllers
             _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
             _liveApiService = liveApiService ?? throw new ArgumentNullException(nameof(liveApiService));
             _pushSettingRepository = pushSettingRepository ?? throw new ArgumentNullException(nameof(pushSettingRepository));
+            _liveSettingRepository = liveSettingRepository ?? throw new ArgumentNullException(nameof(liveSettingRepository));
             _proxyService = proxyService ?? throw new ArgumentNullException(nameof(proxyService));
             _materialRepository = materialRepository ?? throw new ArgumentNullException(nameof(materialRepository));
             _appSettings = settingOptions?.Value ?? throw new ArgumentNullException(nameof(settingOptions));
@@ -153,6 +155,10 @@ namespace BilibiliAutoLiver.Controllers
             {
                 return new ResultModel<string>(-1, "保存配置信息失败");
             }
+
+            //检查直播间信息
+            await UpdateRoomInfo();
+
             if (_proxyService.GetStatus() != PushStatus.Stopped)
             {
                 return new ResultModel<string>(1);
@@ -195,6 +201,44 @@ namespace BilibiliAutoLiver.Controllers
                 return new ResultModel<string>(-1, ex.Message);
             }
             return new ResultModel<string>(0);
+        }
+
+        /// <summary>
+        /// 初始化直播间信息
+        /// </summary>
+        /// <returns></returns>
+        private async Task UpdateRoomInfo()
+        {
+            try
+            {
+                LiveSetting liveSetting = await _liveSettingRepository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
+                if (liveSetting != null)
+                {
+                    return;
+                }
+                MyLiveRoomInfo myLiveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
+                if (myLiveRoomInfo == null)
+                {
+                    _logger.LogError("获取当前登录账户直播间信息失败");
+                    return;
+                }
+                liveSetting = new LiveSetting()
+                {
+                    AreaId = myLiveRoomInfo.area_v2_id,
+                    RoomName = myLiveRoomInfo.audit_info.audit_title,
+                    Content = myLiveRoomInfo.announce.content,
+                    RoomId = myLiveRoomInfo.room_id,
+                    CreatedTime = DateTime.UtcNow,
+                    CreatedUserId = GlobalConfigConstant.SYS_USERID,
+                    UpdatedTime = DateTime.UtcNow,
+                    UpdatedUserId = GlobalConfigConstant.SYS_USERID,
+                };
+                await _liveSettingRepository.InsertAsync(liveSetting);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "获取当前登录账户直播间信息失败");
+            }
         }
 
         [HttpPost]

@@ -45,49 +45,57 @@ namespace BilibiliAutoLiver.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            MyLiveRoomInfo myLiveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
-            List<LiveAreaItem> liveAreas = await _liveApiService.GetLiveAreas();
+            try
+            {
+                MyLiveRoomInfo myLiveRoomInfo = await _liveApiService.GetMyLiveRoomInfo();
+                List<LiveAreaItem> liveAreas = await _liveApiService.GetLiveAreas();
 
-            //可能在B站修改了信息，所以需要判断数据库中是否一致，不一致反向更新
-            LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
-            if (liveSetting == null)
-            {
-                liveSetting = new LiveSetting()
+                //可能在B站修改了信息，所以需要判断数据库中是否一致，不一致反向更新
+                LiveSetting liveSetting = await _repository.Where(p => !p.IsDeleted).OrderByDescending(p => p.CreatedTime).FirstAsync();
+                if (liveSetting == null)
                 {
-                    AreaId = myLiveRoomInfo.area_v2_id,
-                    RoomName = myLiveRoomInfo.audit_info.audit_title,
-                    Content = myLiveRoomInfo.announce.content,
-                    RoomId = myLiveRoomInfo.room_id,
-                    CreatedTime = DateTime.UtcNow,
-                    CreatedUserId = GlobalConfigConstant.SYS_USERID,
-                    UpdatedTime = DateTime.UtcNow,
-                    UpdatedUserId = GlobalConfigConstant.SYS_USERID,
-                };
-                await _repository.InsertAsync(liveSetting);
-            }
-            else
-            {
-                //更新分区
-                if (liveSetting.AreaId != myLiveRoomInfo.area_v2_id
-                    || liveSetting.RoomName != myLiveRoomInfo.audit_info.audit_title
-                    || liveSetting.Content != myLiveRoomInfo.announce.content)
-                {
-                    liveSetting.AreaId = myLiveRoomInfo.area_v2_id;
-                    liveSetting.RoomName = myLiveRoomInfo.audit_info.audit_title;
-                    liveSetting.Content = myLiveRoomInfo.announce.content;
-                    liveSetting.UpdatedTime = DateTime.UtcNow;
-                    liveSetting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
-                    await _repository.UpdateAsync(liveSetting);
+                    liveSetting = new LiveSetting()
+                    {
+                        AreaId = myLiveRoomInfo.area_v2_id,
+                        RoomName = myLiveRoomInfo.audit_info.audit_title,
+                        Content = myLiveRoomInfo.announce.content,
+                        RoomId = myLiveRoomInfo.room_id,
+                        CreatedTime = DateTime.UtcNow,
+                        CreatedUserId = GlobalConfigConstant.SYS_USERID,
+                        UpdatedTime = DateTime.UtcNow,
+                        UpdatedUserId = GlobalConfigConstant.SYS_USERID,
+                    };
+                    await _repository.InsertAsync(liveSetting);
                 }
-            }
-            RoomInfoIndexPageViewModel viewModel = new RoomInfoIndexPageViewModel()
-            {
-                LiveRoomInfo = myLiveRoomInfo,
-                LiveAreas = liveAreas,
-                LiveSetting = liveSetting
-            };
+                else
+                {
+                    //更新分区
+                    if (liveSetting.AreaId != myLiveRoomInfo.area_v2_id
+                        || liveSetting.RoomName != myLiveRoomInfo.audit_info.audit_title
+                        || liveSetting.Content != myLiveRoomInfo.announce.content)
+                    {
+                        liveSetting.AreaId = myLiveRoomInfo.area_v2_id;
+                        liveSetting.RoomName = myLiveRoomInfo.audit_info.audit_title;
+                        liveSetting.Content = myLiveRoomInfo.announce.content;
+                        liveSetting.UpdatedTime = DateTime.UtcNow;
+                        liveSetting.UpdatedUserId = GlobalConfigConstant.SYS_USERID;
+                        await _repository.UpdateAsync(liveSetting);
+                    }
+                }
+                RoomInfoIndexPageViewModel viewModel = new RoomInfoIndexPageViewModel()
+                {
+                    LiveRoomInfo = myLiveRoomInfo,
+                    LiveAreas = liveAreas,
+                    LiveSetting = liveSetting
+                };
 
-            return View(viewModel);
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "加载直播间信息页面失败。");
+                throw;
+            }
         }
 
         [HttpPost]

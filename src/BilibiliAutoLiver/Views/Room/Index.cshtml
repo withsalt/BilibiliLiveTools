@@ -46,11 +46,11 @@
                     <div class="layui-form-item">
                         <label class="layui-form-label">直播名称</label>
                         <div class="layui-input-inline">
-                            <input type="text" name="roomName" value="@Model.LiveRoomInfo?.audit_info?.audit_title" @(Model.LiveRoomInfo?.audit_info?.audit_title_status != 2 ? "disabled" : "") lay-verify="roomName" autocomplete="off" placeholder="直播间名称不能超过12个字符" class="layui-input">
-                            <input type="hidden" name="roomNameStatus" value="@(Model.LiveRoomInfo?.audit_info?.audit_title_status != 2 ? "1" : "0")" autocomplete="off" class="layui-input">
+                            <input type="text" name="roomName" value="@Model.LiveRoomInfo?.audit_info?.audit_title" @(Model.LiveRoomInfo?.audit_info != null && Model.LiveRoomInfo?.audit_info?.audit_title_status != 2 ? "disabled" : "") lay-verify="roomName" autocomplete="off" placeholder="直播间名称不能超过12个字符" class="layui-input">
+                            <input type="hidden" name="roomNameStatus" value="@(Model.LiveRoomInfo?.audit_info != null && Model.LiveRoomInfo?.audit_info?.audit_title_status != 2 ? "1" : "0")" autocomplete="off" class="layui-input">
                         </div>
                         @{
-                            if (Model.LiveRoomInfo?.audit_info?.audit_title_status != 2)
+                            if (Model.LiveRoomInfo?.audit_info != null && Model.LiveRoomInfo?.audit_info?.audit_title_status != 2)
                             {
                                 <div class="layui-form-mid layui-word-aux"><b style="color:darkorange">直播间名称正在审核中</b></div>
                             }

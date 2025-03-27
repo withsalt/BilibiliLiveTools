@@ -15,7 +15,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
         private readonly IAdvancePushStreamService _advancePush;
         private readonly INormalPushStreamService _normalPush;
         private readonly IServiceProvider _serviceProvider;
-        private readonly PushSetting _pushSetting;
 
         private ConfigModel _pushModel;
         private static readonly object _lock = new object();
@@ -29,7 +28,6 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _advancePush = advancePush ?? throw new ArgumentNullException(nameof(advancePush));
             _normalPush = normalPush ?? throw new ArgumentNullException(nameof(normalPush));
-            _pushSetting = GetPushSetting() ?? throw new ArgumentNullException(nameof(PushSetting));
         }
 
         private PushSetting GetPushSetting()
@@ -79,10 +77,14 @@ namespace BilibiliAutoLiver.Services.FFMpeg.Services.PushService
 
         public async Task<bool> Start(bool isStartup)
         {
-            if (isStartup && !this._pushSetting.IsAutoRetry)
+            if (isStartup)
             {
-                _logger.LogInformation("不间断直播已关闭，默认不开播。");
-                return false;
+                var pushSetting = GetPushSetting();
+                if (pushSetting != null && !pushSetting.IsAutoRetry)
+                {
+                    _logger.LogInformation("不间断直播已关闭，默认不开播。");
+                    return false;
+                }
             }
             var service = GetService();
             await service.CheckLiveSetting();

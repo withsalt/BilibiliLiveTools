@@ -42,7 +42,7 @@ namespace BilibiliAutoLiver.Services
         {
             try
             {
-                var userInfo = await Login();
+                UserInfo userInfo = await Login();
                 if (userInfo == null)
                 {
                     _logger.LogWarning("用户未登录！");
@@ -130,6 +130,8 @@ namespace BilibiliAutoLiver.Services
         {
             try
             {
+                //加载直播间信息
+
                 _ffmpeg.GetVersion();
                 _ffmpeg.GetVideoDevices();
                 _ffmpeg.GetAudioDevices();
