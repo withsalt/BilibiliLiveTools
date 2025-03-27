@@ -2,7 +2,6 @@
 using BilibiliAutoLiver.Extensions;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
-using FFMpegCore;
 using FreeSql.DataAnnotations;
 using Newtonsoft.Json;
 

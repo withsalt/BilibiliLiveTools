@@ -83,7 +83,7 @@ namespace BilibiliAutoLiver.Models.Settings
         /// <summary>
         /// 预设参数
         /// </summary>
-        public FFmpegPresetParams FFmpegPresetParams {  get; set; }
+        public FFmpegPresetParams FFmpegPresetParams { get; set; }
     }
 
     public class FFmpegPresetParams
@@ -193,6 +193,6 @@ namespace BilibiliAutoLiver.Models.Settings
         /// <summary>
         /// 额外的自定义参数
         /// </summary>
-        public string CustomArgument {  get; set; }
+        public string CustomArgument { get; set; }
     }
 }

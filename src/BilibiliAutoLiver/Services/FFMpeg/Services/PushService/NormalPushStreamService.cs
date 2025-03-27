@@ -11,7 +11,6 @@ using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.Base;
 using BilibiliAutoLiver.Services.FFMpeg.SourceReaders;
 using BilibiliAutoLiver.Services.Interface;
-using BilibiliAutoLiver.Utils;
 using FFMpegCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;

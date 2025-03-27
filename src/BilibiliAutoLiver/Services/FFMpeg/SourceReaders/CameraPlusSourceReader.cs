@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
-using BilibiliAutoLiver.Models;
+using System.Threading.Channels;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Plugin.Base;
 using BilibiliAutoLiver.Services.FFMpeg.DeviceProviders;
@@ -23,54 +23,47 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         private IPipeContainer PipeContainer { get; }
         private CameraFramePipeSource PipeSource { get; }
 
-        private Queue<BufferFrame> frameQueue = new Queue<BufferFrame>();
-        private readonly int _frameRate = 30;
+        Channel<SKBitmap> _frameChannel = Channel.CreateBounded<SKBitmap>(
+             new BoundedChannelOptions(30)
+             {
+                 FullMode = BoundedChannelFullMode.Wait
+             });
 
         public CameraPlusSourceReader(SettingDto setting, string rtmpAddr, ILogger logger, IPipeContainer pipeContainer) : base(setting, rtmpAddr, logger)
         {
             this.PipeContainer = pipeContainer;
             this.DeviceProvider = new CameraDeviceProvider(this.Settings.PushSetting, OnFrameArrived);
             this.DeviceProvider.Start();
-            this.PipeSource = new CameraFramePipeSource(frameQueue);
+            this.PipeSource = new CameraFramePipeSource(_frameChannel, logger);
         }
 
         private bool hasFrameArrived = false;
         private string streamFormat = string.Empty;
 
-        private void OnFrameArrived(BufferFrame frame)
+        private void OnFrameArrived(SKBitmap frame)
         {
             try
             {
+                if (frame == null)
+                    return;
+
                 if (!hasFrameArrived)
                 {
-                    streamFormat = GetStreamFormat(frame.Bitmap.ColorType);
+                    streamFormat = GetStreamFormat(frame.ColorType);
                     hasFrameArrived = true;
                 }
-                if (frameQueue.Count > _frameRate * 2)
-                {
-                    _logger.LogWarning("帧队列堆积，丢弃...");
-                    while (frameQueue.TryDequeue(out var p))
-                    {
-                        p?.Dispose();
-                    }
-                }
-                if (frame.Bitmap == null)
-                {
-                    return;
-                }
-                var pipes = PipeContainer.Get();
+
+                IEnumerable<IPipeProcess> pipes = PipeContainer.Get();
                 if (pipes.Any())
                 {
-                    SKBitmap tmp = frame.Bitmap;
                     foreach (var item in pipes)
                     {
                         try
                         {
-                            tmp = item.Process(tmp);
-                            if (tmp == null)
+                            frame = item.Process(frame);
+                            if (frame == null)
                             {
                                 _logger.LogWarning($"插件【{item.Name}】处理视频帧异常：返回帧数据为空");
-                                tmp = frame.Bitmap;
                                 continue;
                             }
                         }
@@ -79,14 +72,16 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
                             _logger.LogWarning($"插件【{item.Name}】处理视频帧异常：{ex.Message}");
                         }
                     }
-                    frame.Bitmap = tmp;
                 }
-                if (frame.Bitmap == null)
+                if (frame == null)
                 {
                     _logger.LogWarning($"帧数据由插件处理后为空。");
                     return;
                 }
-                frameQueue.Enqueue(frame);
+                if (!_frameChannel.Writer.TryWrite(frame))
+                {
+                    frame.Dispose();
+                }
             }
             catch (Exception ex)
             {
@@ -196,11 +191,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
             {
                 this.DeviceProvider.Dispose();
             }
-            if (frameQueue != null && frameQueue.Count > 0)
+
+            if (_frameChannel != null && _frameChannel.Reader.Count > 0)
             {
-                while (frameQueue.TryDequeue(out var p))
+                while (_frameChannel.Reader.TryRead(out var bitmap))
                 {
-                    p?.Dispose();
+                    bitmap?.Dispose();
                 }
             }
         }

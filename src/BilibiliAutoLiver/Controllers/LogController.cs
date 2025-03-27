@@ -1,16 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
-using System.Threading.Tasks;
-using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models.Base;
-using BilibiliAutoLiver.Config;
 using BilibiliAutoLiver.Models.Dtos;
-using BilibiliAutoLiver.Models.Entities;
-using BilibiliAutoLiver.Models.ViewModels;
-using BilibiliAutoLiver.Repository.Interface;
-using BilibiliAutoLiver.Services;
 using BilibiliAutoLiver.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

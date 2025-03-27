@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using FlashCap;
+﻿using System.Runtime.InteropServices;
 
 namespace BilibiliAutoLiver.Models.Dtos
 {

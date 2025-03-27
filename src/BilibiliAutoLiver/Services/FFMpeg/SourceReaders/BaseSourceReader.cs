@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Models.Enums;
@@ -197,7 +196,16 @@ namespace BilibiliAutoLiver.Services.FFMpeg.SourceReaders
         {
             if (string.IsNullOrEmpty(this.Settings.PushSetting.CustumVideoCodec))
             {
-                return VideoCodec.LibX264;
+                var libx264 = this.Settings.PushSetting.VideoCodecs.FirstOrDefault(v => v.Name == "libx264");
+                if (libx264 != null)
+                {
+                    return libx264;
+                }
+                var h264 = this.Settings.PushSetting.VideoCodecs.FirstOrDefault(v => v.Name == "h264");
+                if (h264 != null)
+                {
+                    return h264;
+                }
             }
             if (this.Settings.PushSetting.VideoCodecs?.Any() != true)
             {

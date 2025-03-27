@@ -63,7 +63,7 @@ namespace BilibiliAutoLiver.Models.Entities
         /// </summary>
         [MaxLength(25)]
         [Column(IsNullable = true)]
-        public string CustumVideoCodec {  get; set; }
+        public string CustumVideoCodec { get; set; }
 
         /// <summary>
         /// 推流视频Id
@@ -104,7 +104,7 @@ namespace BilibiliAutoLiver.Models.Entities
         /// <summary>
         /// 输入图像格式
         /// </summary>
-        public PixelFormats InputFormat {  get; set; }
+        public PixelFormats InputFormat { get; set; }
 
         /// <summary>
         /// 帧数

@@ -85,7 +85,7 @@ namespace Bilibili.AspNetCore.Apis.Services
                     }
                     finally
                     {
-                        if (isLocked) 
+                        if (isLocked)
                             _localLocker.SpinUnLock(lockKey);
                     }
                 }
@@ -290,7 +290,7 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// <returns></returns>
         public async Task<bool> IsLogged()
         {
-            return  _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && (await _cookie.HasCookie());
+            return _cache.TryGetValue(CacheKeyConstant.LOGIN_STATUS, out bool status) && status && (await _cookie.HasCookie());
         }
 
         public void Logout()

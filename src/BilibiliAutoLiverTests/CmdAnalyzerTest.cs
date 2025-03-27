@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using BilibiliAutoLiver.Utils;
+﻿using BilibiliAutoLiver.Utils;
 using FlashCap;
 
 namespace BilibiliLiverTests

@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BilibiliAutoLiver.Models;
 using BilibiliAutoLiver.Models.Dtos;
 using BilibiliAutoLiver.Utils;
 using FlashCap;
@@ -17,16 +16,15 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
     {
         public Size Size { get; }
 
-        private Action<BufferFrame> _onBuffer;
+        private Action<SKBitmap> _onBuffer;
         private CaptureDevice _captureDevice;
         private CaptureDeviceDescriptor _captureDeviceDescriptor;
         private VideoCharacteristics _characteristics;
         private CancellationTokenSource _tokenSource;
-        private int _countFrames;
         private static readonly object stopLocker = new object();
         private bool _isStopped = false;
 
-        public CameraDeviceProvider(PushSettingDto pushSetting, Action<BufferFrame> onBuffer)
+        public CameraDeviceProvider(PushSettingDto pushSetting, Action<SKBitmap> onBuffer)
         {
             if (onBuffer == null) throw new ArgumentException("On buffer action can not null");
             _onBuffer = onBuffer;
@@ -83,40 +81,45 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
                 return Task.CompletedTask;
             lock (stopLocker)
             {
-                if (_isStopped)
-                    return Task.CompletedTask;
-                if (_captureDevice == null)
+                try
+                {
+                    if (_isStopped)
+                        return Task.CompletedTask;
+                    if (_captureDevice == null)
+                    {
+                        if (_tokenSource != null)
+                        {
+                            _tokenSource.Cancel();
+                            _tokenSource.Dispose();
+                            _tokenSource = null;
+                        }
+                        return Task.CompletedTask;
+                    }
+
+                    _tokenSource.Cancel();
+                    _captureDevice.StopAsync().GetAwaiter().GetResult();
+                    if (_captureDevice.IsRunning)
+                    {
+                        Stopwatch sw = Stopwatch.StartNew();
+                        while (_captureDevice.IsRunning && sw.ElapsedMilliseconds < 3000)
+                        {
+                            Thread.Sleep(0);
+                        }
+                        sw.Stop();
+                    }
+                    _captureDevice.Dispose();
+                }
+                finally
                 {
                     if (_tokenSource != null)
                     {
-                        _tokenSource.Cancel();
                         _tokenSource.Dispose();
                         _tokenSource = null;
                     }
-                    return Task.CompletedTask;
-                }
+                    _captureDevice = null;
 
-                _tokenSource.Cancel();
-                _captureDevice.StopAsync().GetAwaiter().GetResult();
-                if (_captureDevice.IsRunning)
-                {
-                    Stopwatch sw = Stopwatch.StartNew();
-                    while (_captureDevice.IsRunning && sw.ElapsedMilliseconds < 3000)
-                    {
-                        Thread.Sleep(0);
-                    }
-                    sw.Stop();
+                    _isStopped = true;
                 }
-                _captureDevice.Dispose();
-
-                if (_tokenSource != null)
-                {
-                    _tokenSource.Dispose();
-                    _tokenSource = null;
-                }
-                _captureDevice = null;
-
-                _isStopped = true;
             }
             return Task.CompletedTask;
         }
@@ -135,16 +138,12 @@ namespace BilibiliAutoLiver.Services.FFMpeg.DeviceProviders
                 {
                     return;
                 }
-                int countFrames = Interlocked.Increment(ref _countFrames);
-                long frameIndex = bufferScope.Buffer.FrameIndex;
-                TimeSpan timestamp = bufferScope.Buffer.Timestamp;
                 SKBitmap bitmap = SKBitmap.Decode(image);
                 if (bitmap == null)
                 {
                     return;
                 }
-                BufferFrame frame = new BufferFrame(bitmap, countFrames, frameIndex, timestamp);
-                _onBuffer(frame);
+                _onBuffer(bitmap);
             }
             finally
             {

@@ -8,7 +8,8 @@ namespace BilibiliAutoLiver.DependencyInjection
     {
         public static IMvcBuilder AddJsonConfig(this IMvcBuilder builder)
         {
-            builder.AddNewtonsoftJson(options => {
+            builder.AddNewtonsoftJson(options =>
+            {
                 options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;

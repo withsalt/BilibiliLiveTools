@@ -1,5 +1,4 @@
 ﻿using System;
-using FFMpegCore;
 
 namespace BilibiliAutoLiver.Models.Dtos
 {
@@ -36,7 +35,7 @@ namespace BilibiliAutoLiver.Models.Dtos
 
         public string Duration { get; set; }
 
-        public MediaInfo MediaInfo {  get; set; }
+        public MediaInfo MediaInfo { get; set; }
 
         /// <summary>
         /// 创建时间
