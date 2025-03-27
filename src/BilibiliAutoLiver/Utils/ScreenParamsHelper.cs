@@ -1,11 +1,12 @@
 ﻿using System.Drawing;
 using System.Linq;
+using SkiaSharp;
 
 namespace BilibiliAutoLiver.Utils
 {
     public static class ScreenParamsHelper
     {
-        public static bool TryParse(string inputScreen, out string message, out Rectangle? rectangle)
+        public static bool TryParse(string inputScreen, out string message, out SKRect? rectangle)
         {
             message = null;
             rectangle = null;
@@ -38,24 +39,18 @@ namespace BilibiliAutoLiver.Utils
                     return false;
                 }
                 height = paramVal[3];
-
-                if (x >= width || x < -width)
-                {
-                    message = "x参数不正确，x坐标不能大于、等于width或小于-width，示例：0,0,800,800（x, y, width, height）";
-                    return false;
-                }
-                if (y >= height || y < -height)
-                {
-                    message = "y参数不正确，y坐标不能大于、等于height或小于-height，示例：0,0,800,800（x, y, width, height）";
-                    return false;
-                }
             }
             else
             {
                 width = 0;
                 height = 0;
             }
-            rectangle = new Rectangle(x, y, width, height);
+            rectangle = SKRect.Create(new SKPoint(x, y), new SKSize(width, height));
+            if (rectangle.Value.Width < 0 || rectangle.Value.Height < 0)
+            {
+                message = "width和height参数不正确，示例：0,0,800,800（x, y, width, height）";
+                return false;
+            }
             return true;
         }
     }
