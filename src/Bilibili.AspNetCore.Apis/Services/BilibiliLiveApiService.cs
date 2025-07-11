@@ -220,7 +220,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             var postData = new
             {
                 room_id = roomId,
-                platform = "android_link",
+                platform = "pc_link",
                 area_v2 = areaItem.id,
                 backup_stream = 0,
                 csrf_token = await _cookie.GetCsrf(),
