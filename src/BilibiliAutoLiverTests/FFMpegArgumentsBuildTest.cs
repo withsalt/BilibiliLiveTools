@@ -6,16 +6,6 @@ namespace BilibiliLiverTests
     [TestClass()]
     public class FFMpegArgumentsBuildTest
     {
-        [TestMethod()]
-        public void FFMpegArgumentsBuildTest1()
-        {
-            FFMpegArgumentProcessor processor = CreateFFMpegArguments()
-                .OutputToUrl("rtmp://live-push.bilivideo.com/live-bvc/?streamname=live_313499407_25193107&key=91fda6bc743673533f5fa87adfde32ea&schedule=rtmp&pflag=4")
-                .go;
-
-            string text = processor.Arguments;
-        
-        }
 
         public FFMpegArguments CreateFFMpegArguments()
         {
