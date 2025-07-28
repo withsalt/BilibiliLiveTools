@@ -14,48 +14,36 @@ using Bilibili.AspNetCore.Apis.Models.Enums;
 using Bilibili.AspNetCore.Apis.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bilibili.AspNetCore.Apis.Services
+namespace Bilibili.AspNetCore.Apis.Services.Cookie
 {
-    public class HttpClientService : IHttpClientService
+    internal class CookieBuilderHttpClient
     {
-        private readonly IBilibiliCookieService _cookieService;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public HttpClientService(IHttpClientFactory httpClientFactory, IBilibiliCookieService cookieService)
+        public CookieBuilderHttpClient(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-            _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
         }
 
         public async Task<ResultModel<T>> GetAsync<T>(string url, bool rowData = false, CancellationToken cancellationToken = default) where T : class
         {
-            return await Execute<T>(url, HttpMethod.Get, null, BodyFormat.Json, true, rowData, cancellationToken);
+            return await Execute<T>(url, HttpMethod.Get, null, BodyFormat.Json, null, cancellationToken);
         }
 
-        public async Task<ResultModel<T>> GetWithoutPermissionAsync<T>(string url, bool rowData = false, CancellationToken cancellationToken = default) where T : class
+        public async Task<ResultModel<T>> PostAsync<T>(string url, object body, BodyFormat format, string cookie, CancellationToken cancellationToken = default) where T : class
         {
-            return await Execute<T>(url, HttpMethod.Get, null, BodyFormat.Json, false, rowData, cancellationToken);
+            return await Execute<T>(url, HttpMethod.Post, body, format, cookie, cancellationToken);
         }
 
-        public async Task<ResultModel<T>> PostAsync<T>(string url, object body, BodyFormat format, CancellationToken cancellationToken = default) where T : class
-        {
-            return await Execute<T>(url, HttpMethod.Post, body, format, true, false, cancellationToken);
-        }
-
-        private async Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, bool withCookie = true, bool getRowData = false, CancellationToken cancellationToken = default) where T : class
+        private async Task<ResultModel<T>> Execute<T>(string url, HttpMethod method, object body = null, BodyFormat format = BodyFormat.Json, string cookie = null, CancellationToken cancellationToken = default) where T : class
         {
             // 1. 创建 HttpRequestMessage，这是最佳实践
             using var request = new HttpRequestMessage(method, url);
 
             // 2. 处理 Cookie
-            if (withCookie)
+            if (!string.IsNullOrWhiteSpace(cookie))
             {
-                var cookieValue = await _cookieService.GetString();
-                if (string.IsNullOrWhiteSpace(cookieValue))
-                {
-                    throw new HttpRequestException("The cookie can not null.");
-                }
-                request.Headers.Add("cookie", cookieValue);
+                request.Headers.Add("cookie", cookie);
             }
 
             // 3. 处理请求体
@@ -63,17 +51,13 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 request.Content = CreateHttpContent(body, format);
             }
-            else if (method == HttpMethod.Post && body == null)
-            {
-                throw new ArgumentNullException(nameof(body), "POST request body cannot be null.");
-            }
 
             // 4. 发送请求
             var httpClient = _httpClientFactory.CreateClient("BilibiliRequestClient");
             using var response = await httpClient.SendAsync(request, cancellationToken);
 
             // 5. 处理响应
-            return await ProcessResponse<T>(response, getRowData, url);
+            return await ProcessResponse<T>(response, false, url);
         }
 
         /// <summary>

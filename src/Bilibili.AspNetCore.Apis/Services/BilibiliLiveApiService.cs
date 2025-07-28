@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using Bilibili.AspNetCore.Apis.Constants;
 using Bilibili.AspNetCore.Apis.Exceptions;
 using Bilibili.AspNetCore.Apis.Interface;
@@ -12,6 +13,7 @@ using Bilibili.AspNetCore.Apis.Models.Enums;
 using Bilibili.AspNetCore.Apis.Utils;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Bilibili.AspNetCore.Apis.Services
 {
@@ -66,20 +68,24 @@ namespace Bilibili.AspNetCore.Apis.Services
         private readonly IHttpClientService _httpClient;
         private readonly IBilibiliCookieService _cookie;
         private readonly IMemoryCache _cache;
+        private readonly IOptions<BilibiliAppKey> _appKeyOptions;
 
         public BilibiliLiveApiService(ILogger<BilibiliLiveApiService> logger
             , IBilibiliCookieService cookie
-            , IMemoryCache cache)
+            , IMemoryCache cache
+            , IHttpClientService httpClient
+            , IOptions<BilibiliAppKey> appKeyOptions)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cookie = cookie ?? throw new ArgumentNullException(nameof(cookie));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-            _httpClient = new HttpClientService(_cookie);
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _appKeyOptions = appKeyOptions ?? throw new ArgumentNullException(nameof(appKeyOptions));
         }
 
         public async Task<MyLiveRoomInfo> GetMyLiveRoomInfo()
         {
-            var result = await _httpClient.Execute<MyLiveRoomInfo>(_getMyLiveRoomInfoApi, HttpMethod.Get);
+            var result = await _httpClient.GetAsync<MyLiveRoomInfo>(_getMyLiveRoomInfoApi);
             if (result == null)
             {
                 throw new ApiRequestException(_getMyLiveRoomInfoApi, HttpMethod.Get, "返回内容为空");
@@ -93,7 +99,7 @@ namespace Bilibili.AspNetCore.Apis.Services
 
         public async Task<LiveRoomInfo> GetLiveRoomInfo(long roomId)
         {
-            var result = await _httpClient.Execute<LiveRoomInfo>(string.Format(_getLiveRoomInfoByIdApi, roomId), HttpMethod.Get, withCookie: false);
+            var result = await _httpClient.GetWithoutPermissionAsync<LiveRoomInfo>(string.Format(_getLiveRoomInfoByIdApi, roomId));
             if (result == null)
             {
                 throw new ApiRequestException(_getLiveRoomInfoByIdApi, HttpMethod.Get, "返回内容为空");
@@ -111,7 +117,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 p.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60);
 
-                var result = await _httpClient.Execute<List<LiveAreaItem>>(_getLiveCategoryApi, HttpMethod.Get, null, BodyFormat.Json, false);
+                var result = await _httpClient.GetWithoutPermissionAsync<List<LiveAreaItem>>(_getLiveCategoryApi);
                 if (result == null)
                 {
                     throw new ApiRequestException(_getLiveCategoryApi, HttpMethod.Get, "返回内容为空");
@@ -131,7 +137,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             {
                 throw new ArgumentNullException(nameof(roomId));
             }
-            var result = await _httpClient.Execute<RoomPlayInfo>(string.Format(_getRoomPlayInfo, roomId), HttpMethod.Get, null, BodyFormat.Json, false);
+            var result = await _httpClient.GetWithoutPermissionAsync<RoomPlayInfo>(string.Format(_getRoomPlayInfo, roomId));
             if (result == null)
             {
                 throw new ApiRequestException(string.Format(_getRoomPlayInfo, roomId), HttpMethod.Get, "返回内容为空");
@@ -143,24 +149,37 @@ namespace Bilibili.AspNetCore.Apis.Services
             return result.Data;
         }
 
-        public async Task<LiveVersionInfo> GetHomePageLiveVersion(string appKey, string appSec)
+        public async Task<LiveVersionInfo> GetHomePageLiveVersion()
         {
-            if (string.IsNullOrWhiteSpace(appKey))
+            if (string.IsNullOrWhiteSpace(_appKeyOptions?.Value.AppKey))
             {
-                throw new ArgumentNullException(nameof(appKey), "App key cannot be null or empty.");
+                throw new ArgumentNullException("AppKey", "App key cannot be null or empty.");
             }
-            if (string.IsNullOrWhiteSpace(appSec))
+            if (string.IsNullOrWhiteSpace(_appKeyOptions?.Value.AppSecret))
             {
-                throw new ArgumentNullException(nameof(appSec), "App secret cannot be null or empty.");
+                throw new ArgumentNullException("AppSecret", "App secret cannot be null or empty.");
             }
+
             var urlParams = new Dictionary<string, string>
             {
                 { "system_version", "2" },
                 { "ts", TimeUtil.Timestamp().ToString() },
             };
-            urlParams["sign"] = AppSigner.Sign(appKey, appSec, urlParams);
-            string url = $"{_getHomePageLiveVersion}?appkey={urlParams["appkey"]}&sign={urlParams["sign"]}&system_version=2&ts={urlParams["ts"]}";
-            var result = await _httpClient.Execute<LiveVersionInfo>(_getHomePageLiveVersion, HttpMethod.Get, null, BodyFormat.Json);
+            urlParams["sign"] = AppSigner.Sign(_appKeyOptions.Value.AppKey, _appKeyOptions.Value.AppSecret, urlParams);
+
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            foreach (var param in urlParams)
+            {
+                query[param.Key] = param.Value;
+            }
+
+            var uriBuilder = new UriBuilder(_getHomePageLiveVersion)
+            {
+                Query = query.ToString()
+            };
+
+
+            var result = await _httpClient.GetWithoutPermissionAsync<LiveVersionInfo>(uriBuilder.Uri.ToString());
             if (result == null)
             {
                 throw new ApiRequestException(_getHomePageLiveVersion, HttpMethod.Get, "返回内容为空");
@@ -194,7 +213,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             };
             try
             {
-                var result = await _httpClient.Execute<ResultModel<object>>(_updateLiveRoomNameApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                var result = await _httpClient.PostAsync<ResultModel<object>>(_updateLiveRoomNameApi, postData, BodyFormat.Form_UrlEncoded);
                 if (result == null)
                 {
                     throw new ApiRequestException(_updateLiveRoomNameApi, HttpMethod.Post, "返回内容为空");
@@ -231,7 +250,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             };
             try
             {
-                var result = await _httpClient.Execute<ResultModel<object>>(_updateRoomNews, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                var result = await _httpClient.PostAsync<ResultModel<object>>(_updateRoomNews, postData, BodyFormat.Form_UrlEncoded);
                 if (result == null)
                 {
                     throw new ApiRequestException(_updateRoomNews, HttpMethod.Post, "返回内容为空");
@@ -252,25 +271,30 @@ namespace Bilibili.AspNetCore.Apis.Services
         {
             var areaItem = await CheckArea(areaId);
             var csrf = await _cookie.GetCsrf();
-            var postData = new
+            var versionInfo = await GetHomePageLiveVersion();
+            if (versionInfo == null)
             {
-                access_key = "",
-                appkey = "",
-                room_id = roomId,
-                platform = "pc_link",
-                area_v2 = areaItem.id,
-                backup_stream = 0,
-                csrf_token = csrf,
-                csrf = csrf,
-                build = "",
-                sign = "",
-                ts = TimeUtil.Timestamp().ToString(),
-                type = "2",
-                version = "",
+                throw new InvalidOperationException("获取直播版本信息失败！");
+            }
+
+            Dictionary<string, string> requestParams = new Dictionary<string, string>()
+            {
+                { "room_id", roomId.ToString() },
+                { "platform", "pc_link" },
+                { "area_v2", areaItem.id.ToString() },
+                { "backup_stream", "0" },
+                { "csrf_token", csrf },
+                { "csrf", csrf },
+                { "ts", TimeUtil.Timestamp().ToString() },
+                { "type", "2" },
+                { "version", versionInfo.curr_version },
+                { "build", versionInfo.build.ToString() }
             };
+            requestParams["sign"] = AppSigner.Sign(_appKeyOptions.Value.AppKey, _appKeyOptions.Value.AppSecret, requestParams);
+
             try
             {
-                var result = await _httpClient.Execute<StartLiveInfo>(_startLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                var result = await _httpClient.PostAsync<StartLiveInfo>(_startLiveApi, requestParams, BodyFormat.Form_UrlEncoded);
                 if (result == null)
                 {
                     throw new ApiRequestException(_startLiveApi, HttpMethod.Post, "返回内容为空");
@@ -302,7 +326,7 @@ namespace Bilibili.AspNetCore.Apis.Services
             };
             try
             {
-                var result = await _httpClient.Execute<StopLiveInfo>(_stopLiveApi, HttpMethod.Post, postData, BodyFormat.Form_UrlEncoded);
+                var result = await _httpClient.PostAsync<StopLiveInfo>(_stopLiveApi, postData, BodyFormat.Form_UrlEncoded);
                 if (result == null)
                 {
                     throw new ApiRequestException(_stopLiveApi, HttpMethod.Post, "返回内容为空");

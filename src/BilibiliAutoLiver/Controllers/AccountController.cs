@@ -128,7 +128,7 @@ namespace BilibiliAutoLiver.Controllers
         {
             try
             {
-                await _cookie.RefreshCookie();
+                await _accountService.RefreshCookie();
                 _logger.LogInformation("强制重新刷新Cookie成功。");
                 return Content("刷新成功");
             }

@@ -44,7 +44,7 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// <param name="appKey"></param>
         /// <param name="appSec"></param>
         /// <returns></returns>
-        Task<LiveVersionInfo> GetHomePageLiveVersion(string appKey, string appSec);
+        Task<LiveVersionInfo> GetHomePageLiveVersion();
 
         /// <summary>
         /// 更新直播间分区

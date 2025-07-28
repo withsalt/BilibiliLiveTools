@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,7 +43,10 @@ namespace BilibiliAutoLiver
             //缓存
             builder.Services.AddMemoryCache();
             //添加Bilibili相关的服务
-            builder.Services.AddBilibiliApis(false);
+            builder.Services.AddBilibiliApis(options =>
+            {
+                builder.Configuration.GetSection("AppSettings:BilibiliAppKey").Bind(options);
+            }, false);
             //定时任务
             builder.Services.AddQuartz();
             //FFMpeg

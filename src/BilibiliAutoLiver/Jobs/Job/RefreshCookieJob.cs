@@ -54,7 +54,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                     _logger.LogInformation("定时刷新Cookie失败，未登录。");
                     return;
                 }
-                if (await _cookie.CookieNeedToRefresh())
+                if (await _accountService.CookieNeedToRefresh())
                 {
                     _logger.LogInformation("检测到Cookie需要刷新，刷新Cookie。");
                 }
@@ -68,7 +68,7 @@ namespace BilibiliAutoLiver.Jobs.Job
                         return;
                     }
                 }
-                updateStatus = await _cookie.RefreshCookie();
+                updateStatus = await _accountService.RefreshCookie();
                 if (!updateStatus)
                 {
                     _logger.LogWarning("定时刷新Cookie失败，具体信息请查看日志。");

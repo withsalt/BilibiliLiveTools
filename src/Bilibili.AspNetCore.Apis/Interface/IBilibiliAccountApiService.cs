@@ -54,5 +54,17 @@ namespace Bilibili.AspNetCore.Apis.Interface
         Task<bool> IsLogged();
 
         void Logout();
+
+        /// <summary>
+        /// 刷新Cookie
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> RefreshCookie();
+
+        /// <summary>
+        /// 是否需要刷新Cookie
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> CookieNeedToRefresh();
     }
 }

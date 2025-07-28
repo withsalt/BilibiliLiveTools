@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Bilibili.AspNetCore.Apis.Models;
 using BilibiliAutoLiver.Utils;
 
 namespace BilibiliAutoLiver.Models.Settings
@@ -91,26 +92,7 @@ namespace BilibiliAutoLiver.Models.Settings
         public FFmpegPresetParams FFmpegPresetParams { get; set; }
     }
 
-    public class BilibiliAppKey
-    {
-        public static string Position { get { return "BilibiliAppKey"; } }
-
-        /// <summary>
-        /// 获取或设置B站AppKey
-        /// </summary>
-        public string AppKey { get; set; }
-
-        /// <summary>
-        /// 获取或设置B站AppSecret
-        /// </summary>
-        public string AppSecret { get; set; }
-
-        public string Platform { get; set; }
-
-        public int NeuronAppId { get; set; }
-    }
-
-public class FFmpegPresetParams
+    public class FFmpegPresetParams
     {
         public static string Position { get { return "FFMpegPresetParams"; } }
 

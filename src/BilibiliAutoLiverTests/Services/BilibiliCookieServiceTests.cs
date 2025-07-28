@@ -78,7 +78,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task CookieNeedToRefreshTest()
         {
-            var result = await _cookieService.CookieNeedToRefresh();
+            var result = await _accountService.CookieNeedToRefresh();
         }
 
         [TestMethod()]
@@ -86,7 +86,7 @@ namespace BilibiliLiverTests.Services
         {
             UserInfo userInfo = await _accountService.LoginByCookie();
 
-            await _cookieService.RefreshCookie();
+            await _accountService.RefreshCookie();
 
             userInfo = await _accountService.LoginByCookie();
         }

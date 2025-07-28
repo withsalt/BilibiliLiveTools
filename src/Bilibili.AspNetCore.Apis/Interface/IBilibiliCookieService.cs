@@ -42,17 +42,5 @@ namespace Bilibili.AspNetCore.Apis.Interface
         /// </summary>
         /// <returns></returns>
         Task<string> GetRefreshToken();
-
-        /// <summary>
-        /// 刷新Cookie
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> RefreshCookie();
-
-        /// <summary>
-        /// 是否需要刷新Cookie
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> CookieNeedToRefresh();
     }
 }

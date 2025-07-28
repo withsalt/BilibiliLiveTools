@@ -28,7 +28,12 @@ namespace BilibiliLiverTests
             //缓存
             builder.Services.AddMemoryCache();
             //添加Bilibili相关的服务
-            builder.Services.AddBilibiliApis();
+            builder.Services.AddBilibiliApis(options =>
+            {
+                options.AppKey = "aae92bc66f3edfab";
+                options.AppSecret = "af125a0d5279fd576c1b4418a3e8276d";
+                options.Platform = "pc_link";
+            });
             //定时任务
             builder.Services.AddQuartz();
             //FFMpeg

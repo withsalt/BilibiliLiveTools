@@ -19,8 +19,8 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
 {
     internal class BilibiliCookieBuilder
     {
-        private readonly IHttpClientService _httpClient;
         private readonly ILogger<BilibiliCookieService> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
         /// 获取设备指纹
@@ -42,11 +42,11 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
         private readonly ulong _timestamp = (ulong)(DateTimeOffset.Now.AddMinutes(-1).ToUnixTimeMilliseconds() / 1000);
 
         public BilibiliCookieBuilder(ILogger<BilibiliCookieService> logger
-            , IHttpClientService httpClient
+            , IHttpClientFactory httpClientFactory
             , string cookieStr)
         {
             _logger = logger;
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
 
             //转换模型
             _cookiesJson = JsonUtil.DeserializeJsonToObject<CookiesJson>(cookieStr);
@@ -178,7 +178,7 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
                 RefreshToken = _cookiesJson.RefreshToken,
             };
             string cookie = cookiesData.GetCookieString();
-            ResultModel<CookieInfo> result = await _httpClient.Execute<CookieInfo>(_activeBuvidfp, HttpMethod.Post, payload, withCookie: true, cookie: cookie);
+            ResultModel<CookieInfo> result = await new CookieBuilderHttpClient(_httpClientFactory).PostAsync<CookieInfo>(_activeBuvidfp, payload, BodyFormat.Json, cookie);
             if (result == null || result.Data == null)
             {
                 throw new Exception("Active buvid_fp失败，返回数据为空");
@@ -244,22 +244,21 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
 
         private async Task<TicketInfo> GetTicket()
         {
-            string key = "XgwSnGZ1p";
-            string ts = (DateTimeOffset.UtcNow.AddMinutes(-1).ToUnixTimeMilliseconds() / 1000).ToString();
-            string tsStr = $"ts{ts}";
-            string hash = HmacSha256(key, tsStr);
+            long ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            string hexSign = HmacSha256("XgwSnGZ1p", "ts" + ts);
 
-            Dictionary<string, string> param = new Dictionary<string, string>()
+            var query = HttpUtility.ParseQueryString(string.Empty);
+            query["key_id"] = "ec02";
+            query["hexsign"] = hexSign;
+            query["context[ts]"] = ts.ToString();
+            query["csrf"] = "";
+
+            var uriBuilder = new UriBuilder(_getBiliTicket)
             {
-                { "key_id", "ec02" },
-                { "hexsign", hash },
-                { "context[ts]", ts },
-                { "csrf", "" },
+                Query = query.ToString()
             };
 
-            string urlParams = $"key_id=ec02&hexsign={hash}&{HttpUtility.UrlEncode("context[ts]")}={ts}&csrf=";
-            string url = _getBiliTicket.Contains("?") ? (_getBiliTicket + "&" + urlParams) : (_getBiliTicket + "?" + urlParams);
-            ResultModel<TicketInfo> result = await _httpClient.Execute<TicketInfo>(url, HttpMethod.Post, param, BodyFormat.Form_UrlEncoded, withCookie: false);
+            ResultModel<TicketInfo> result = await new CookieBuilderHttpClient(_httpClientFactory).PostAsync<TicketInfo>(uriBuilder.Uri.ToString(), null, BodyFormat.Form, null);
             if (result == null || result.Data == null)
             {
                 throw new Exception("获取Ticket结果为空！");
@@ -284,7 +283,7 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
 
         private async Task<BuvidInfo> GetBuvid()
         {
-            ResultModel<BuvidInfo> result = await _httpClient.Execute<BuvidInfo>(_getbuvid, HttpMethod.Get, withCookie: false);
+            ResultModel<BuvidInfo> result = await new CookieBuilderHttpClient(_httpClientFactory).GetAsync<BuvidInfo>(_getbuvid);
             if (result == null || result.Data == null)
             {
                 throw new Exception("获取buvid结果为空！");
@@ -312,19 +311,6 @@ namespace Bilibili.AspNetCore.Apis.Services.Cookie
                 HttpOnly = _cookies[0].HttpOnly,
             };
             return result;
-        }
-        private string GetMd5Hash(string input)
-        {
-            using (MD5 md5Hash = MD5.Create())
-            {
-                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-                StringBuilder sBuilder = new StringBuilder();
-                for (int i = 0; i < data.Length; i++)
-                {
-                    sBuilder.Append(data[i].ToString("x2"));
-                }
-                return sBuilder.ToString();
-            }
         }
 
         private string GetCookieUuid()

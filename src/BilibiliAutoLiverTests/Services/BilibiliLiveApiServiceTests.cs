@@ -33,9 +33,7 @@ namespace BilibiliLiverTests.Services
         [TestMethod()]
         public async Task GetHomePageLiveVersion()
         {
-            string appKey = "1d8b6e7d45233436";
-            string appSec = "560c52ccd288fed045859ed18bffd973";
-            var info = await _apiService.GetHomePageLiveVersion(appKey, appSec);
+            var info = await _apiService.GetHomePageLiveVersion();
             Assert.IsNotNull(info);
         }
 
