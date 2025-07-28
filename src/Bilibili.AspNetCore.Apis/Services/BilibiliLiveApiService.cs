@@ -9,6 +9,7 @@ using Bilibili.AspNetCore.Apis.Interface;
 using Bilibili.AspNetCore.Apis.Models;
 using Bilibili.AspNetCore.Apis.Models.Base;
 using Bilibili.AspNetCore.Apis.Models.Enums;
+using Bilibili.AspNetCore.Apis.Utils;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -56,6 +57,10 @@ namespace Bilibili.AspNetCore.Apis.Services
         /// </summary>
         private const string _getRoomPlayInfo = "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?room_id={0}&protocol=0,1&format=0,1,2&codec=0,1&qn=0&platform=web&ptype=8&dolby=5";
 
+        /// <summary>
+        /// 获取直播版本信息
+        /// </summary>
+        private const string _getHomePageLiveVersion = "https://api.live.bilibili.com/xlive/app-blink/v1/liveVersionInfo/getHomePageLiveVersion";
 
         private readonly ILogger<BilibiliLiveApiService> _logger;
         private readonly IHttpClientService _httpClient;
@@ -134,6 +139,35 @@ namespace Bilibili.AspNetCore.Apis.Services
             if (result.Code != 0)
             {
                 throw new ApiRequestException(string.Format(_getRoomPlayInfo, roomId), HttpMethod.Get, result.Message);
+            }
+            return result.Data;
+        }
+
+        public async Task<LiveVersionInfo> GetHomePageLiveVersion(string appKey, string appSec)
+        {
+            if (string.IsNullOrWhiteSpace(appKey))
+            {
+                throw new ArgumentNullException(nameof(appKey), "App key cannot be null or empty.");
+            }
+            if (string.IsNullOrWhiteSpace(appSec))
+            {
+                throw new ArgumentNullException(nameof(appSec), "App secret cannot be null or empty.");
+            }
+            var urlParams = new Dictionary<string, string>
+            {
+                { "system_version", "2" },
+                { "ts", TimeUtil.Timestamp().ToString() },
+            };
+            urlParams["sign"] = AppSigner.Sign(appKey, appSec, urlParams);
+            string url = $"{_getHomePageLiveVersion}?appkey={urlParams["appkey"]}&sign={urlParams["sign"]}&system_version=2&ts={urlParams["ts"]}";
+            var result = await _httpClient.Execute<LiveVersionInfo>(_getHomePageLiveVersion, HttpMethod.Get, null, BodyFormat.Json);
+            if (result == null)
+            {
+                throw new ApiRequestException(_getHomePageLiveVersion, HttpMethod.Get, "返回内容为空");
+            }
+            if (result.Code != 0)
+            {
+                throw new ApiRequestException(_getHomePageLiveVersion, HttpMethod.Get, result.Message);
             }
             return result.Data;
         }
@@ -217,14 +251,22 @@ namespace Bilibili.AspNetCore.Apis.Services
         public async Task<StartLiveInfo> StartLive(long roomId, int areaId)
         {
             var areaItem = await CheckArea(areaId);
+            var csrf = await _cookie.GetCsrf();
             var postData = new
             {
+                access_key = "",
+                appkey = "",
                 room_id = roomId,
                 platform = "pc_link",
                 area_v2 = areaItem.id,
                 backup_stream = 0,
-                csrf_token = await _cookie.GetCsrf(),
-                csrf = await _cookie.GetCsrf(),
+                csrf_token = csrf,
+                csrf = csrf,
+                build = "",
+                sign = "",
+                ts = TimeUtil.Timestamp().ToString(),
+                type = "2",
+                version = "",
             };
             try
             {

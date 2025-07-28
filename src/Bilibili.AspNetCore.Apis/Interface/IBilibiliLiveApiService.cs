@@ -39,6 +39,14 @@ namespace Bilibili.AspNetCore.Apis.Interface
         Task<RoomPlayInfo> GetRoomPlayInfo(long roomId);
 
         /// <summary>
+        /// 获取直播版本
+        /// </summary>
+        /// <param name="appKey"></param>
+        /// <param name="appSec"></param>
+        /// <returns></returns>
+        Task<LiveVersionInfo> GetHomePageLiveVersion(string appKey, string appSec);
+
+        /// <summary>
         /// 更新直播间分区
         /// </summary>
         /// <param name="roomId"></param>

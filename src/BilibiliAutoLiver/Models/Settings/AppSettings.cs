@@ -71,6 +71,11 @@ namespace BilibiliAutoLiver.Models.Settings
         }
 
         /// <summary>
+        /// Bilibili AppKey配置，用于获取APP签名
+        /// </summary>
+        public BilibiliAppKey BilibiliAppKey { get; set; }
+
+        /// <summary>
         /// 高级模式命令解析采用严格模式
         /// </summary>
         public bool AdvanceStrictMode { get; set; }
@@ -86,7 +91,26 @@ namespace BilibiliAutoLiver.Models.Settings
         public FFmpegPresetParams FFmpegPresetParams { get; set; }
     }
 
-    public class FFmpegPresetParams
+    public class BilibiliAppKey
+    {
+        public static string Position { get { return "BilibiliAppKey"; } }
+
+        /// <summary>
+        /// 获取或设置B站AppKey
+        /// </summary>
+        public string AppKey { get; set; }
+
+        /// <summary>
+        /// 获取或设置B站AppSecret
+        /// </summary>
+        public string AppSecret { get; set; }
+
+        public string Platform { get; set; }
+
+        public int NeuronAppId { get; set; }
+    }
+
+public class FFmpegPresetParams
     {
         public static string Position { get { return "FFMpegPresetParams"; } }
 
