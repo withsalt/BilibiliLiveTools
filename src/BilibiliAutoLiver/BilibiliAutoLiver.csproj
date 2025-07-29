@@ -37,13 +37,11 @@
 		<ProjectReference Include="..\BilibiliAutoLiver.Plugin.Base\BilibiliAutoLiver.Plugin.Base.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Update="runtimes\win-x64\bin\ffmpeg.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64' OR ($([MSBuild]::IsOSPlatform('Windows')) AND $([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) == 'X64' AND '$(RuntimeIdentifier)' == '')">
+		<Content Include="runtimes\win-x64\bin\*.*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="runtimes\win-x64\bin\ffprobe.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
 	</ItemGroup>
 
 </Project>
