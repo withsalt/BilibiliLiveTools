@@ -96,7 +96,7 @@ namespace BilibiliLiverTests.Services
         public async Task GetTest()
         {
             string cookieText = await _cookieService.GetString();
-            Assert.IsTrue(!string.IsNullOrEmpty(cookieText));
+            Assert.IsFalse(string.IsNullOrEmpty(cookieText));
         }
 
         [TestMethod()]

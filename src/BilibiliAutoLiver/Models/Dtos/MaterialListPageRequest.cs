@@ -4,7 +4,7 @@ namespace BilibiliAutoLiver.Models.Dtos
 {
     public class MaterialListPageRequest
     {
-        private string field = "id";
+        private string @field = "id";
 
         private string order = "desc";
 
@@ -20,14 +20,14 @@ namespace BilibiliAutoLiver.Models.Dtos
         {
             get
             {
-                return field;
+                return @field;
             }
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    field = "id";
+                    @field = "id";
                 else
-                    field = value.ToLower();
+                    @field = value.ToLower();
             }
         }
 

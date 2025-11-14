@@ -13,13 +13,10 @@ namespace Bilibili.AspNetCore.Apis.Models
 
         public byte[] GetBytes()
         {
-            if (string.IsNullOrWhiteSpace(this.url)) throw new ArgumentNullException("url");
-            var qrCode = new SkiaSharp.QrCode.Image.QrCode(this.url, new Vector2Slim(512, 512), SKEncodedImageFormat.Png);
-            using (MemoryStream ms = new MemoryStream())
-            {
-                qrCode.GenerateImage(ms, true, SkiaSharp.QrCode.ECCLevel.M);
-                return ms.ToArray();
-            }
+            if (string.IsNullOrWhiteSpace(this.url)) 
+                throw new ArgumentNullException("url");
+
+            return QRCodeImageBuilder.GetImageBytes(this.url, SKEncodedImageFormat.Png, SkiaSharp.QrCode.ECCLevel.M, 512);
         }
     }
 }

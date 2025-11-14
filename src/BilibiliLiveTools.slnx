@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Plugins/">
+    <Project Path="BilibiliAutoLiver.Plugin.Base/BilibiliAutoLiver.Plugin.Base.csproj" />
+    <Project Path="BilibiliAutoLiver.Plugin.YoloAI/BilibiliAutoLiver.Plugin.YoloAI.csproj" />
+  </Folder>
+  <Project Path="Bilibili.AspNetCore.Apis/Bilibili.AspNetCore.Apis.csproj" />
+  <Project Path="BilibiliAutoLiver/BilibiliAutoLiver.csproj">
+    <BuildDependency Project="BilibiliAutoLiver.Plugin.YoloAI/BilibiliAutoLiver.Plugin.YoloAI.csproj" />
+  </Project>
+  <Project Path="BilibiliAutoLiverTests/BilibiliAutoLiverTests.csproj" />
+</Solution>
