@@ -12,7 +12,7 @@
 		<PackageReference Include="FFMpegCore" Version="5.4.0" />
 		<PackageReference Include="FlashCap" Version="1.11.0" />
 		<PackageReference Include="IdleBus" Version="1.5.3" />
-		<PackageReference Include="MailKit" Version="4.14.1" />
+		<PackageReference Include="MailKit" Version="4.16.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="6.1.0" />
